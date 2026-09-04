@@ -29,6 +29,17 @@ def _expand(value: str, plugin_root: str, data_root: str) -> str:
     return "".join(out)
 
 
+def plugin_data_root(binding: Mapping[str, Any]) -> Path:
+    """PLUGIN_DATA directory: from the binding, else a fresh temporary directory."""
+
+    import tempfile
+
+    configured = binding.get("plugin_data_root")
+    if configured:
+        return Path(str(configured))
+    return Path(tempfile.mkdtemp(prefix="acp-plugin-data-"))
+
+
 def effective_server_config(server: McpServer, *, data_root: Path) -> dict[str, Any]:
     """Return the client-facing configuration for one Agent Plugin MCP server.
 

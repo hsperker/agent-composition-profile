@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -14,20 +16,21 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 from .skills import SkillCatalog
 
 
 TARGET = "pydantic-ai"
 
 
-def _mcp_toolsets(agent):
+def _mcp_toolsets(agent, data_root: Path):
     from fastmcp.client.transports import SSETransport, StdioTransport, StreamableHttpTransport
     from pydantic_ai.mcp import MCPToolset
 
     toolsets = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport == "streamable-http":
             native_transport = StreamableHttpTransport(
@@ -83,6 +86,7 @@ def build(
     runtime_trace: list[RuntimeObservation] = []
     native_agents: dict[str, Agent] = {}
     mcp_losses: dict[str, list[str]] = {}
+    data_root = plugin_data_root(binding)
 
     def build_agent(name: str) -> Agent:
         if name in native_agents:
@@ -130,7 +134,7 @@ def build(
                     description=package.agents[delegate_name].description,
                 )
             )
-        toolsets, losses = _mcp_toolsets(source)
+        toolsets, losses = _mcp_toolsets(source, data_root)
         mcp_losses[name] = losses
         native = Agent(
             model,
@@ -223,13 +227,54 @@ def build(
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
+    from pydantic_ai.mcp import MCPToolset
+    from pydantic_ai.messages import ToolCallPart, ToolReturnPart
+
     entry_name = str(artifact.metadata["entry_name"])
+    agent = artifact.native_agents[entry_name]
     trace: list[RuntimeObservation] = artifact.metadata["runtime_trace"]
     start = len(trace)
-    result = artifact.native_agents[entry_name].run_sync(task)
+    observations: list[RuntimeObservation] = []
+    tool_servers: dict[str, str] = {}
+
+    async def execute():
+        if not activate_plugins:
+            return await agent.run(task)
+        async with agent:  # enters every toolset: MCP connect and initialize
+            for toolset in agent.toolsets:
+                if isinstance(toolset, MCPToolset):
+                    names = [tool.name for tool in await toolset.list_tools()]
+                    tool_servers.update({name: toolset.id for name in names})
+                    observations.append(
+                        RuntimeObservation(
+                            "mcp-tools-discovered", entry_name, {"server": toolset.id, "tools": names}
+                        )
+                    )
+            return await agent.run(task)
+
+    result = asyncio.run(execute())
+    for message in result.all_messages():
+        for part in message.parts:
+            if isinstance(part, ToolCallPart) and part.tool_name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked",
+                        entry_name,
+                        {"server": tool_servers[part.tool_name], "tool": part.tool_name, "arguments": part.args_as_dict()},
+                    )
+                )
+            if isinstance(part, ToolReturnPart) and part.tool_name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": tool_servers[part.tool_name], "tool": part.tool_name, "result": str(part.content)},
+                    )
+                )
     output = str(result.output)
-    observation = RuntimeObservation("runtime-output", entry_name, {"result": output})
-    observations = tuple(trace[start:]) + (observation,)
-    artifact.observations.extend(observations)
-    return RuntimeRun(output, observations)
+    all_observations = tuple(trace[start:]) + tuple(observations) + (
+        RuntimeObservation("runtime-output", entry_name, {"result": output}),
+    )
+    artifact.observations.extend(all_observations)
+    return RuntimeRun(output, all_observations)

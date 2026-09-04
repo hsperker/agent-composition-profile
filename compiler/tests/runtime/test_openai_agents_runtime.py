@@ -2,16 +2,22 @@ from pathlib import Path
 
 from agents import Agent, Runner, set_tracing_disabled
 from agents.mcp import MCPServerStreamableHttp
+from agents.items import ModelResponse
+from agents.models.interface import Model
 from agents.testing import ScriptedModel, assistant_message, function_call
+from agents.usage import Usage
 
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import openai_agents as adapter
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
 
 
 set_tracing_disabled(True)
 ROOT = Path(__file__).parents[3]
 EXAMPLE = ROOT / "examples" / "research-team"
 DELEGATION = ROOT / "examples" / "runtime-probes" / "delegation"
+PROBE = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+PLUGIN_ROOT = (PROBE / "plugins" / "local-echo").resolve()
 
 
 def binding(models: dict) -> dict:
@@ -85,3 +91,40 @@ def test_strict_openai_agents_accepts_the_full_fixture_with_durability_unverifie
     assert not artifact.report.has_blocking_loss
     assert artifact.report.has_unverified
     assert artifact.report.module_outcomes()["skills"]["outcome"] == "accepted"
+
+
+class EchoCallingModel(Model):
+    """Calls every discovered echo tool once, one per turn, then finishes."""
+
+    def __init__(self) -> None:
+        self.called: list[str] = []
+
+    async def get_response(self, system_instructions, input, model_settings, tools, output_schema, handoffs, tracing, *, previous_response_id, conversation_id, prompt):
+        remaining = sorted(tool.name for tool in tools if "echo" in tool.name and tool.name not in self.called)
+        if remaining:
+            self.called.append(remaining[0])
+            item = function_call(remaining[0], {"text": ECHO_TASK}, call_id=f"call-{len(self.called)}")
+            return ModelResponse(output=[item], usage=Usage(), response_id=None)
+        return ModelResponse(output=[assistant_message("echo done")], usage=Usage(), response_id=None)
+
+    def stream_response(self, *args, **kwargs):
+        raise NotImplementedError
+
+def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> None:
+    package = load_package(PROBE / "agent.agent.md", PROBE)
+    artifact = adapter.build(package, binding({"plugin-user": EchoCallingModel()}), strict=True)
+
+    with echo_http_server(PLUGIN_ROOT):
+        result = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+
+    assert result.output == "echo done"
+    discovered = {o.data["server"]: o.data["tools"] for o in result.observations if o.kind == "mcp-tools-discovered"}
+    assert set(discovered) == {"echostdio", "echohttp"}, result.observations
+    assert all(any("echo" in name for name in names) for names in discovered.values())
+    results = {o.data["server"]: parse_echo_result(o.data["result"]) for o in result.observations if o.kind == "mcp-tool-result"}
+    assert set(results) == {"echostdio", "echohttp"}, result.observations
+    stdio, http = results["echostdio"], results["echohttp"]
+    assert stdio["label"] == "stdio" and stdio["plugin_root_env"] is True and stdio["plugin_data_env"] is True
+    assert stdio["cwd"] == str(PLUGIN_ROOT)
+    assert http["label"] == "http" and http["plugin_root_env"] is False
+    assert [o.kind for o in result.observations if o.kind == "mcp-activation-failed"] == []

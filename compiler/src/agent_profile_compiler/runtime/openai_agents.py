@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -15,19 +17,20 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 from .skills import SkillCatalog
 
 
 TARGET = "openai-agents"
 
 
-def _mcp_servers(agent):
+def _mcp_servers(agent, data_root: Path):
     from agents.mcp import MCPServerSse, MCPServerStdio, MCPServerStreamableHttp
 
     native = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport == "streamable-http":
             native.append(
@@ -81,6 +84,7 @@ def build(
     observations: list[RuntimeObservation] = []
     native_agents: dict[str, Agent] = {}
     mcp_losses: dict[str, list[str]] = {}
+    data_root = plugin_data_root(binding)
 
     def build_agent(name: str) -> Agent:
         if name in native_agents:
@@ -117,7 +121,7 @@ def build(
                     tool_description=package.agents[delegate_name].description,
                 )
             )
-        servers, losses = _mcp_servers(source)
+        servers, losses = _mcp_servers(source, data_root)
         mcp_losses[name] = losses
         native = Agent(
             name=source.name,
@@ -212,40 +216,89 @@ def build(
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
     from agents import Runner
 
     entry_name = str(artifact.metadata["entry_name"])
-    result = Runner.run_sync(artifact.native_agents[entry_name], task)
+    agent = artifact.native_agents[entry_name]
     observations: list[RuntimeObservation] = []
+    tool_servers: dict[str, str] = {}
+
+    async def execute():
+        connected = []
+        if activate_plugins:
+            for server in list(agent.mcp_servers):
+                try:
+                    await server.connect()
+                    tools = await server.list_tools()
+                except Exception as exc:  # Agent Plugins §7.2.2: report and continue
+                    observations.append(
+                        RuntimeObservation(
+                            "mcp-activation-failed",
+                            entry_name,
+                            {"server": server.name, "error": f"{type(exc).__name__}: {exc}"},
+                        )
+                    )
+                    agent.mcp_servers.remove(server)
+                    continue
+                connected.append(server)
+                names = [tool.name for tool in tools]
+                tool_servers.update({name: server.name for name in names})
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tools-discovered", entry_name, {"server": server.name, "tools": names}
+                    )
+                )
+        try:
+            return await Runner.run(agent, task)
+        finally:
+            for server in connected:
+                await server.cleanup()
+
+    result = asyncio.run(execute())
     delegates = set(artifact.metadata["delegate_names"].get(entry_name, []))
-    pending: dict[str, str] = {}
+    pending: dict[str, tuple[str, str]] = {}
     for item in result.new_items:
         raw = getattr(item, "raw_item", None)
         name = raw.get("name") if isinstance(raw, dict) else getattr(raw, "name", None)
-        if name in delegates and hasattr(raw, "arguments"):
+        if hasattr(raw, "arguments") and (name in delegates or name in tool_servers):
             arguments = json.loads(raw.arguments)
-            pending[getattr(raw, "call_id", name)] = name
-            observations.append(
-                RuntimeObservation(
-                    "delegate-started",
-                    entry_name,
-                    {
-                        "delegate": name,
-                        "mechanism": "agent-as-tool",
-                        "task": arguments.get("input", ""),
-                    },
+            call_id = getattr(raw, "call_id", name)
+            if name in delegates:
+                pending[call_id] = ("delegate", name)
+                observations.append(
+                    RuntimeObservation(
+                        "delegate-started",
+                        entry_name,
+                        {"delegate": name, "mechanism": "agent-as-tool", "task": arguments.get("input", "")},
+                    )
                 )
-            )
+            else:
+                pending[call_id] = ("mcp", name)
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked",
+                        entry_name,
+                        {"server": tool_servers[name], "tool": name, "arguments": arguments},
+                    )
+                )
         call_id = raw.get("call_id") if isinstance(raw, dict) else getattr(raw, "call_id", None)
         if call_id in pending and hasattr(item, "output"):
-            observations.append(
-                RuntimeObservation(
-                    "delegate-returned",
-                    entry_name,
-                    {"delegate": pending[call_id], "result": str(item.output)},
+            kind, name = pending[call_id]
+            if kind == "delegate":
+                observations.append(
+                    RuntimeObservation(
+                        "delegate-returned", entry_name, {"delegate": name, "result": str(item.output)}
+                    )
                 )
-            )
+            else:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": tool_servers[name], "tool": name, "result": str(item.output)},
+                    )
+                )
     output = str(result.final_output)
     observations.append(RuntimeObservation("runtime-output", entry_name, {"result": output}))
     artifact.observations.extend(observations)

@@ -18,10 +18,14 @@ from agent_framework import (
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import microsoft_agent_framework as adapter
 
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
+
 
 ROOT = Path(__file__).parents[3]
 EXAMPLE = ROOT / "examples" / "research-team"
 DELEGATION = ROOT / "examples" / "runtime-probes" / "delegation"
+PROBE = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+PLUGIN_ROOT = (PROBE / "plugins" / "local-echo").resolve()
 
 
 class ScriptedChatClient(FunctionInvocationLayer, BaseChatClient):
@@ -162,3 +166,57 @@ def test_strict_microsoft_adapter_accepts_the_full_fixture_with_durability_unver
         "explorer:skills.durability",
         "explorer:skills.resources",
     ]
+
+
+class EchoCallingChatClient(FunctionInvocationLayer, BaseChatClient):
+    """Calls every echo tool the framework exposes, one per turn, then finishes."""
+
+    def __init__(self):
+        super().__init__()
+        self.called: list[str] = []
+
+    def _inner_get_response(self, *, messages, stream, options, **kwargs):
+        names = sorted(
+            tool.name for tool in (options.get("tools") or [])
+            if "echo" in getattr(tool, "name", "") and tool.name not in self.called
+        )
+        if names:
+            self.called.append(names[0])
+            response = ChatResponse(
+                messages=Message(
+                    "assistant",
+                    [Content("function_call", name=names[0], arguments={"text": ECHO_TASK}, call_id=f"call-{len(self.called)}")],
+                )
+            )
+        else:
+            response = text_response("echo done")
+        if not stream:
+            async def complete():
+                return response
+
+            return complete()
+
+        async def updates():
+            for message in response.messages:
+                yield ChatResponseUpdate(role=message.role, contents=message.contents)
+
+        return self._build_response_stream(updates())
+
+def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> None:
+    package = load_package(PROBE / "agent.agent.md", PROBE)
+    artifact = adapter.build(package, binding({"plugin-user": EchoCallingChatClient()}), strict=True)
+
+    with echo_http_server(PLUGIN_ROOT):
+        result = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+
+    assert result.output == "echo done"
+    discovered = {o.data["server"]: o.data["tools"] for o in result.observations if o.kind == "mcp-tools-discovered"}
+    assert set(discovered) == {"echostdio", "echohttp"}, result.observations
+    assert all(any("echo" in name for name in names) for names in discovered.values())
+    results = {o.data["server"]: parse_echo_result(o.data["result"]) for o in result.observations if o.kind == "mcp-tool-result"}
+    assert set(results) == {"echostdio", "echohttp"}, result.observations
+    stdio, http = results["echostdio"], results["echohttp"]
+    assert stdio["label"] == "stdio" and stdio["plugin_root_env"] is True and stdio["plugin_data_env"] is True
+    assert stdio["cwd"] == str(PLUGIN_ROOT)
+    assert http["label"] == "http" and http["plugin_root_env"] is False
+    assert [o.kind for o in result.observations if o.kind == "mcp-activation-failed"] == []

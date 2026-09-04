@@ -5,6 +5,7 @@ from __future__ import annotations
 import keyword
 import re
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -16,6 +17,7 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 from .skills import SkillCatalog
 
 
@@ -54,7 +56,7 @@ def _activate_skill_tool(catalog: SkillCatalog):
     return activate_skill
 
 
-def _mcp_toolsets(agent):
+def _mcp_toolsets(agent, data_root: Path):
     from google.adk.tools.mcp_tool import McpToolset
     from google.adk.tools.mcp_tool.mcp_session_manager import (
         SseConnectionParams,
@@ -66,7 +68,7 @@ def _mcp_toolsets(agent):
     toolsets = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport == "streamable-http":
             connection = StreamableHTTPConnectionParams(
@@ -112,6 +114,7 @@ def build(
     observations: list[RuntimeObservation] = []
     native_agents: dict[str, LlmAgent] = {}
     mcp_losses: dict[str, list[str]] = {}
+    data_root = plugin_data_root(binding)
 
     def build_agent(name: str) -> LlmAgent:
         if name in native_agents:
@@ -124,7 +127,7 @@ def build(
         tools: list[Any] = []
         if catalog.metadata():
             tools.append(_activate_skill_tool(catalog))
-        toolsets, losses = _mcp_toolsets(source)
+        toolsets, losses = _mcp_toolsets(source, data_root)
         mcp_losses[name] = losses
         tools.extend(toolsets)
         for delegate_name in source.delegate_names:
@@ -239,21 +242,48 @@ def build(
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
     import asyncio
 
     from google.adk.runners import InMemoryRunner
+    from google.adk.tools.mcp_tool import McpToolset
 
     entry_name = str(artifact.metadata["entry_name"])
-    runner = InMemoryRunner(agent=artifact.native_agents[entry_name])
+    agent = artifact.native_agents[entry_name]
+    observations: list[RuntimeObservation] = []
+    tool_servers: dict[str, str] = {}
+    runner = InMemoryRunner(agent=agent)
+
     async def execute():
+        toolsets = [tool for tool in agent.tools if isinstance(tool, McpToolset)] if activate_plugins else []
         try:
+            for toolset in toolsets:
+                try:
+                    tools = await toolset.get_tools_with_prefix()
+                except Exception as exc:  # Agent Plugins §7.2.2: report and continue
+                    observations.append(
+                        RuntimeObservation(
+                            "mcp-activation-failed",
+                            entry_name,
+                            {"server": toolset.tool_name_prefix, "error": f"{type(exc).__name__}: {exc}"},
+                        )
+                    )
+                    agent.tools.remove(toolset)
+                    continue
+                names = [tool.name for tool in tools]
+                tool_servers.update({name: toolset.tool_name_prefix for name in names})
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tools-discovered", entry_name, {"server": toolset.tool_name_prefix, "tools": names}
+                    )
+                )
             return await runner.run_debug(task, quiet=True)
         finally:
+            for toolset in toolsets:
+                await toolset.close()
             await runner.close()
 
     events = asyncio.run(execute())
-    observations: list[RuntimeObservation] = []
     delegates = set(artifact.metadata["delegate_native_names"].get(entry_name, []))
     output = ""
     for event in events:
@@ -272,6 +302,14 @@ def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
                         },
                     )
                 )
+            elif call and call.name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked",
+                        entry_name,
+                        {"server": tool_servers[call.name], "tool": call.name, "arguments": dict(call.args or {})},
+                    )
+                )
             response = getattr(part, "function_response", None)
             if response and response.name in delegates:
                 observations.append(
@@ -279,6 +317,14 @@ def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
                         "delegate-returned",
                         entry_name,
                         {"delegate": response.name, "result": str(response.response)},
+                    )
+                )
+            elif response and response.name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": tool_servers[response.name], "tool": response.name, "result": str(response.response)},
                     )
                 )
             text = getattr(part, "text", None)
