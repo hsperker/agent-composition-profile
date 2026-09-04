@@ -1,54 +1,46 @@
-# Agent Composition Profile runtime evidence
+# Agent Composition Profile evidence
 
-**Experiment date:** 3 September 2026
+**Date:** 3 September 2026
 
-**Portable fixture:** `examples/research-team/` (unchanged)
-
-**Additional probes:** `examples/runtime-probes/delegation/` (isolates delegation from the fixture's intentionally unreachable MCP endpoint) and `examples/runtime-probes/plugin-activation/` (one Agent Plugin with a local deterministic MCP echo server over stdio and header-gated streamable HTTP)
+**Fixtures:** `examples/research-team/` (unchanged throughout), `examples/runtime-probes/delegation/` (delegation without the fixture's unreachable MCP endpoint), `examples/runtime-probes/plugin-activation/` (one Agent Plugin, a local MCP echo server over stdio and header gated streamable HTTP).
 
 ## Result
 
-The proposed profile is not one coherent portable runtime abstraction.
+The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences and generic delegation did not survive.
 
-Two semantics survived as a convincing core: a logical agent identity as required metadata and persistent behavioral instructions as the one core behavioral semantic. Description, Agent Skills, and Agent Plugins are optional fields with one rule: if present, a strict host must preserve their defined semantics or reject the profile. Model requirements are declared by the agent author and resolved by the host, but without a standardized capability vocabulary they remain incubating. The generic `delegates` field overloads several incompatible mechanisms and should leave the profile.
-
-This is not a majority vote. The recommendations below use the semantic intersection actually observed. A framework accepting similarly named constructor arguments does not count as preservation.
-
-The classifications are recorded reviewer judgments about each native mechanism, graded against the published Agent Skills, Agent Plugins, and MCP contracts. Each adapter states its grade and rationale explicitly, the tests assert those grades, and the construction and runtime observations back them. The grades are not derived from the traces by measurement. The runtime runs use scripted deterministic models, so they prove that instructions, tool calls, and returns travel through the real framework code paths, not that any model behaves differently as a result. A property that was not exercised is recorded as `unverified`, never as `approximated`. Read the matrix as a structured, reproducible assessment, not as an instrument reading.
-
-| Source semantic | Recommendation | Narrow semantic that survived |
+| Field | Status | What survived |
 |---|---|---|
-| `name` | **REQUIRED METADATA** | Stable logical identity for discovery, diagnostics, and packaging. A host may translate it to a target-specific identifier only if it retains a collision-free mapping back to the logical name. Not itself a runtime behavior. |
-| Markdown instructions | **CORE** | Persistent agent-level behavioral instructions applied on every invocation and kept distinct from ordinary task input. |
-| `description` | **OPTIONAL** | Metadata to understand, display, discover, or select the agent; it must not be merged into behavioral instructions. A catalog profile may require it. |
-| `model.requires` | **INCUBATING** | Declared by the agent author, attested by the host binding. Sound as a concept, but `tool-use` and `reasoning` have no standardized meaning yet. |
-| `model.prefers` | **REMOVE** | Non-binding deployment selection policy; belongs in the host binding. |
-| `skills` | **OPTIONAL** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. The experiment verified catalog disclosure and activation; it did not verify behavior under context compaction or access to bundled resources. |
-| `plugins` | **OPTIONAL** | A referenced Agent Plugin contributes all standard components it contains; a strict host makes them available to the declaring agent or rejects the profile. Composition is guaranteed; a stable model-visible tool identifier is not. |
-| `delegates` | **REMOVE** | One field overloads agent-as-tool, handoff, graph transition, shared-state run, and team collaboration. No agent inventory replaces it; packaging and orchestration are separate concerns. |
+| `name` | **REQUIRED METADATA** | Stable logical identity for discovery, diagnostics, and packaging. A host may translate it to a native identifier only with a collision free mapping back. Not itself a runtime behavior. |
+| Markdown instructions | **CORE** | Persistent agent level behavioral instructions, applied on every invocation and kept distinct from ordinary task input. |
+| `description` | **OPTIONAL** | Metadata to understand, display, discover, or select the agent. Never merged into instructions. A catalog profile may require it. |
+| `skills` | **OPTIONAL** | Additive Agent Skills declaration: metadata first, activation on demand. Verified: catalog and activation. Not verified: behavior under context compaction, access to bundled resources. |
+| `plugins` | **OPTIONAL** | A referenced plugin contributes all its standard components; a strict host makes them available to the declaring agent or rejects. Composition is guaranteed, a stable model visible tool name is not. |
+| `model.requires` | **INCUBATING** | Declared by the author, attested by the host binding. Sound as a concept; `tool-use` and `reasoning` have no standardized meaning. |
+| `model.prefers` | **REMOVED** | Deployment selection policy. Belongs in the host binding. |
+| `delegates` | **REMOVED** | One field for `agent-as-tool`, handoff, graph transition, shared state runs, and team collaboration. No agent inventory replaces it. |
+
+How to read the grades. Each adapter states a grade and its reason for every field of every agent, tests assert those grades, and construction and runtime observations back them. The grades are judgments against the published Agent Skills, Agent Plugins, and MCP contracts, not measurements derived from traces. Deterministic models prove that instructions, tool calls, and results travel through the real framework code paths, not that a model behaves differently. A property that was not exercised is `unverified`, never `approximated`. Strict mode rejects `approximated` and `unsupported`, never discards a field, and lets `unverified` pass while listing it.
 
 ## What ran
 
-Each environment is independently locked because a single environment is impossible: CrewAI 1.15.18 requires `openai>=2.30,<3`, while OpenAI Agents 0.22.0 requires `openai>=3,<4`. Python 3.13 was used because CrewAI's transitive Chroma/Pydantic v1 path failed to import on Python 3.14.
+Each framework has its own hash locked environment. One shared environment is impossible: CrewAI 1.15.18 needs `openai>=2.30,<3`, OpenAI Agents 0.22.0 needs `openai>=3,<4`. Python 3.13, because CrewAI's Chroma and Pydantic v1 path fails to import on 3.14.
 
-| Runtime | Tested version | Native objects constructed | Runtime exercised | Full fixture strict result |
+| Runtime | Version | Native objects | Runtime path exercised | Full fixture, strict |
 |---|---:|---|---|---|
-| LangChain / LangGraph | LangChain 1.4.0; LangGraph 1.2.11 | `CompiledStateGraph`, `StructuredTool` | Parent → child agent-tool → parent | Rejected |
-| CrewAI | 1.15.18 | `Agent`, `Crew`, native Skills, MCP configs | Leaf `Agent.kickoff`; native skill load | Rejected |
-| LlamaIndex | core 0.14.24 | `FunctionAgent`, `AgentWorkflow`, `BasicMCPClient` | Leaf `FunctionAgent.run` | Rejected |
-| Agno | 3.0.5 | `Agent`, `Team`, `Skills`, `MCPTools` | Leaf `Agent.run`; native skill load | Rejected |
-| OpenAI Agents SDK | 0.22.0 | `Agent`, MCP servers, agent tools | Parent → child `Agent.as_tool` → parent | Accepted, durability unverified |
-| Google ADK | 2.8.0 | `LlmAgent`, `AgentTool`, `McpToolset` | Parent → nested AgentTool → parent | Rejected |
-| PydanticAI | 2.38.0 | `Agent`, `Tool`, `MCPToolset` | Parent → async adapter tool → child → parent | Accepted, durability unverified |
-| Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | Parent → child `Agent.as_tool` → parent | Accepted, durability unverified |
+| LangGraph | LangChain 1.4.0, LangGraph 1.2.11 | `CompiledStateGraph`, `StructuredTool` | parent, child agent tool, parent | rejected |
+| CrewAI | 1.15.18 | `Agent`, `Crew`, native Skills, MCP configs | leaf `Agent.kickoff`, native skill load | rejected |
+| LlamaIndex | core 0.14.24 | `FunctionAgent`, `AgentWorkflow`, `BasicMCPClient` | leaf `FunctionAgent.run` | rejected |
+| Agno | 3.0.5 | `Agent`, `Team`, `Skills`, `MCPTools` | leaf `Agent.run`, native skill load | rejected |
+| OpenAI Agents SDK | 0.22.0 | `Agent`, MCP servers, agent tools | parent, child `Agent.as_tool`, parent | accepted, skills unverified |
+| Google ADK | 2.8.0 | `LlmAgent`, `AgentTool`, `McpToolset` | parent, nested `AgentTool`, parent | rejected |
+| PydanticAI | 2.38.0 | `Agent`, `Tool`, `MCPToolset` | parent, async adapter tool, child, parent | accepted, skills unverified |
+| Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | parent, child `Agent.as_tool`, parent | accepted, skills unverified |
 
-The runtime traces are under `generated/runtime/<target>/runtime.json`; each directory also contains `test-output.txt`. Individual compatibility reports are under `generated/runtime/<target>/compatibility.json`. `generated/runtime/matrix.json` and `matrix.md` are generated from those eight reports plus the still-valid static-lowering reports for Amplifier, Claude Code, Codex, and AFM. The matrix labels evidence kind; static lowering is not presented as runtime certification. It also records hashes for every unchanged research-fixture file.
+Per target: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `plugin-activation.json`, `test-output.txt`. `generated/runtime/matrix.md` merges the eight runtime reports with the four static lowering reports and labels which is which. CrewAI, Agno, and LlamaIndex team and workflow objects were constructed but their transitions were not forced: the profile carries no task graph, process, or routing policy, and inventing one would be evidence for nothing.
 
-CrewAI, Agno, and LlamaIndex multi-agent objects were constructed but their team/workflow transitions were not forced with invented orchestration. The profile does not contain the task graph, process, shared-state, or routing policy those mechanisms require. That underdetermination is evidence against `delegates`, not a reason to fabricate a passing run.
+## Grades
 
-## Classification matrix
-
-This table summarizes the entry agent. Machine-readable agent-by-agent details and explanations remain authoritative.
+Entry agent only. The JSON reports hold every agent and every reason.
 
 | Target | name | description | instructions | requires | prefers | skills | durability | resources | plugins | delegates |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -65,11 +57,9 @@ This table summarizes the entry agent. Machine-readable agent-by-agent details a
 | Codex (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
 | AFM 0.4.0 (static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
-`requires` combines the fixture's `reasoning` and `tool-use` rows; every runtime result is a binding attestation, not native capability proof. `prefers` abbreviates `omitted-preference` for runtime targets. The earlier static targets used a binding that selected the preferred capability, so their result is `resolved`. `durability` and `resources` are the `skills.durability` and `skills.resources` findings; static targets were never executed, so neither is declared for them.
+`requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; static targets never ran, so neither applies.
 
-### Conformance by field
-
-Strict outcome for the required core and for each optional field, across all agents of the fixture, from `generated/runtime/matrix.md` (the JSON key is `modules`). `accepted` means no finding in the group is `approximated` or `unsupported`; `unverified` findings do not block.
+Strict outcome per field group, all agents:
 
 | Field | LangGraph | CrewAI | LlamaIndex | Agno | OpenAI Agents | Google ADK | PydanticAI | Microsoft |
 |---|---|---|---|---|---|---|---|---|
@@ -80,179 +70,87 @@ Strict outcome for the required core and for each optional field, across all age
 | plugins | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted |
 | delegates | accepted | rejected | rejected | rejected | accepted | rejected | accepted | accepted |
 
-A rejected combined fixture does not show the core is non-portable. CrewAI is the only runtime whose core is rejected, because its role, goal, and backstory prompt template changes the boundary of both name and instructions, and its template override trades that for a single user message with no persistent system context. That is a genuinely different agent abstraction, and the portable core should not be contorted to make it pass.
+A rejected combined fixture says which field a target cannot preserve, not that the core is unportable. CrewAI is the one core rejection. Its role, goal, and backstory template fuses name, description, and instructions, and its template override drops role and goal only by collapsing the prompt into a single user message. That is a different agent abstraction, and the core should not be bent to pass it.
 
-## Field findings
+## Findings by field
 
-### `name` — CORE
+### `name`
 
-Observed mechanisms:
+Six runtimes have a native name field. CrewAI has a role, which is prompt content, not identity. Google ADK requires Python identifiers, so `lead-researcher` becomes `lead_researcher` with an explicit map back. All four static targets have identity fields.
 
-- LangGraph, LlamaIndex, Agno, OpenAI Agents, PydanticAI, and Microsoft have native name fields.
-- CrewAI has a role, not a stable agent identity; using the source name as role changes its semantics. CrewAI's custom `system_template` and `prompt_template` were probed as a route around this: they do remove role and goal from the prompt, but CrewAI then builds one combined prompt with no system message, so the mechanism does not restore a clean identity plus instructions split.
-- Google ADK rejects `lead-researcher` because names must be valid Python identifiers. The adapter uses `lead_researcher` and retains an explicit source/native identity map.
-- The four static targets have native identity fields.
+The portable part is a stable logical identity for discovery, diagnostics, and packaging. Native spelling is not portable, and a native identifier may double as prompt content. With `delegates` gone the document has no internal references, so the name defines nothing at runtime. A host may translate it only with a collision free mapping back, graded `resolved` rather than `preserved`.
 
-Intersection: a stable logical identity is necessary for references, diagnostics, and package resolution. Native spelling is not portable.
+### `description`
 
-Important difference: a runtime identifier may have a stricter grammar or may double as prompt content.
+Google ADK, LlamaIndex, OpenAI Agents, PydanticAI, and Microsoft have native description or handoff metadata. LangGraph's compiled agent has none, so the adapter keeps descriptions in a catalog in the artifact metadata, never in the prompt, and children wrapped as tools carry theirs as the tool description. Agno injects the description into model context. CrewAI's nearest field is `goal`, which is behavioral.
 
-Recommendation: keep `name` as required metadata and define it as the package-level logical identity. A host may translate it to a target-specific identifier only if it retains a collision-free mapping back to the logical name. Do not claim byte-for-byte native preservation when a translation is used. With `delegates` removed there are no intra-document references, so the name defines discovery and diagnostics, not runtime behavior.
+Discovery metadata, routing metadata, tool description, and behavioral goal are not interchangeable; promotion into instructions can change output. A same named native field is not preservation, and the lack of one is not `unsupported`: a host that keeps the description in a catalog, registry, UI, or diagnostics and says where reports `resolved`. Injection into prompt content is `approximated` and strict mode rejects it. CrewAI and Agno could reach `resolved` by keeping the description out of the prompt; this experiment did not try.
 
-### `description` — OPTIONAL
+### Markdown instructions
 
-Observed mechanisms:
+Seven runtimes and all static targets have a persistent instruction path. Google ADK interpolates `{state_key}` in string instructions, so the adapter passes a callback to keep Markdown literal. Microsoft passes instructions through chat options rather than writing a system message itself.
 
-- Google ADK, LlamaIndex, OpenAI Agents, PydanticAI, and Microsoft expose native description or handoff-description metadata.
-- LangGraph's compiled entry agent has no description property. The adapter keeps every description in an agent catalog in the artifact metadata, where it never enters the prompt, and a child description also becomes the tool description when the child is wrapped as a tool.
-- Agno injects description into model context.
-- CrewAI's closest field is `goal`, which is behavioral prompt content rather than passive selection metadata.
+CrewAI embeds the body as `backstory` inside its generated role, goal, backstory template, so the instructions are no longer separate from role and goal text. Custom templates (`system_template="{backstory}"`, `prompt_template="{input}"`) remove role and goal, but CrewAI's prompt builder returns one combined prompt for any template override and sends it as a single user message fused with the task. The test `test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn` records both shapes. Neither path yields persistent instructions distinct from task input, so `approximated` stands.
 
-Intersection: a human-readable hint about what an agent does and when to select it.
+Preservation means persistence and separation from ordinary task input. It does not mean a particular provider role or a byte identical prompt.
 
-Important difference: discovery metadata, routing metadata, tool description, and behavioral goal are not interchangeable. Promotion into instructions can change output.
+### `model.requires`
 
-Recommendation: retain description as optional metadata used to understand, display, discover, or select an agent. A same-named native field is not automatically preservation, and the lack of one is not automatically `unsupported`: a host that retains the description in its own catalog, registry, UI, or diagnostics and names that surface reports `resolved`. A target that can only inject it as behavioral prompt content must report `approximated`; strict mode rejects that mapping. CrewAI and Agno could reach `resolved` by keeping the description out of `goal` and the model context, which this experiment did not attempt.
+No SDK exposes a common, trustworthy capability contract. Every `resolved` result came from a binding assertion such as `tool-use: true`. `tool-use` can sometimes be inferred from model and tool APIs but depends on provider, model, and request mode. `reasoning` has no shared operational meaning.
 
-### Markdown instructions — CORE
+The author knows what the agent needs; the deployment knows which model provides it and can refuse one that does not. The requirement is host resolved, not host authored, so it stays in the document. But a requirement is interoperable only when its name has a standardized meaning, and none does yet. Incubating, not in the first normative proposal. Reports grade a requirement `resolved` only on recorded attestation and never imply the SDK verified it.
 
-Observed mechanisms:
+### `model.prefers`
 
-- LangGraph, LlamaIndex, Agno, OpenAI Agents, Google ADK, PydanticAI, Microsoft, and the static targets provide persistent instruction/system-prompt paths.
-- Google ADK's string instructions perform `{state_key}` interpolation; the adapter uses a native instruction callback so arbitrary Markdown remains literal.
-- Microsoft passes instructions through chat options to the client rather than inserting a `system` message itself; the nested runtime recorded the child instructions in those options.
-- CrewAI embeds the body as `backstory` within a generated role/goal/backstory prompt template. The instructions run, but they are no longer separate from role and goal text. With custom templates (`system_template="{backstory}"`, `prompt_template="{input}"`) role and goal disappear, but CrewAI's prompt builder returns a single prompt for any template override and the executor sends it as one user message fused with the task text. The test `test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn` records both message shapes. Neither path yields persistent context distinct from task input, so the `approximated` grade stands.
+Every runtime bound a model without the preferred `vision-input`, reported `omitted-preference`, and behaved identically. Selectors use incompatible vocabularies and ranking rules. Preferences are deployment policy and belong in the host binding.
 
-Intersection: persistent behavioral context applied on every invocation, distinct from ordinary task input and tool output.
+### `skills`
 
-Important difference: exact provider message role is not portable. Persistence and separation from task input are.
+CrewAI, Agno, and Microsoft implement Agent Skills natively. Tests confirmed metadata only discovery, then invoked the native loader (`LoadSkillTool`, `get_skill_instructions`, `SkillsProvider.load_skill`). Each returns the full body on demand as a tool result, the dedicated tool activation the Agent Skills integration guide describes, so `preserved`. Microsoft gates loading behind approval by default; the adapter disables it and records that as host policy. LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no skills concept; the adapter supplies the activation tool with the catalog in its description, so `resolved`. Claude Code, Codex, and AFM have static mappings with documented scope differences. Amplifier has none without a runtime module.
 
-Recommendation: keep the Markdown body in the core. Define semantic preservation by persistence and separation from ordinary task input, not by a required provider message role or byte-identical final prompt.
+Not exercised, and therefore `unverified` everywhere: whether activated content survives context compaction, and whether bundled references, scripts, and assets are reachable on demand, since the fixture skills bundle none. Agent Skills does not define skill isolation, so `skills` is additive: the listed skills must be available to the agent, and ambient skills are host policy.
 
-### `model.requires` — INCUBATING, HOST RESOLVED
+### `plugins`
 
-Observed mechanism in all eight runtime adapters: the profile parser exposes capability names, but the framework model objects do not provide a common, trustworthy capability contract. Every successful result came from an external binding assertion such as `tool-use: true`.
+Six runtimes construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
 
-Intersection: the agent author knows what the agent needs; the deployment knows which concrete model provides it and can refuse to bind one that does not. The requirement is host resolved, not host authored.
+The probe plugin declares a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. One echo server script runs under MCP SDK 1.x and 2.x, because the environments pin three `mcp` releases. A deterministic model calls every echo tool once. The echo result reports working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` arrived, and which server answered.
 
-Important differences:
-
-- `tool-use` can sometimes be inferred from model/tool APIs, but support may depend on provider, selected model, or request mode.
-- `reasoning` has no shared operational definition across the SDKs.
-- Capability names, evidence, and fallback policy are deployment concerns.
-
-Recommendation: keep `model.requires` as an incubating field so deployments do not have to rediscover an agent's intrinsic needs. Declaration lives in the document; vocabulary governance lives outside it; selection and attestation live in the host binding. Reports classify a requirement `resolved` only on recorded attestation and must not imply the SDK verified it. The evidence supports the concept, not a vocabulary: a requirement is interoperable only when its name has a standardized meaning, and `reasoning` clearly does not. Do not force the field into the first normative proposal.
-
-### `model.prefers` — REMOVE
-
-Observed mechanism: all runtime experiments deliberately bound models without the preferred `vision-input` and reported `omitted-preference`. Execution behavior was unchanged, as required for a preference.
-
-Intersection: none beyond a non-binding deployment hint.
-
-Important difference: model selectors use incompatible vocabularies and ranking rules.
-
-Recommendation: remove `model.prefers` from the portable agent document. Put model-selection preferences in target bindings or deployment policy, where ignoring them cannot be confused with semantic preservation.
-
-### `skills` — OPTIONAL
-
-Observed mechanisms:
-
-- CrewAI, Agno, and Microsoft have native Agent Skills implementations. Tests proved metadata-only discovery and then invoked the native loader (CrewAI `LoadSkillTool`, Agno `get_skill_instructions`, Microsoft `SkillsProvider` `load_skill`). Each delivers the full body on demand as a tool result, which the Agent Skills integration guide names as dedicated tool activation. Microsoft gates `load_skill` behind approval by default; the adapter disables that gate and records it as host policy.
-- Claude Code, Codex, and AFM have still-valid static Agent Skills mappings, with scope differences documented in their reports.
-- LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no Agent Skills concept; the adapter supplies the dedicated activation tool with the catalog in its description. That is `resolved`: the pattern is the published one, but the framework did not provide it.
-- No experiment exercised context compaction or summarization, so whether activated skill content stays effective for the session is `unverified` in all eight runtimes.
-- The fixture skills bundle no references, scripts, or assets, so on-demand resource access, which Agent Skills also requires, is `unverified` in all eight runtimes.
-- Agent Skills does not define skill isolation. The `skills` field is additive: the listed skills must be available to the agent. Whether the host also exposes ambient skills is host policy.
-- Amplifier's direct static mapping remains unsupported without a runtime module.
-
-Intersection: a catalog identified by name and description, full instructions disclosed only when activated, and resources reachable on demand.
-
-Important differences: catalog scope, session durability under compaction, approval, resource access, and script execution. The delivery mechanism is not one of them: the integration guide treats a tool result as a conforming way to bring instructions into context.
-
-Recommendation: retain Agent Skill references as an optional field graded against the Agent Skills specification and integration guide: metadata first, on-demand activation, full instructions into context, resources on demand. Native implementations are `preserved`, adapter supplied activation tools are `resolved`, eager injection is `approximated`. Session durability and resource access are separate findings and remain `unverified` until a compaction test and a fixture skill with bundled resources exist. Only catalog and activation were tested; complete Agent Skills preservation is not claimed.
-
-### `plugins` — OPTIONAL
-
-Observed mechanisms:
-
-- CrewAI, Agno, OpenAI Agents, Google ADK, PydanticAI, and Microsoft construct native MCP clients/toolsets from the Agent Plugin MCP server and attach them to the declaring agent.
-- LangGraph and LlamaIndex can construct clients, but cannot attach tools to an agent until a handshake succeeds. Against the research fixture's unreachable endpoint they report unsupported rather than inventing tools; against the live probe they attach tools through langchain-mcp-adapters and McpToolSpec respectively.
-- Static Claude, Codex, and AFM mappings resolve supported plugin components; Amplifier still needs a runtime shim.
-- All eight runtimes activated the live probe plugin end to end on both transports. See the activation table below.
-
-Intersection: an Agent Plugin reference is a required package dependency whose supported components are made available to the declaring agent, and every tested runtime's native MCP client can take the plugin's `mcp.json` entry through handshake, discovery, and invocation. Whether the same components are also visible elsewhere is a host decision; the profile promises availability, not isolation.
-
-Important differences: the plugin wrapper disappears after expansion; MCP connection ownership, activation timing, working directory, tool naming, approvals, and tool catalog scope vary. Construction proves representability, not endpoint availability, which is why the research fixture keeps `plugins.activation` unverified and the live probe is reported separately.
-
-#### Plugin activation probe
-
-The probe fixture declares one plugin whose `mcp.json` has a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. The same echo server script runs under MCP SDK 1.x and 2.x, because the eight environments pin three different `mcp` releases. A deterministic model calls every echo tool once; the echo result reports the working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` were provided, and which server answered. Per target results are in `generated/runtime/<target>/plugin-activation.json`, summarized in `generated/runtime/matrix.md`.
-
-| Target | stdio | streamable HTTP with header | stdio cwd honored | stdio env honored | Tool naming |
+| Target | stdio | HTTP with header | stdio cwd honored | stdio env honored | Tool naming |
 |---|---|---|---|---|---|
-| LangGraph | activated | activated | yes | yes | tool name as published |
+| LangGraph | activated | activated | yes | yes | as published |
 | CrewAI | activated | activated | no | yes | derived from command or URL, hashed when long |
-| LlamaIndex | activated | activated | no | yes | tool name as published |
-| Agno | activated | activated | yes | yes | tool name as published |
-| OpenAI Agents | activated | activated | yes | yes | tool name as published |
+| LlamaIndex | activated | activated | no | yes | as published |
+| Agno | activated | activated | yes | yes | as published |
+| OpenAI Agents | activated | activated | yes | yes | as published |
 | Google ADK | activated | activated | yes | yes | `<server>_<tool>` |
-| PydanticAI | activated | activated | yes | yes | tool name as published |
+| PydanticAI | activated | activated | yes | yes | as published |
 | Microsoft Agent Framework | activated | activated | yes | yes | `<server>_<tool>` |
 
-Findings from the probe:
+What the probe showed:
 
-- Agent Plugins §9 is the adapter's job, not the SDK's. No SDK expands `${PLUGIN_ROOT}` or provides `PLUGIN_ROOT` and `PLUGIN_DATA`; the shared `effective_server_config` helper does, and every stdio server then saw both variables.
-- `cwd` is lost in two SDKs. CrewAI's `MCPServerStdio` and LlamaIndex's `BasicMCPClient` have no working directory parameter, so their servers ran in the inherited directory. Agent Plugins §7.2.1 makes the plugin root the required default when `cwd` is omitted, so every stdio server needs it; both adapters therefore grade any stdio server `unsupported`, and strict mode rejects the activation fixture for both. Their `resolved` grade in the research fixture is not a contradiction: that plugin declares only a streamable HTTP server, which neither SDK mishandles. Native MCP support is not Agent Plugins support. The same rule makes AFM 0.4.0 lose every stdio server.
-- Headers survived everywhere. All eight clients sent the configured header; the 401 gate never fired.
-- Tool naming is not portable. Google ADK and Microsoft prefix tools with the server name. CrewAI names tools after the server command or URL, not the Agent Plugins server name, and truncates long sanitized names to a hash, so the model saw `python_users_..._98b36a1f` for `echo_stdio`. Agent Plugins delegates wire behavior to MCP and does not standardize how a host presents tools to a model. Consequently a plugin reference guarantees capability composition, not a stable model-visible tool identifier. A portable instruction such as "always call `echo_stdio` before answering" is unsafe, because another host may expose the tool as `echostdio_echo_stdio` or a hash. Portable instructions cannot rely on a target-native tool name unless another standard supplies a stable logical reference.
-- Server attribution is not portable. CrewAI exposes no mapping from a discovered tool back to the configured server; the probe attributes results by payload content instead.
-- Lifecycle ownership differs. OpenAI Agents needs an explicit `connect()`; Microsoft and PydanticAI connect when the agent enters its async context; Agno connects inside `arun` and releases in the same task; ADK connects on first tool listing; CrewAI connects inside `kickoff`; LangGraph opens a session per tool call; LlamaIndex binds its HTTP client to the first event loop that uses it.
-- Two servers exposing the same tool name were not tested. Namespacing across servers is client defined and remains an open question.
-- Activation failure reporting per Agent Plugins §7.2.2 is implemented in the adapters but was not exercised, because no server failed.
+- **Agent Plugins §7.2.1 and §9 are the host's job.** No SDK defaults `cwd` to the plugin root, expands `${PLUGIN_ROOT}`, or provides the reserved variables. The shared `effective_server_config` helper does, and every stdio server then saw both.
+- **Native MCP support is not Agent Plugins support.** CrewAI's `MCPServerStdio` and LlamaIndex's `BasicMCPClient` cannot set a working directory. Since the plugin root is the required default, both adapters grade every stdio server `unsupported`, and strict mode rejects the probe fixture for both. Their `resolved` grade in the research fixture is consistent: that plugin has only an HTTP server. AFM 0.4.0 loses every stdio server for the same reason.
+- **Headers survived everywhere.** The 401 gate never fired.
+- **Tool names are not portable.** ADK and Microsoft prefix with the server name. CrewAI names tools after the command or URL and truncates long names to a hash, so the model saw `python_users_..._98b36a1f` for `echo_stdio`. Agent Plugins leaves presentation to the host. A plugin reference therefore guarantees composition, not a tool identifier an instruction can rely on. "Always call `echo_stdio`" is unsafe in a portable profile.
+- **Server attribution is not portable.** CrewAI exposes no mapping from a discovered tool to its server; the probe attributes by payload content.
+- **Lifecycle ownership differs.** OpenAI Agents needs an explicit `connect()`. Microsoft and PydanticAI connect when the agent enters its async context. Agno connects inside `arun`. ADK connects on first tool listing. CrewAI connects inside `kickoff`. LangGraph opens a session per call. LlamaIndex binds its HTTP client to the first event loop that uses it.
 
-Recommendation: retain plugin references as optional composition. A referenced Agent Plugin contributes all standard components it contains; a strict host must make those components available to the declaring agent, including the §7.2.1 working directory default, or reject the profile. This is an Agent Profile composition rule, not a change to Agent Plugins conformance, which permits clients with partial component-type support. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle, tool naming, or scoping beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §7.2.1 and §9 themselves, and the profile must state that tool names seen by the model are not portable.
+Not tested: two servers with the same tool name, SSE, OAuth, and failure reporting per §7.2.2, which the adapters implement but no server triggered.
 
-### `delegates` — REMOVE
+A referenced plugin contributes all its standard components; a strict host makes them available to the declaring agent, working directory default included, or rejects. This is a profile composition rule, not a change to Agent Plugins conformance, which allows clients with partial component support. Availability is not isolation; scoping stays with the host.
 
-Observed mechanisms:
+### `delegates`
 
-- LangGraph: no agent relationship primitive; an adapter-authored `StructuredTool` starts a fresh child graph and returns text. Graded `resolved`: it implements the draft 0.1 contract, though the framework does not provide it.
-- OpenAI Agents and Microsoft: native agent-as-tool; Microsoft explicitly defaults to an independent child session.
-- PydanticAI: no agent relationship primitive; an async adapter `Tool` reproduces the bounded text-in/text-out contract, graded `resolved` for the same reason as LangGraph. A first synchronous implementation failed at runtime because nested `run_sync()` is forbidden.
-- Google ADK: `AgentTool` creates a child session but copies parent state and propagates child state deltas back.
-- LlamaIndex: `AgentWorkflow.can_handoff_to` transfers active control through shared workflow state.
-- Agno: `Team` expresses team/member collaboration.
-- CrewAI: delegation is coupled to Crew tasks, context, and process.
-- Codex exposes a project catalog rather than the same per-parent contract; AFM 0.4.0 has no local equivalent.
+The eight runtimes use six mechanisms. OpenAI Agents and Microsoft: native agent as tool, Microsoft in an isolated child session. LangGraph and PydanticAI: no relationship primitive, so an adapter tool implements the draft 0.1 contract of fresh child, task in, text out, control returns; graded `resolved`. Google ADK `AgentTool`: a child session that copies parent state and propagates deltas back. LlamaIndex `can_handoff_to`: transfer of control through shared workflow state. Agno `Team`: member collaboration. CrewAI: delegation bound to Crew tasks, context, and process. Codex exposes a project catalog; AFM has no local equivalent.
 
-Intersection: other named agents may be available. There is no shared answer to who retains control, whether state is shared, whether the child is a tool, whether a workflow transition occurs, or what task/result contract applies.
-
-Important difference: these mechanisms change observable behavior. Treating a handoff or shared team as a fresh child function call is not lowering; it is inventing an orchestration policy. An adapter-authored tool that implements an explicit source contract is legitimate; the problem is that one generic field cannot say which contract a target actually honors.
-
-Recommendation: remove the generic `delegates` field from the profile because it is semantically overloaded, not because adapter implementation is illegitimate. Do not add an `agents:` inventory either: an Agent Profile describes one agent, a package may contain several, and orchestration defines their relationships. A future optional field may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not cover multi-agent orchestration.
-
-## Conformance results
-
-Strict construction rejects any required semantic classified `approximated` or `unsupported`; it never discards one. `omitted-preference` and `unverified` are non-blocking, and every `unverified` finding is listed in the report. Every report contains exactly one finding for every semantic declared by every source agent, and an outcome for the core and for each optional field.
-
-The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework, each with skill durability and resource access unverified. Seven of eight runtimes accept the required core. The table above shows which optional field each remaining target cannot preserve: description in CrewAI and Agno, plugins in LangGraph and LlamaIndex, delegates in CrewAI, LlamaIndex, Agno, and Google ADK.
-
-## Proposed profile changes
-
-1. Reduce the core to `name` as required metadata plus Markdown instructions.
-2. Make `description`, `skills`, and `plugins` optional fields with one rule: if present, a strict host preserves their defined semantics or rejects the profile. Report conformance for the core and for each optional field.
-3. Carry `model.requires` as an incubating host-resolved declaration until a capability vocabulary is standardized; move `model.prefers`, model selection, and attestation to external target bindings.
-4. Remove `delegates` from the profile because it is overloaded. Add no agent inventory; leave packaging and orchestration to their own efforts.
-5. Extend the diagnostic vocabulary with `unverified` for properties that were not exercised. Keep `omitted-preference` for legacy reports only.
-6. Require adapters to distinguish construction, activation, and execution evidence, and hosts to implement Agent Plugins §9 placeholder expansion and reserved variables.
-7. Continue to forbid in-document host extensions. Target bindings remain external.
+The only shared meaning is that other agents exist. Who keeps control, whether state is shared, whether the child is a tool, and what the result contract is all differ, and lowering one mechanism into another invents orchestration policy. The field is removed because it is overloaded, not because adapter tools are illegitimate. No `agents:` inventory replaces it: a profile describes one agent, a package may hold several, orchestration relates them. A typed relationship such as `agent-as-tool` could become a future optional field.
 
 ## Limits
 
-- Deterministic fake/model subclasses avoided paid network inference but used each framework's real agent, tool, workflow/team, and runner code paths.
-- The research fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable, so its `plugins.activation` finding stays unverified. Live activation was exercised only through the separate plugin-activation probe, against a local echo server rather than a shared reference server.
-- The four earlier targets remain static-lowering evidence only.
-- No conclusion depends on generated answer quality. The experiment tests representation, persistence, separation from task input, scope, and control flow.
-- Skill activation was judged against the Agent Skills integration guide, not measured. No test exercises context compaction or bundled resources, so durability and resource access are unverified in every runtime.
-- Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint; the activation probe used a two-server fixture with no skills or delegates.
-- The activation probe did not test SSE, OAuth, two servers with colliding tool names, or activation failure reporting.
+- Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
+- The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
+- The four static targets were never executed.
+- Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
+- The combined fixture's strict outcome is a construction result. The probe fixture has no skills or delegates.
+- The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.

@@ -1,60 +1,47 @@
 # Agent Composition Profile interoperability experiment
 
-This repository tries to falsify a small portable Agent Profile, not merely translate similar-looking configuration keys.
+One question: which parts of a small agent declaration mean the same thing across independent agent frameworks?
 
-The experiment started with the unchanged `examples/research-team/` fixture and tested every proposed semantic independently:
+We took a candidate profile with eight fields (`name`, `description`, Markdown instructions, `model.requires`, `model.prefers`, Agent Skills, Agent Plugins, `delegates`) and built the same fixture in eight framework runtimes and four declarative formats. Each adapter constructs native objects, runs them with deterministic models, and grades every field against the published Agent Skills, Agent Plugins, and MCP contracts. The runtimes are LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework. The formats are Amplifier, Claude Code, Codex, and AFM.
+
+## What survived
 
 ```text
-name · description · Markdown instructions · model.requires · model.prefers
-Agent Skills · Agent Plugins · delegates
+Required     name, Markdown instructions
+Optional     description, skills, plugins
+Incubating   model.requires
+Removed      model.prefers, delegates
 ```
 
-Eight adapters construct real framework objects and exercise native runtime paths for LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework. Four earlier static-lowering targets remain in the consolidated matrix and are clearly labeled as static evidence.
+- Seven of eight runtimes preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions, and its template override only collapses everything into one user message.
+- Optional fields follow one rule. If the field is present, a strict host preserves its defined semantics or rejects the profile.
+- Model requirements belong to the author and are resolved by the host. No capability vocabulary is standardized yet, so the field stays incubating.
+- `delegates` hid six different mechanisms behind one word.
+- One Agent Plugin with a local MCP server activated in all eight runtimes over stdio and header gated streamable HTTP. Two SDKs cannot set a working directory, so speaking MCP is not the same as supporting Agent Plugins. The tool names a model sees are not portable.
 
-## Conclusion
+Grades are reviewer judgments backed by tests, not measurements. Anything not exercised is marked `unverified`.
 
-The original abstraction was too broad.
-
-- `name` as required metadata and persistent Markdown instructions form the portable core.
-- `description`, Agent Skills, and Agent Plugins are optional fields. If present, a strict host preserves their defined semantics or rejects the profile. Conformance is reported for the core and for each optional field.
-- Model requirements are declared by the agent author and resolved by the host, but stay incubating until a capability vocabulary is standardized. Model selection and preferences belong in host bindings.
-- `delegates` overloads incompatible mechanisms and should leave the profile.
-- One Agent Plugin with a local MCP echo server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP. Two SDKs cannot honor `cwd`, so their native MCP support is not Agent Plugins support; tool names seen by the model are not portable; and Agent Plugins §7.2.1 and §9 handling had to be implemented by the adapter.
-
-Read the compatibility classifications as recorded reviewer judgments about each native mechanism, graded against the Agent Skills, Agent Plugins, and MCP contracts and backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. Properties that were not exercised, such as skill durability under context compaction and on-demand skill resources, are reported as `unverified`. Three of eight runtimes accept the combined fixture; seven accept the core.
-
-See [EVIDENCE.md](EVIDENCE.md) for the field-by-field findings and [the evidence revision](spec/agent-composition-profile-v0.2-discussion-draft.md) for the resulting draft. The concise [external proposal](EXTERNAL-PROPOSAL.md) frames the work as evidence for the existing Agent Plugins incubation effort.
+[EVIDENCE.md](EVIDENCE.md) has the findings. The [draft profile](spec/agent-composition-profile-v0.2-discussion-draft.md) has the resulting shape. [EXTERNAL-PROPOSAL.md](EXTERNAL-PROPOSAL.md) frames the work for the Agent Plugins incubation.
 
 ## Reproduce
 
-The base parser and static lowering suite:
-
 ```bash
-./scripts/verify.sh
+./scripts/verify.sh          # parser, static targets, generated artifacts
+./scripts/verify-runtime.sh  # eight locked environments, native tests, probes, matrix
 ```
 
-All eight isolated runtime environments, native tests, reports, traces, and consolidated matrix:
+Each runtime has its own hash locked environment under `compiler/runtime-requirements/`, because CrewAI and OpenAI Agents need incompatible major versions of `openai`. Everything under `generated/runtime/` is produced by the scripts and never edited by hand.
 
-```bash
-./scripts/verify-runtime.sh
-```
-
-Runtime dependencies are exact and independently hash-locked under `compiler/runtime-requirements/`. A single shared environment is intentionally not used because current CrewAI and OpenAI Agents releases require incompatible major versions of the `openai` package.
-
-Generated evidence lives under `generated/runtime/`. The authoritative matrix is generated by `scripts/build_runtime_matrix.py`; it is not maintained by hand.
-
-## Repository map
+## Map
 
 ```text
-compiler/src/agent_profile_compiler/runtime/  executable adapters
-compiler/tests/runtime/                       native construction/runtime tests
-compiler/runtime-requirements/                per-framework pins and hash locks
-examples/research-team/                       unchanged falsification fixture
-examples/runtime-probes/delegation/           minimal offline control-flow probe
-examples/runtime-probes/plugin-activation/    one plugin, local MCP echo server, stdio and streamable HTTP
-generated/runtime/                            reports and traces
-EVIDENCE.md                                   conclusions
-spec/                                         evidence-revised discussion draft
+compiler/src/agent_profile_compiler/runtime/  the eight runtime adapters
+compiler/tests/runtime/                       native construction and runtime tests
+compiler/runtime-requirements/                per framework pins and hash locks
+examples/research-team/                       the unchanged fixture
+examples/runtime-probes/delegation/           offline control flow probe
+examples/runtime-probes/plugin-activation/    one plugin, local MCP echo server
+generated/runtime/                            reports, traces, matrix
+spec/                                         draft 0.2 and its schema
+docs/                                         static lowering provenance, discussion post draft
 ```
-
-The static lowering walkthrough and its original limitations remain in `docs/LOWERING_WALKTHROUGH.md` and `docs/IMPLEMENTATION_REPORT.md` for provenance.
