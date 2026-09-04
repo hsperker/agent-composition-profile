@@ -50,7 +50,7 @@ def test_builds_native_pydantic_agents_mcp_and_delegate_tools() -> None:
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
     assert status(artifact, "lead-researcher", "skills") == "approximated"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "resolved"
+    assert status(artifact, "lead-researcher", "delegates") == "approximated"
 
 
 def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() -> None:
@@ -65,7 +65,7 @@ def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() 
                 "worker": TestModel(custom_output_text="worker result"),
             }
         ),
-        strict=True,
+        strict=False,
     )
 
     result = adapter.run(artifact, "Solve the problem.")
@@ -79,11 +79,11 @@ def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() 
     assert result.observations[1].data["result"] == "worker result"
 
 
-def test_strict_pydantic_ai_rejects_skill_authority_approximation() -> None:
+def test_strict_pydantic_ai_rejects_skill_authority_and_adapter_delegate_approximations() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     models = {
         name: TestModel(custom_output_text=f"unused-{name}") for name in package.agents
     }
 
-    with pytest.raises(RuntimeCompatibilityError, match="skills"):
+    with pytest.raises(RuntimeCompatibilityError, match="skills.*delegates"):
         adapter.build(package, binding(models), strict=True)

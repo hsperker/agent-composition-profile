@@ -188,8 +188,8 @@ def build(
             ),
             "delegates": (
                 (
-                    "resolved",
-                    "PydanticAI has no agent relationship primitive; the adapter creates native Tool objects that perform bounded child Agent runs and return text.",
+                    "approximated",
+                    "PydanticAI has no agent relationship primitive; the adapter authors Tool objects that run a child Agent and return text. That is an adapter-chosen orchestration policy, not a framework semantic.",
                 )
                 if agent.delegate_names
                 else ("preserved", "The source agent declares no delegates.")

@@ -120,7 +120,7 @@ def runtime_probe(target: str, ns: dict, adapter):
         )
     else:
         raise AssertionError(target)
-    artifact = adapter.build(package, binding, strict=target in {"openai-agents", "pydantic-ai", "microsoft-agent-framework"})
+    artifact = adapter.build(package, binding, strict=target in {"openai-agents", "microsoft-agent-framework"})
     return "delegation", artifact, adapter.run(artifact, "Solve the problem.")
 
 
