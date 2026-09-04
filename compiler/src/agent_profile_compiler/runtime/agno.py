@@ -146,8 +146,8 @@ def build(
             ),
             "skills": (
                 (
-                    "preserved",
-                    "Agno natively loads Agent Skills through LocalSkills with browse/load/reference progressive disclosure.",
+                    "approximated",
+                    "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
                 )
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
