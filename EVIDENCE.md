@@ -146,6 +146,18 @@ The eight runtimes use six mechanisms. OpenAI Agents and Microsoft: native agent
 
 The only shared meaning is that other agents exist. Who keeps control, whether state is shared, whether the child is a tool, and what the result contract is all differ, and lowering one mechanism into another invents orchestration policy. The field is removed because it is overloaded, not because adapter tools are illegitimate. No `agents:` inventory replaces it: a profile describes one agent, a package may hold several, orchestration relates them. A typed relationship such as `agent-as-tool` could become a future optional field.
 
+## What changes in the profile
+
+The draft in `spec/` applies these seven changes. Each traces to a finding above.
+
+1. The core is `name` plus Markdown instructions. Nothing else is required.
+2. `description`, `skills`, and `plugins` are optional, with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Conformance is reported for the core and for each optional field.
+3. `model.requires` stays in the document as an incubating, host resolved declaration until a capability vocabulary is standardized. `model.prefers`, model selection, and attestation move to the host binding.
+4. `delegates` is removed as overloaded. No `agents:` inventory replaces it; packaging and orchestration are separate concerns.
+5. The grading vocabulary gains `unverified` for properties that were not exercised. `omitted-preference` remains only for legacy reports.
+6. Reports distinguish construction, activation, and execution evidence. Hosts implement Agent Plugins §7.2.1 and §9 themselves: the working directory default, placeholder expansion, and the reserved variables.
+7. Host specific settings stay outside the document. No `x-<host>` sections, no extension map.
+
 ## Limits
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
