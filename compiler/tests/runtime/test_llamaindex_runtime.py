@@ -10,9 +10,13 @@ from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import llamaindex as adapter
 from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
 
+from llama_index.core.base.llms.types import ToolCallBlock
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
 
 ROOT = Path(__file__).parents[3]
 EXAMPLE = ROOT / "examples" / "research-team"
+PROBE = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+PLUGIN_ROOT = (PROBE / "plugins" / "local-echo").resolve()
 
 
 def fixed_model(output: str, calls: list) -> MockFunctionCallingLLM:
@@ -81,3 +85,47 @@ def test_strict_llamaindex_rejects_plugin_and_handoff_semantic_losses() -> None:
 
     with pytest.raises(RuntimeCompatibilityError, match="plugins.*delegates"):
         adapter.build(package, binding(), strict=True)
+
+
+def echo_calling_model() -> MockFunctionCallingLLM:
+    """Calls every offered echo tool once, one per turn, then finishes."""
+
+    called: list[str] = []
+
+    def respond(messages, **kwargs):
+        offered = sorted(tool.metadata.name for tool in (kwargs.get("tools") or []) if "echo" in tool.metadata.name)
+        remaining = [name for name in offered if name not in called]
+        if remaining:
+            called.append(remaining[0])
+            return ChatMessage(
+                role="assistant",
+                blocks=[ToolCallBlock(tool_call_id=f"call-{len(called)}", tool_name=remaining[0], tool_kwargs={"text": ECHO_TASK})],
+            )
+        return ChatMessage(role="assistant", content="echo done")
+
+    return MockFunctionCallingLLM(response_generator=respond, is_chat_model=True)
+
+def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> None:
+    package = load_package(PROBE / "agent.agent.md", PROBE)
+    binding = {"capabilities": {}, "models": {"plugin-user": echo_calling_model()}, "activate_plugins": True}
+
+    with echo_http_server(PLUGIN_ROOT):
+        # The fixture declares cwd, which BasicMCPClient cannot express, so strict mode rejects it.
+        with pytest.raises(RuntimeCompatibilityError, match="cwd"):
+            adapter.build(package, binding, strict=True)
+        artifact = adapter.build(package, binding, strict=False)
+        assert status(artifact, "plugin-user", "plugins") == "unsupported"
+        result = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+
+    assert result.output == "echo done"
+    # BasicMCPClient has no cwd parameter, so the stdio server runs in the inherited directory.
+    assert parse_echo_result(next(o.data["result"] for o in result.observations if o.kind == "mcp-tool-result" and o.data["server"] == "echostdio"))["cwd"] != str(PLUGIN_ROOT)
+    discovered = {o.data["server"]: o.data["tools"] for o in result.observations if o.kind == "mcp-tools-discovered"}
+    assert set(discovered) == {"echostdio", "echohttp"}, result.observations
+    assert all(any("echo" in name for name in names) for names in discovered.values())
+    results = {o.data["server"]: parse_echo_result(o.data["result"]) for o in result.observations if o.kind == "mcp-tool-result"}
+    assert set(results) == {"echostdio", "echohttp"}, result.observations
+    stdio, http = results["echostdio"], results["echohttp"]
+    assert stdio["label"] == "stdio" and stdio["plugin_root_env"] is True and stdio["plugin_data_env"] is True
+    assert http["label"] == "http" and http["plugin_root_env"] is False
+    assert [o.kind for o in result.observations if o.kind == "mcp-activation-failed"] == []

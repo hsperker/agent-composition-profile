@@ -12,12 +12,15 @@ import runpy
 
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
 from agent_profile_compiler.runtime.registry import RUNTIME_TARGETS, load_runtime_adapter
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "research-team"
 DELEGATION = ROOT / "examples" / "runtime-probes" / "delegation"
+ACTIVATION = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+ACTIVATION_PLUGIN_ROOT = (ACTIVATION / "plugins" / "local-echo").resolve()
 TEST_FILES = {
     "langgraph": "test_langgraph_runtime.py",
     "crewai": "test_crewai_runtime.py",
@@ -124,6 +127,100 @@ def runtime_probe(target: str, ns: dict, adapter):
     return "delegation", artifact, adapter.run(artifact, "Solve the problem.")
 
 
+def activation_model(target: str, ns: dict):
+    if target == "langgraph":
+        return ns["EchoCallingModel"]()
+    if target == "crewai":
+        return ns["EchoCallingCrewLLM"](model="echo-caller")
+    if target == "llamaindex":
+        return ns["echo_calling_model"]()
+    if target == "agno":
+        return ns["EchoCallingAgnoModel"](id="echo-caller")
+    if target == "openai-agents":
+        return ns["EchoCallingModel"]()
+    if target == "google-adk":
+        return ns["EchoCallingLlm"](model="echo-caller")
+    if target == "pydantic-ai":
+        return ns["TestModel"](call_tools="all", custom_output_text="echo done")
+    if target == "microsoft-agent-framework":
+        return ns["EchoCallingChatClient"]()
+    raise AssertionError(target)
+
+
+def activation_probe(target: str, ns: dict, adapter) -> dict:
+    """Activate the plugin-activation fixture end to end and summarize per server."""
+
+    package = load_package(ACTIVATION / "agent.agent.md", ACTIVATION)
+    entry = package.entry
+    binding = {"capabilities": {}, "models": {entry.name: activation_model(target, ns)}, "activate_plugins": True}
+    label_to_server = {
+        ("stdio" if server.config["type"] == "stdio" else "http"): server.name for server in entry.mcp_servers
+    }
+    summary: dict[str, dict] = {
+        server.name: {
+            "transport": server.config["type"],
+            "status": "failed",
+            "tools_as_seen": [],
+            "result": None,
+            "error": None,
+        }
+        for server in entry.mcp_servers
+    }
+    observations: list[dict] = []
+    output = None
+    error = None
+    try:
+        with echo_http_server(ACTIVATION_PLUGIN_ROOT):
+            artifact = adapter.build(package, binding, strict=False)
+            plugin_findings = {
+                finding.feature: finding.status
+                for finding in artifact.report.findings
+                if finding.agent == entry.name and finding.feature.startswith("plugins")
+            }
+            run = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+        output = run.output
+        observations = [item.to_dict() for item in run.observations]
+        for item in run.observations:
+            if item.kind == "mcp-tools-discovered":
+                if item.data["server"] in summary:
+                    summary[item.data["server"]]["tools_as_seen"] = list(item.data["tools"])
+                else:  # CrewAI cannot attribute tools to a server
+                    for server in summary.values():
+                        server["tools_as_seen"] = list(item.data["tools"])
+                        server["tool_attribution"] = item.data.get("note")
+            if item.kind == "mcp-activation-failed" and item.data["server"] in summary:
+                summary[item.data["server"]]["error"] = item.data["error"]
+            if item.kind == "mcp-tool-result":
+                payload = parse_echo_result(item.data["result"])
+                server_name = item.data["server"]
+                if server_name not in summary:
+                    server_name = label_to_server.get(payload.get("label"), server_name)
+                if server_name in summary and "label" in payload:
+                    entry_summary = summary[server_name]
+                    entry_summary["status"] = "activated"
+                    entry_summary["result"] = payload
+                    if entry_summary["transport"] == "stdio":
+                        entry_summary["cwd_honored"] = payload.get("cwd") == str(ACTIVATION_PLUGIN_ROOT)
+                        entry_summary["env_honored"] = bool(payload.get("plugin_root_env")) and bool(
+                            payload.get("plugin_data_env")
+                        )
+                    else:
+                        entry_summary["header_honored"] = True
+    except Exception as exc:  # the probe itself must never hide a failure
+        error = f"{type(exc).__name__}: {exc}"
+        plugin_findings = {}
+    return {
+        "target": target,
+        "fixture": "examples/runtime-probes/plugin-activation",
+        "chain": ["construct", "handshake", "discover", "invoke", "result"],
+        "construction_findings": plugin_findings,
+        "servers": summary,
+        "output": output,
+        "error": error,
+        "observations": observations,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("target", choices=RUNTIME_TARGETS)
@@ -181,7 +278,15 @@ def main() -> None:
     (output_dir / "runtime.json").write_text(
         json.dumps(runtime, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"generated {target}: strict={strict_result['outcome']} runtime={run.output!r}")
+    activation = activation_probe(target, ns, adapter)
+    (output_dir / "plugin-activation.json").write_text(
+        json.dumps(activation, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    statuses = ", ".join(f"{name}={server['status']}" for name, server in activation["servers"].items())
+    print(
+        f"generated {target}: strict={strict_result['outcome']} runtime={run.output!r} "
+        f"activation=[{statuses}]"
+    )
 
 
 if __name__ == "__main__":

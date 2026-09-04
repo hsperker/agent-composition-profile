@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -15,33 +16,40 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 from .skills import SkillCatalog
 
 
 TARGET = "llamaindex"
 
 
-def _mcp_clients(agent):
+def _mcp_clients(agent, data_root: Path):
     from llama_index.tools.mcp import BasicMCPClient
 
     clients = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport in {"streamable-http", "sse"}:
             clients.append(
-                BasicMCPClient(
-                    config["url"],
-                    headers=config.get("headers"),
+                (
+                    server.name,
+                    BasicMCPClient(
+                        config["url"],
+                        headers=config.get("headers"),
+                    ),
                 )
             )
         elif transport == "stdio":
             clients.append(
-                BasicMCPClient(
-                    config["command"],
-                    args=list(config.get("args", [])),
-                    env=config.get("env"),
+                (
+                    server.name,
+                    BasicMCPClient(
+                        config["command"],
+                        args=list(config.get("args", [])),
+                        env=config.get("env"),
+                    ),
                 )
             )
             if "cwd" in config:
@@ -49,6 +57,37 @@ def _mcp_clients(agent):
         else:
             losses.append(f"{server.name}: unsupported transport {transport!r}")
     return clients, losses
+
+
+async def _activate_plugins(agent_name, clients, observations, tool_servers) -> list[Any]:
+    """Handshake with each plugin MCP server through McpToolSpec and load its tools.
+
+    Runs inside the same event loop as the agent run: BasicMCPClient keeps an
+    httpx client whose connections are bound to the loop that first used it.
+    """
+
+    from llama_index.tools.mcp import McpToolSpec
+
+    tools: list[Any] = []
+    for server_name, client in clients:
+        try:
+            loaded = await McpToolSpec(client).to_tool_list_async()
+        except Exception as exc:  # Agent Plugins §7.2.2: report and continue
+            observations.append(
+                RuntimeObservation(
+                    "mcp-activation-failed",
+                    agent_name,
+                    {"server": server_name, "error": f"{type(exc).__name__}: {exc}"},
+                )
+            )
+            continue
+        names = [tool.metadata.name for tool in loaded]
+        tool_servers.update({name: server_name for name in names})
+        tools.extend(loaded)
+        observations.append(
+            RuntimeObservation("mcp-tools-discovered", agent_name, {"server": server_name, "tools": names})
+        )
+    return tools
 
 
 def build(
@@ -63,6 +102,9 @@ def build(
     models = binding.get("models", {})
     if not isinstance(models, Mapping):
         models = {}
+    activate = bool(binding.get("activate_plugins"))
+    data_root = plugin_data_root(binding)
+    named_clients: dict[str, list[tuple[str, Any]]] = {}
     report = CompatibilityReport(target=TARGET, source_entry=package.entry_name)
     observations: list[RuntimeObservation] = []
     native_agents: dict[str, FunctionAgent] = {}
@@ -93,9 +135,11 @@ def build(
                     ),
                 )
             )
-        clients, losses = _mcp_clients(agent)
-        mcp_clients[agent.name] = clients
+        clients, losses = _mcp_clients(agent, data_root)
+        mcp_clients[agent.name] = [client for _, client in clients]
         mcp_losses[agent.name] = losses
+        if activate and clients:
+            named_clients[agent.name] = clients
         native = FunctionAgent(
             name=agent.name,
             description=agent.description,
@@ -141,8 +185,15 @@ def build(
             ),
             "plugins": (
                 (
-                    "unsupported",
-                    "A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable.",
+                    (
+                        "resolved",
+                        "Each plugin MCP server is activated at run start: BasicMCPClient performs the handshake and McpToolSpec attaches its tools to this FunctionAgent; the plugin wrapper is not retained.",
+                    )
+                    if activate
+                    else (
+                        "unsupported",
+                        "A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable.",
+                    )
                 )
                 if agent.plugins
                 else ("preserved", "The source agent declares no plugins.")
@@ -183,17 +234,46 @@ def build(
             "entry_name": package.entry_name,
             "workflow": workflow,
             "mcp_clients": mcp_clients,
+            "mcp_named_clients": named_clients,
         },
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
+    from llama_index.core.agent.workflow import ToolCall, ToolCallResult
+
+    entry_name = str(artifact.metadata["entry_name"])
+    agent = artifact.native_agents[entry_name]
+    tool_servers: dict[str, str] = {}
+    observations: list[RuntimeObservation] = []
+
     async def invoke():
-        return await artifact.native_agents[str(artifact.metadata["entry_name"])].run(task)
+        if activate_plugins:
+            clients = artifact.metadata.get("mcp_named_clients", {}).get(entry_name, [])
+            loaded = await _activate_plugins(entry_name, clients, observations, tool_servers)
+            agent.tools = [*(agent.tools or []), *loaded]
+        handler = agent.run(task)
+        async for event in handler.stream_events():
+            if isinstance(event, ToolCall) and event.tool_name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked",
+                        entry_name,
+                        {"server": tool_servers[event.tool_name], "tool": event.tool_name, "arguments": dict(event.tool_kwargs)},
+                    )
+                )
+            if isinstance(event, ToolCallResult) and event.tool_name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": tool_servers[event.tool_name], "tool": event.tool_name, "result": str(event.tool_output.content)},
+                    )
+                )
+        return await handler
 
     response = asyncio.run(invoke())
     output = str(response)
-    entry_name = str(artifact.metadata["entry_name"])
     observation = RuntimeObservation("runtime-output", entry_name, {"result": output})
     artifact.observations.append(observation)
-    return RuntimeRun(output, (observation,))
+    return RuntimeRun(output, tuple(observations) + (observation,))

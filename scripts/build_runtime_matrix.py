@@ -37,6 +37,12 @@ def main() -> None:
     ]
     if len(runtime_reports) != 8:
         raise SystemExit(f"expected 8 runtime reports, found {len(runtime_reports)}")
+    activation_reports = {
+        json.loads(path.read_text(encoding="utf-8"))["target"]: json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(RUNTIME.glob("*/plugin-activation.json"))
+    }
+    if len(activation_reports) != 8:
+        raise SystemExit(f"expected 8 plugin activation reports, found {len(activation_reports)}")
     legacy_reports = [json.loads(path.read_text(encoding="utf-8")) for path in LEGACY_REPORTS]
     reports = [*runtime_reports, *legacy_reports]
     findings_by_target = {
@@ -60,6 +66,17 @@ def main() -> None:
             for feature in features
         },
         "modules": {report["target"]: module_outcomes(report) for report in reports},
+        "plugin_activation": {
+            target: {
+                name: {
+                    key: value
+                    for key, value in server.items()
+                    if key in {"transport", "status", "cwd_honored", "env_honored", "header_honored", "tool_attribution", "error"}
+                }
+                for name, server in report["servers"].items()
+            }
+            for target, report in activation_reports.items()
+        },
         "strict_outcomes": {
             report["target"]: (
                 report["strict_mode"]["outcome"]
@@ -111,6 +128,30 @@ def main() -> None:
         "| " + " | ".join(module_headers) + " |",
         "| " + " | ".join("---" for _ in module_headers) + " |",
         *("| " + " | ".join(row) + " |" for row in module_rows),
+        "",
+        "## Agent Plugin activation probe (runtime targets)",
+        "",
+        "Fixture `examples/runtime-probes/plugin-activation`: one plugin, one stdio server spawned by the "
+        "framework and one header-gated streamable HTTP server. `activated` means handshake, tool discovery, "
+        "invocation, and a result reaching the agent runtime all succeeded.",
+        "",
+        "| target | echostdio | echohttp | stdio cwd honored | stdio env honored | tool attribution |",
+        "| --- | --- | --- | --- | --- | --- |",
+        *(
+            "| "
+            + " | ".join(
+                [
+                    target,
+                    servers["echostdio"]["status"],
+                    servers["echohttp"]["status"],
+                    str(servers["echostdio"].get("cwd_honored", "n/a")).lower(),
+                    str(servers["echostdio"].get("env_honored", "n/a")).lower(),
+                    servers["echostdio"].get("tool_attribution") or "by server name",
+                ]
+            )
+            + " |"
+            for target, servers in sorted(matrix["plugin_activation"].items())
+        ),
         "",
         "Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.",
         "",

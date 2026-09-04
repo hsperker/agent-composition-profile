@@ -100,6 +100,17 @@ def main() -> None:
         assert "100%" in test_output
         assert "failed" not in test_output.lower()
 
+    activation_reports = list((GENERATED / "runtime").glob("*/plugin-activation.json"))
+    assert len(activation_reports) == 8
+    for path in activation_reports:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        assert payload["error"] is None, (payload["target"], payload["error"])
+        assert set(payload["servers"]) == {"echostdio", "echohttp"}
+        for name, server in payload["servers"].items():
+            assert server["status"] == "activated", (payload["target"], name, server)
+        assert payload["servers"]["echostdio"]["env_honored"] is True, payload["target"]
+        assert payload["servers"]["echohttp"]["header_honored"] is True, payload["target"]
+
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))
     assert len(matrix["targets"]) == 12
     assert sum(kind == "runtime" for kind in matrix["evidence_kind"].values()) == 8
@@ -111,6 +122,7 @@ def main() -> None:
     }
     assert matrix["source_fixture_sha256"] == expected_hashes
     assert set(matrix["modules"]) == set(matrix["targets"])
+    assert len(matrix["plugin_activation"]) == 8
     assert all(set(outcomes) == modules for outcomes in matrix["modules"].values())
     assert (GENERATED / "runtime/matrix.md").is_file()
 
