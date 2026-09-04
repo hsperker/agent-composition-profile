@@ -153,6 +153,20 @@
       "microsoft-agent-framework": "unverified",
       "openai-agents": "unverified",
       "pydantic-ai": "unverified"
+    },
+    "skills.resources": {
+      "afm": "not-declared",
+      "agno": "unverified",
+      "amplifier": "not-declared",
+      "claude-code": "not-declared",
+      "codex": "not-declared",
+      "crewai": "unverified",
+      "google-adk": "unverified",
+      "langgraph": "unverified",
+      "llamaindex": "unverified",
+      "microsoft-agent-framework": "unverified",
+      "openai-agents": "unverified",
+      "pydantic-ai": "unverified"
     }
   },
   "modules": {

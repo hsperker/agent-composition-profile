@@ -96,6 +96,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Agent Skills requires references, scripts, and assets to be reachable on demand. The fixture skills bundle no resources, so on-demand resource access was not exercised.",
+      "feature": "skills.resources",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
@@ -140,6 +146,12 @@
       "agent": "explorer",
       "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
       "feature": "skills.durability",
+      "status": "unverified"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent Skills requires references, scripts, and assets to be reachable on demand. The fixture skills bundle no resources, so on-demand resource access was not exercised.",
+      "feature": "skills.resources",
       "status": "unverified"
     },
     {
@@ -237,7 +249,9 @@
       "outcome": "accepted",
       "unverified": [
         "lead-researcher:skills.durability",
-        "explorer:skills.durability"
+        "lead-researcher:skills.resources",
+        "explorer:skills.durability",
+        "explorer:skills.resources"
       ]
     }
   },
@@ -253,7 +267,7 @@
     "omitted-preference": 1,
     "preserved": 12,
     "resolved": 6,
-    "unverified": 2
+    "unverified": 4
   },
   "target": "agno",
   "tested_distribution": "agno",

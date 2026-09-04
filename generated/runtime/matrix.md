@@ -16,6 +16,7 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 | plugins | resolved | resolved | resolved | unsupported | unsupported | resolved | resolved | resolved | unsupported | resolved | resolved | resolved |
 | skills | preserved | preserved | resolved | resolved | resolved | preserved | resolved | resolved | unsupported | resolved | resolved | preserved |
 | skills.durability | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared |
+| skills.resources | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared |
 
 ## Strict conformance by module (all agents)
 
