@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, enforce_strict_runtime
+from .common import assess_agent_semantics, enforce_strict_runtime, skill_durability_assessment
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 from .skills import SkillCatalog
 
@@ -177,8 +177,8 @@ def build(
                 )
                 if agent.name in referenced
                 else (
-                    "unsupported",
-                    "A standalone LangChain compiled agent has no native discovery-description property.",
+                    "resolved",
+                    "A compiled LangGraph agent has no description property. The adapter retains the description in its agent catalog (artifact metadata) for discovery and diagnostics; it never enters the prompt.",
                 )
             ),
             "instructions": (
@@ -186,10 +186,7 @@ def build(
                 "The Markdown body is supplied through create_agent(system_prompt=...) on every model turn.",
             ),
             "skills": (
-                (
-                    "approximated",
-                    "A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority.",
-                )
+                ("resolved", "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.")
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
             ),
@@ -203,14 +200,15 @@ def build(
             ),
             "delegates": (
                 (
-                    "approximated",
-                    "LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic.",
+                    "resolved",
+                    "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
                 )
                 if agent.delegate_names
                 else ("preserved", "The source agent declares no delegates.")
             ),
         }
         assessments.update(_capability_assessments(agent, binding))
+        assessments.update(skill_durability_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:
@@ -220,7 +218,14 @@ def build(
         native_agents=native_agents,
         report=report,
         observations=observations,
-        metadata={"entry_name": package.entry_name, "skill_catalogs": skill_catalogs},
+        metadata={
+            "entry_name": package.entry_name,
+            "skill_catalogs": skill_catalogs,
+            "agent_catalog": {
+                agent.name: {"name": agent.name, "description": agent.description}
+                for agent in package.agents.values()
+            },
+        },
     )
 
 

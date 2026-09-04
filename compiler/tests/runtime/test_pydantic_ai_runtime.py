@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pytest
 from fastmcp.client.transports import StreamableHttpTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
@@ -8,7 +7,6 @@ from pydantic_ai.models.test import TestModel
 
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import pydantic_ai as adapter
-from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
 
 
 ROOT = Path(__file__).parents[3]
@@ -48,9 +46,10 @@ def test_builds_native_pydantic_agents_mcp_and_delegate_tools() -> None:
     assert status(artifact, "lead-researcher", "name") == "preserved"
     assert status(artifact, "lead-researcher", "description") == "preserved"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "resolved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "approximated"
+    assert status(artifact, "lead-researcher", "delegates") == "resolved"
 
 
 def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() -> None:
@@ -65,7 +64,7 @@ def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() 
                 "worker": TestModel(custom_output_text="worker result"),
             }
         ),
-        strict=False,
+        strict=True,
     )
 
     result = adapter.run(artifact, "Solve the problem.")
@@ -79,11 +78,13 @@ def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() 
     assert result.observations[1].data["result"] == "worker result"
 
 
-def test_strict_pydantic_ai_rejects_skill_authority_and_adapter_delegate_approximations() -> None:
+def test_strict_pydantic_ai_accepts_the_full_fixture_with_durability_unverified() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     models = {
         name: TestModel(custom_output_text=f"unused-{name}") for name in package.agents
     }
 
-    with pytest.raises(RuntimeCompatibilityError, match="skills.*delegates"):
-        adapter.build(package, binding(models), strict=True)
+    artifact = adapter.build(package, binding(models), strict=True)
+
+    assert not artifact.report.has_blocking_loss
+    assert artifact.report.has_unverified

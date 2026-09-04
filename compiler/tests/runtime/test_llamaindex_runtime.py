@@ -54,7 +54,8 @@ def test_builds_native_llamaindex_agents_and_handoff_workflow() -> None:
     assert status(artifact, "lead-researcher", "name") == "preserved"
     assert status(artifact, "lead-researcher", "description") == "preserved"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "resolved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 
@@ -74,8 +75,8 @@ def test_runs_real_llamaindex_leaf_and_passes_persistent_system_prompt() -> None
     )
 
 
-def test_strict_llamaindex_rejects_skill_plugin_and_handoff_semantic_losses() -> None:
+def test_strict_llamaindex_rejects_plugin_and_handoff_semantic_losses() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
-    with pytest.raises(RuntimeCompatibilityError, match="skills.*plugins.*delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="plugins.*delegates"):
         adapter.build(package, binding(), strict=True)

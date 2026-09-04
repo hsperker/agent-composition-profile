@@ -80,7 +80,8 @@ def test_builds_native_adk_agents_mcp_and_agent_tools() -> None:
     assert status(artifact, "lead-researcher", "name") == "resolved"
     assert status(artifact, "lead-researcher", "description") == "preserved"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "resolved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 
@@ -115,12 +116,12 @@ def test_adk_runner_executes_nested_agent_tool_and_returns_to_parent() -> None:
     ]
 
 
-def test_strict_adk_rejects_skill_and_shared_state_delegate_approximations() -> None:
+def test_strict_adk_rejects_shared_state_delegate_approximation() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     models = {
         name: ScriptedLlm(model=f"scripted-{name}", responses=[text_response("unused")])
         for name in package.agents
     }
 
-    with pytest.raises(RuntimeCompatibilityError, match="skills.*delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="delegates"):
         adapter.build(package, binding(models), strict=True)

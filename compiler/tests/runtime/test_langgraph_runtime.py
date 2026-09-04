@@ -76,11 +76,13 @@ def test_builds_real_langgraph_agents_and_reports_semantics_independently() -> N
     assert all(isinstance(agent, CompiledStateGraph) for agent in artifact.native_agents.values())
     assert artifact.native_agents["lead-researcher"].name == "lead-researcher"
     assert status(artifact, "lead-researcher", "name") == "preserved"
-    assert status(artifact, "lead-researcher", "description") == "unsupported"
+    assert status(artifact, "lead-researcher", "description") == "resolved"
+    assert artifact.metadata["agent_catalog"]["lead-researcher"]["description"] == package.entry.description
     assert status(artifact, "explorer", "description") == "resolved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "resolved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
-    assert status(artifact, "lead-researcher", "delegates") == "approximated"
+    assert status(artifact, "lead-researcher", "delegates") == "resolved"
     assert status(artifact, "lead-researcher", "model.prefers.vision-input") == "omitted-preference"
 
 
@@ -123,8 +125,8 @@ def test_native_langgraph_runtime_returns_control_after_specialist_tool_call() -
     )
 
 
-def test_strict_langgraph_rejects_description_skill_plugin_and_delegate_losses() -> None:
+def test_strict_langgraph_rejects_only_the_unactivated_plugin() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
-    with pytest.raises(RuntimeCompatibilityError, match="description.*skills.*plugins.*delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="plugins"):
         adapter.build(package, bindings(), strict=True)

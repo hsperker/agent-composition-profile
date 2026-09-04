@@ -80,7 +80,8 @@ def test_builds_native_agno_agents_skills_mcp_and_team() -> None:
     assert status(artifact, "lead-researcher", "name") == "preserved"
     assert status(artifact, "lead-researcher", "description") == "approximated"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "preserved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 
@@ -96,8 +97,8 @@ def test_runs_real_agno_leaf_with_its_persistent_instructions() -> None:
     assert result.observations[-1].kind == "runtime-output"
 
 
-def test_strict_agno_rejects_description_skill_and_team_semantic_changes() -> None:
+def test_strict_agno_rejects_description_and_team_semantic_changes() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
-    with pytest.raises(RuntimeCompatibilityError, match="description.*skills.*delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="description.*delegates"):
         adapter.build(package, binding(), strict=True)

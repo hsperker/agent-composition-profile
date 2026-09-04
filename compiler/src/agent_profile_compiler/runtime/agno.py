@@ -6,7 +6,12 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, capability_assessments, enforce_strict_runtime
+from .common import (
+    assess_agent_semantics,
+    capability_assessments,
+    enforce_strict_runtime,
+    skill_durability_assessment,
+)
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 
 
@@ -145,10 +150,7 @@ def build(
                 "The literal Markdown body is stored in Agent.instructions and sent in system context.",
             ),
             "skills": (
-                (
-                    "approximated",
-                    "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
-                )
+                ("preserved", "Agno's native Agent Skills implementation: catalog metadata in the system prompt, then get_skill_instructions delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide.")
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
             ),
@@ -183,6 +185,7 @@ def build(
                 resolved_detail="The external binding attests the capability for the injected Agno Model.",
             )
         )
+        assessments.update(skill_durability_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:

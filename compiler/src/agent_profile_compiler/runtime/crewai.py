@@ -6,7 +6,12 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, capability_assessments, enforce_strict_runtime
+from .common import (
+    assess_agent_semantics,
+    capability_assessments,
+    enforce_strict_runtime,
+    skill_durability_assessment,
+)
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 
 
@@ -118,10 +123,7 @@ def build(
                 "The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field.",
             ),
             "skills": (
-                (
-                    "approximated",
-                    "CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context.",
-                )
+                ("preserved", "CrewAI's native Agent Skills implementation: catalog metadata first, then LoadSkillTool delivers the full SKILL.md body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide.")
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
             ),
@@ -157,6 +159,7 @@ def build(
                 resolved_detail="The external binding attests the capability for the injected CrewAI BaseLLM.",
             )
         )
+        assessments.update(skill_durability_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:

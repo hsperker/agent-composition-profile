@@ -7,7 +7,12 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, capability_assessments, enforce_strict_runtime
+from .common import (
+    assess_agent_semantics,
+    capability_assessments,
+    enforce_strict_runtime,
+    skill_durability_assessment,
+)
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 from .skills import SkillCatalog
 
@@ -129,10 +134,7 @@ def build(
                 "The literal Markdown body is FunctionAgent.system_prompt.",
             ),
             "skills": (
-                (
-                    "approximated",
-                    "A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context.",
-                )
+                ("resolved", "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.")
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
             ),
@@ -165,6 +167,7 @@ def build(
                 resolved_detail="The external binding attests the capability for the injected LlamaIndex LLM.",
             )
         )
+        assessments.update(skill_durability_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:

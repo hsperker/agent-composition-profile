@@ -1,13 +1,11 @@
 from pathlib import Path
 
-import pytest
 from agents import Agent, Runner, set_tracing_disabled
 from agents.mcp import MCPServerStreamableHttp
 from agents.testing import ScriptedModel, assistant_message, function_call
 
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import openai_agents as adapter
-from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
 
 
 set_tracing_disabled(True)
@@ -43,7 +41,8 @@ def test_builds_native_openai_agents_mcp_and_agent_as_tool() -> None:
     assert status(artifact, "lead-researcher", "name") == "preserved"
     assert status(artifact, "lead-researcher", "description") == "preserved"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "approximated"
+    assert status(artifact, "lead-researcher", "skills") == "resolved"
+    assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "preserved"
 
@@ -76,9 +75,12 @@ def test_native_runner_executes_agent_as_tool_and_returns_control_to_parent() ->
     ]
 
 
-def test_strict_openai_agents_rejects_skill_authority_approximation() -> None:
+def test_strict_openai_agents_accepts_the_full_fixture_with_durability_unverified() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     models = {name: ScriptedModel() for name in package.agents}
 
-    with pytest.raises(RuntimeCompatibilityError, match="skills"):
-        adapter.build(package, binding(models), strict=True)
+    artifact = adapter.build(package, binding(models), strict=True)
+
+    assert not artifact.report.has_blocking_loss
+    assert artifact.report.has_unverified
+    assert artifact.report.module_outcomes()["skills"]["outcome"] == "accepted"

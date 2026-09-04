@@ -7,7 +7,12 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, capability_assessments, enforce_strict_runtime
+from .common import (
+    assess_agent_semantics,
+    capability_assessments,
+    enforce_strict_runtime,
+    skill_durability_assessment,
+)
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 
 
@@ -145,10 +150,7 @@ def build(
                 "The Markdown is stored as native Agent instructions and passed through chat options to the client on every run.",
             ),
             "skills": (
-                (
-                    "approximated",
-                    "SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource.",
-                )
+                ("preserved", "SkillsProvider is a native Agent Skills implementation: catalog metadata first, then load_skill delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide. The adapter disables the provider's default approval gate on load_skill and read_skill_resource, which is host policy rather than a semantic change.")
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
             ),
@@ -184,6 +186,7 @@ def build(
                 resolved_detail="The external binding attests the capability for the injected chat client.",
             )
         )
+        assessments.update(skill_durability_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:
