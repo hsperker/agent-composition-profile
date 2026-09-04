@@ -91,7 +91,7 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agent Plugin MCP servers become agent-scoped MCPToolset objects with explicit FastMCP transports.",
+      "detail": "Agent Plugin MCP servers become MCPToolset objects available to the declaring agent, with explicit FastMCP transports.",
       "feature": "plugins",
       "status": "resolved"
     },
@@ -151,7 +151,7 @@
     },
     {
       "agent": "explorer",
-      "detail": "Agent Plugin MCP servers become agent-scoped MCPToolset objects with explicit FastMCP transports.",
+      "detail": "Agent Plugin MCP servers become MCPToolset objects available to the declaring agent, with explicit FastMCP transports.",
       "feature": "plugins",
       "status": "resolved"
     },

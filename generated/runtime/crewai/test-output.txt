@@ -1,14 +1,14 @@
-....                                                                     [100%]
+.....                                                                    [100%]
 =============================== warnings summary ===============================
-tests/runtime/test_crewai_runtime.py: 11 warnings
+tests/runtime/test_crewai_runtime.py: 15 warnings
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:399: DeprecationWarning: function_calling_llm is deprecated and will be removed in a future release.
     if self.function_calling_llm and not isinstance(
 
-tests/runtime/test_crewai_runtime.py: 11 warnings
+tests/runtime/test_crewai_runtime.py: 15 warnings
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:407: DeprecationWarning: deprecated
     if self.allow_code_execution:
 
-tests/runtime/test_crewai_runtime.py: 11 warnings
+tests/runtime/test_crewai_runtime.py: 15 warnings
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:418: DeprecationWarning: deprecated
     if self.reasoning and self.planning_config is None:
 
@@ -21,6 +21,8 @@ tests/runtime/test_crewai_runtime.py::test_activates_agent_plugin_mcp_servers_ov
 
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
 tests/runtime/test_crewai_runtime.py::test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http
+tests/runtime/test_crewai_runtime.py::test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn
+tests/runtime/test_crewai_runtime.py::test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:1552: DeprecationWarning: function_calling_llm is deprecated and will be removed in a future release.
     function_calling_llm=self.function_calling_llm,
 

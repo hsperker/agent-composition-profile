@@ -91,7 +91,7 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
+      "detail": "Agent Plugin MCP servers become MCP tools available to the declaring agent, with the configured transport and lifecycle.",
       "feature": "plugins",
       "status": "resolved"
     },
@@ -151,7 +151,7 @@
     },
     {
       "agent": "explorer",
-      "detail": "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
+      "detail": "Agent Plugin MCP servers become MCP tools available to the declaring agent, with the configured transport and lifecycle.",
       "feature": "plugins",
       "status": "resolved"
     },

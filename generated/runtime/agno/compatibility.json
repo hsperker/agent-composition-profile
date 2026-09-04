@@ -102,7 +102,7 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
+      "detail": "Each Agent Plugin MCP server becomes a native MCPTools toolkit available to the declaring agent, with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
     },
@@ -162,7 +162,7 @@
     },
     {
       "agent": "explorer",
-      "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
+      "detail": "Each Agent Plugin MCP server becomes a native MCPTools toolkit available to the declaring agent, with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
     },

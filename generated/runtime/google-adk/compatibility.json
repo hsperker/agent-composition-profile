@@ -85,7 +85,7 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
+      "detail": "Agent Plugin MCP servers become native McpToolset objects available to the declaring agent, with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
     },
@@ -145,7 +145,7 @@
     },
     {
       "agent": "explorer",
-      "detail": "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
+      "detail": "Agent Plugin MCP servers become native McpToolset objects available to the declaring agent, with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
     },
