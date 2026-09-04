@@ -1,0 +1,133 @@
+{
+  "target": "amplifier",
+  "source_entry": "lead-researcher",
+  "has_unsupported": true,
+  "has_blocking_loss": true,
+  "summary": {
+    "preserved": 11,
+    "resolved": 5,
+    "unsupported": 4
+  },
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "feature": "identity",
+      "status": "preserved",
+      "detail": "Name and discovery description are emitted natively."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.prefers.vision-input",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "delegates",
+      "status": "preserved",
+      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "skills",
+      "status": "unsupported",
+      "detail": "The native agent file has no demonstrated Agent Skills reference with progressive-disclosure semantics; a runtime module shim is required."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "plugins",
+      "status": "unsupported",
+      "detail": "The native agent file cannot lower an Agent Plugin package without an Amplifier module or bundle adapter."
+    },
+    {
+      "agent": "explorer",
+      "feature": "identity",
+      "status": "preserved",
+      "detail": "Name and discovery description are emitted natively."
+    },
+    {
+      "agent": "explorer",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "explorer",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "explorer",
+      "feature": "delegates",
+      "status": "preserved",
+      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+    },
+    {
+      "agent": "explorer",
+      "feature": "skills",
+      "status": "unsupported",
+      "detail": "The native agent file has no demonstrated Agent Skills reference with progressive-disclosure semantics; a runtime module shim is required."
+    },
+    {
+      "agent": "explorer",
+      "feature": "plugins",
+      "status": "unsupported",
+      "detail": "The native agent file cannot lower an Agent Plugin package without an Amplifier module or bundle adapter."
+    },
+    {
+      "agent": "critic",
+      "feature": "identity",
+      "status": "preserved",
+      "detail": "Name and discovery description are emitted natively."
+    },
+    {
+      "agent": "critic",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "critic",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "critic",
+      "feature": "delegates",
+      "status": "preserved",
+      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+    },
+    {
+      "agent": "critic",
+      "feature": "skills",
+      "status": "preserved",
+      "detail": "The agent declares no skills."
+    },
+    {
+      "agent": "critic",
+      "feature": "plugins",
+      "status": "preserved",
+      "detail": "The agent declares no plugins."
+    }
+  ]
+}

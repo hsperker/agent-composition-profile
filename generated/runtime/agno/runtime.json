@@ -1,0 +1,17 @@
+{
+  "native_types": {
+    "critic": "agno.agent.agent.Agent"
+  },
+  "observations": [
+    {
+      "agent": "critic",
+      "data": {
+        "result": "deterministic Agno result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "deterministic Agno result",
+  "probe": "research-team/critic",
+  "target": "agno"
+}

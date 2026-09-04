@@ -1,0 +1,193 @@
+{
+  "construction_observations": [
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "handoff_targets": [
+          "explorer",
+          "critic"
+        ],
+        "mcp_clients": 1,
+        "native_type": "llama_index.core.agent.workflow.function_agent.FunctionAgent"
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "explorer",
+      "data": {
+        "handoff_targets": [],
+        "mcp_clients": 1,
+        "native_type": "llama_index.core.agent.workflow.function_agent.FunctionAgent"
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "handoff_targets": [],
+        "mcp_clients": 0,
+        "native_type": "llama_index.core.agent.workflow.function_agent.FunctionAgent"
+      },
+      "kind": "native-agent-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "FunctionAgent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "FunctionAgent has native description metadata used by AgentWorkflow routing.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The literal Markdown body is FunctionAgent.system_prompt.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected LlamaIndex LLM.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected LlamaIndex LLM.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The target binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable.",
+      "feature": "plugins",
+      "status": "unsupported"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent.",
+      "feature": "delegates",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "FunctionAgent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "FunctionAgent has native description metadata used by AgentWorkflow routing.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The literal Markdown body is FunctionAgent.system_prompt.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding attests the capability for the injected LlamaIndex LLM.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable.",
+      "feature": "plugins",
+      "status": "unsupported"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "FunctionAgent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "FunctionAgent has native description metadata used by AgentWorkflow routing.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The literal Markdown body is FunctionAgent.system_prompt.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding attests the capability for the injected LlamaIndex LLM.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": true,
+  "has_unsupported": true,
+  "requirements_lock": "compiler/runtime-requirements/llamaindex.lock",
+  "requirements_sha256": "a3a3de17c3c20b7339b53b91fb868f42abebeae2958ff6e80210ec1c782a3a76",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "rejected",
+    "reason": "strict runtime construction would lose required semantics for llamaindex: approximated lead-researcher:skills: A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context. | unsupported lead-researcher:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable. | approximated lead-researcher:delegates: AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent. | approximated explorer:skills: A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context. | unsupported explorer:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable."
+  },
+  "summary": {
+    "approximated": 3,
+    "omitted-preference": 1,
+    "preserved": 13,
+    "resolved": 4,
+    "unsupported": 2
+  },
+  "target": "llamaindex",
+  "tested_distribution": "llama-index-core",
+  "tested_version": "0.14.24"
+}

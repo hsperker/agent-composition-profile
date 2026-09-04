@@ -1,0 +1,35 @@
+{
+  "native_types": {
+    "coordinator": "google.adk.agents.llm_agent.LlmAgent",
+    "worker": "google.adk.agents.llm_agent.LlmAgent"
+  },
+  "observations": [
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "mechanism": "agent-tool-shared-state",
+        "task": "Analyze this."
+      },
+      "kind": "delegate-started"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "result": "{'result': 'worker result'}"
+      },
+      "kind": "delegate-returned"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "result": "coordinator used worker result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "coordinator used worker result",
+  "probe": "delegation",
+  "target": "google-adk"
+}

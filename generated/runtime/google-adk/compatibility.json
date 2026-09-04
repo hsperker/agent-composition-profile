@@ -1,0 +1,189 @@
+{
+  "construction_observations": [
+    {
+      "agent": "explorer",
+      "data": {
+        "native_name": "explorer",
+        "native_type": "google.adk.agents.llm_agent.LlmAgent",
+        "tool_count": 2
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "native_name": "critic",
+        "native_type": "google.adk.agents.llm_agent.LlmAgent",
+        "tool_count": 0
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "native_name": "lead_researcher",
+        "native_type": "google.adk.agents.llm_agent.LlmAgent",
+        "tool_count": 4
+      },
+      "kind": "native-agent-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "ADK rejects 'lead-researcher'; the adapter uses 'lead_researcher' and retains a bidirectional identity map.",
+      "feature": "name",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "LlmAgent.description is native agent and AgentTool selection metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A native instruction callback returns the Markdown literally on each run, avoiding ADK state-template interpolation.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected ADK BaseLlm.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected ADK BaseLlm.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The target binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back.",
+      "feature": "delegates",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source name already satisfies ADK's Python-identifier constraint.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "LlmAgent.description is native agent and AgentTool selection metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "A native instruction callback returns the Markdown literally on each run, avoiding ADK state-template interpolation.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding attests the capability for the injected ADK BaseLlm.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source name already satisfies ADK's Python-identifier constraint.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "LlmAgent.description is native agent and AgentTool selection metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "A native instruction callback returns the Markdown literally on each run, avoiding ADK state-template interpolation.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding attests the capability for the injected ADK BaseLlm.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": true,
+  "has_unsupported": false,
+  "requirements_lock": "compiler/runtime-requirements/google-adk.lock",
+  "requirements_sha256": "63983fdd4362e25b41efdaaf6e70944dc9a6e133af5c6cb8f490dd566501e5e1",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "rejected",
+    "reason": "strict runtime construction would lose required semantics for google-adk: approximated lead-researcher:skills: An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority. | approximated lead-researcher:delegates: AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back. | approximated explorer:skills: An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority."
+  },
+  "summary": {
+    "approximated": 3,
+    "omitted-preference": 1,
+    "preserved": 12,
+    "resolved": 7
+  },
+  "target": "google-adk",
+  "tested_distribution": "google-adk",
+  "tested_version": "2.8.0"
+}

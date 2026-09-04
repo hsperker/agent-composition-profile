@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-profile-compiler"
+version = "0.1.0"
+description = "Reference compiler experiment for the Agent Composition Profile discussion draft"
+requires-python = ">=3.11"
+dependencies = ["PyYAML==6.0.3", "jsonschema==4.26.0"]
+
+[project.optional-dependencies]
+test = ["pytest==9.1.1"]
+
+[project.scripts]
+agent-profile = "agent_profile_compiler.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

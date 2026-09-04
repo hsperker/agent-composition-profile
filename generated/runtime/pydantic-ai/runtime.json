@@ -1,0 +1,35 @@
+{
+  "native_types": {
+    "coordinator": "pydantic_ai.agent.Agent",
+    "worker": "pydantic_ai.agent.Agent"
+  },
+  "observations": [
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "mechanism": "adapter-function-tool",
+        "task": "a"
+      },
+      "kind": "delegate-started"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "result": "worker result"
+      },
+      "kind": "delegate-returned"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "result": "coordinator used worker result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "coordinator used worker result",
+  "probe": "delegation",
+  "target": "pydantic-ai"
+}

@@ -1,0 +1,9 @@
+bundle:
+  name: research-team-agents
+  version: 0.1.0
+  description: Generated agent roster
+agents:
+  include:
+  - research-team:lead-researcher
+  - research-team:explorer
+  - research-team:critic

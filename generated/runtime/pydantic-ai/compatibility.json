@@ -1,0 +1,195 @@
+{
+  "construction_observations": [
+    {
+      "agent": "explorer",
+      "data": {
+        "function_tools": [
+          "activate_skill"
+        ],
+        "mcp_toolsets": 1,
+        "native_type": "pydantic_ai.agent.Agent"
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "function_tools": [],
+        "mcp_toolsets": 0,
+        "native_type": "pydantic_ai.agent.Agent"
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "function_tools": [
+          "activate_skill",
+          "critic",
+          "explorer"
+        ],
+        "mcp_toolsets": 1,
+        "native_type": "pydantic_ai.agent.Agent"
+      },
+      "kind": "native-agent-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "PydanticAI Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "PydanticAI Agent.description stores native human-readable agent metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The literal Markdown is registered as persistent native Agent instructions.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected PydanticAI Model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected PydanticAI Model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The target binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent Plugin MCP servers become agent-scoped MCPToolset objects with explicit FastMCP transports.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "PydanticAI has no agent relationship primitive; the adapter creates native Tool objects that perform bounded child Agent runs and return text.",
+      "feature": "delegates",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "PydanticAI Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "PydanticAI Agent.description stores native human-readable agent metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The literal Markdown is registered as persistent native Agent instructions.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding attests the capability for the injected PydanticAI Model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent Plugin MCP servers become agent-scoped MCPToolset objects with explicit FastMCP transports.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "PydanticAI Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "PydanticAI Agent.description stores native human-readable agent metadata.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The literal Markdown is registered as persistent native Agent instructions.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding attests the capability for the injected PydanticAI Model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": true,
+  "has_unsupported": false,
+  "requirements_lock": "compiler/runtime-requirements/pydantic-ai.lock",
+  "requirements_sha256": "f4c8296ee6af3091d232e53118dd0cfe866b3f2df5a6b19624bc78aa0fc35652",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "rejected",
+    "reason": "strict runtime construction would lose required semantics for pydantic-ai: approximated lead-researcher:skills: A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority. | approximated explorer:skills: A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority."
+  },
+  "summary": {
+    "approximated": 2,
+    "omitted-preference": 1,
+    "preserved": 13,
+    "resolved": 7
+  },
+  "target": "pydantic-ai",
+  "tested_distribution": "pydantic-ai",
+  "tested_version": "2.38.0"
+}

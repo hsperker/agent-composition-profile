@@ -1,0 +1,9 @@
+name = "explorer"
+description = "Finds and assesses primary sources for a focused research question. Use when claims need external evidence before synthesis."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+developer_instructions = "# Instructions\n\nSearch broadly, then prefer primary sources.\n\nReturn findings, source locations, and unresolved uncertainty. Do not write the final answer."
+
+[mcp_servers."research"]
+url = "https://research.example.com/mcp"
+required = true

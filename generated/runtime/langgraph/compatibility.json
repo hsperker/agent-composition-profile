@@ -1,0 +1,193 @@
+{
+  "construction_observations": [
+    {
+      "agent": "explorer",
+      "data": {
+        "native_type": "langgraph.graph.state.CompiledStateGraph",
+        "tool_names": [
+          "activate_skill"
+        ]
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "native_type": "langgraph.graph.state.CompiledStateGraph",
+        "tool_names": []
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "native_type": "langgraph.graph.state.CompiledStateGraph",
+        "tool_names": [
+          "activate_skill",
+          "explorer",
+          "critic"
+        ]
+      },
+      "kind": "native-agent-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "LangChain create_agent assigns the source name to the native compiled graph.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A standalone LangChain compiled agent has no native discovery-description property.",
+      "feature": "description",
+      "status": "unsupported"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The Markdown body is supplied through create_agent(system_prompt=...) on every model turn.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding explicitly attests this capability for the injected LangChain model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding explicitly attests this capability for the injected LangChain model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted.",
+      "feature": "plugins",
+      "status": "unsupported"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Each declared specialist is a native StructuredTool that starts a fresh child graph invocation and returns text to the parent.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "LangChain create_agent assigns the source name to the native compiled graph.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The description is the native StructuredTool description shown to a parent for routing.",
+      "feature": "description",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The Markdown body is supplied through create_agent(system_prompt=...) on every model turn.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding explicitly attests this capability for the injected LangChain model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority.",
+      "feature": "skills",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted.",
+      "feature": "plugins",
+      "status": "unsupported"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "LangChain create_agent assigns the source name to the native compiled graph.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The description is the native StructuredTool description shown to a parent for routing.",
+      "feature": "description",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The Markdown body is supplied through create_agent(system_prompt=...) on every model turn.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding explicitly attests this capability for the injected LangChain model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": true,
+  "has_unsupported": true,
+  "requirements_lock": "compiler/runtime-requirements/langgraph.lock",
+  "requirements_sha256": "a0e356ce017dd2b66cea5e8e343f00bb403a87bf88a78512a6c72c12cf3ba62c",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "rejected",
+    "reason": "strict runtime construction would lose required semantics for langgraph: unsupported lead-researcher:description: A standalone LangChain compiled agent has no native discovery-description property. | approximated lead-researcher:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported lead-researcher:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted. | approximated explorer:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported explorer:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted."
+  },
+  "summary": {
+    "approximated": 2,
+    "omitted-preference": 1,
+    "preserved": 11,
+    "resolved": 6,
+    "unsupported": 3
+  },
+  "target": "langgraph",
+  "tested_distribution": "langchain",
+  "tested_version": "1.4.0"
+}

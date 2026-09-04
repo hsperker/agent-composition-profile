@@ -1,0 +1,193 @@
+{
+  "construction_observations": [
+    {
+      "agent": "explorer",
+      "data": {
+        "delegate_tools": [],
+        "mcp_tools": 1,
+        "native_type": "agent_framework._agents.Agent",
+        "skills_provider": true
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "delegate_tools": [],
+        "mcp_tools": 0,
+        "native_type": "agent_framework._agents.Agent",
+        "skills_provider": false
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "delegate_tools": [
+          "explorer",
+          "critic"
+        ],
+        "mcp_tools": 1,
+        "native_type": "agent_framework._agents.Agent",
+        "skills_provider": true
+      },
+      "kind": "native-agent-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent.description is native discovery metadata and supplies agent-tool selection text.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The Markdown is stored as native Agent instructions and emitted as a system message on every run.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected chat client.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected chat client.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The target binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "SkillsProvider natively implements Agent Skills metadata advertisement, load_skill, and resource disclosure.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agent.as_tool(propagate_session=False) is a native bounded child run with an independent session that returns text to the caller.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent.description is native discovery metadata and supplies agent-tool selection text.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The Markdown is stored as native Agent instructions and emitted as a system message on every run.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding attests the capability for the injected chat client.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "SkillsProvider natively implements Agent Skills metadata advertisement, load_skill, and resource disclosure.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "Agent.name preserves the source identity.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "Agent.description is native discovery metadata and supplies agent-tool selection text.",
+      "feature": "description",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The Markdown is stored as native Agent instructions and emitted as a system message on every run.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding attests the capability for the injected chat client.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": false,
+  "has_unsupported": false,
+  "requirements_lock": "compiler/runtime-requirements/microsoft-agent-framework.lock",
+  "requirements_sha256": "37bb54ceebecbf342e0d6dc3606d7c74f89c20396e39b1dea5dfaf714d97cb3f",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "accepted"
+  },
+  "summary": {
+    "omitted-preference": 1,
+    "preserved": 16,
+    "resolved": 6
+  },
+  "target": "microsoft-agent-framework",
+  "tested_distribution": "agent-framework-core",
+  "tested_version": "1.17.0"
+}

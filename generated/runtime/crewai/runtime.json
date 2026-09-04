@@ -1,0 +1,17 @@
+{
+  "native_types": {
+    "critic": "crewai.agent.core.Agent"
+  },
+  "observations": [
+    {
+      "agent": "critic",
+      "data": {
+        "result": "deterministic result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "deterministic result",
+  "probe": "research-team/critic",
+  "target": "crewai"
+}

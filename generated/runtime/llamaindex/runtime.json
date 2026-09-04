@@ -1,0 +1,17 @@
+{
+  "native_types": {
+    "critic": "llama_index.core.agent.workflow.function_agent.FunctionAgent"
+  },
+  "observations": [
+    {
+      "agent": "critic",
+      "data": {
+        "result": "critic result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "critic result",
+  "probe": "research-team/critic",
+  "target": "llamaindex"
+}

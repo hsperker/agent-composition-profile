@@ -1,0 +1,206 @@
+{
+  "construction_observations": [
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "mcp_toolkits": 1,
+        "native_type": "agno.agent.agent.Agent",
+        "skill_names": [
+          "source-evaluation",
+          "query-planning"
+        ]
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "explorer",
+      "data": {
+        "mcp_toolkits": 1,
+        "native_type": "agno.agent.agent.Agent",
+        "skill_names": [
+          "source-evaluation",
+          "query-planning"
+        ]
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "critic",
+      "data": {
+        "mcp_toolkits": 0,
+        "native_type": "agno.agent.agent.Agent",
+        "skill_names": []
+      },
+      "kind": "native-agent-constructed"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "mechanism": "team-member-collaboration",
+        "members": [
+          "explorer",
+          "critic"
+        ]
+      },
+      "kind": "team-constructed"
+    }
+  ],
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "detail": "Agno Agent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content.",
+      "feature": "description",
+      "status": "approximated"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The literal Markdown body is stored in Agent.instructions and sent in system context.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected Agno Model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The external binding attests the capability for the injected Agno Model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "The target binding does not attest preferred capability 'vision-input'.",
+      "feature": "model.prefers.vision-input",
+      "status": "omitted-preference"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agno natively loads Agent Skills through LocalSkills with browse/load/reference progressive disclosure.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent.",
+      "feature": "delegates",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agno Agent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content.",
+      "feature": "description",
+      "status": "approximated"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The literal Markdown body is stored in Agent.instructions and sent in system context.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The external binding attests the capability for the injected Agno Model.",
+      "feature": "model.requires.tool-use",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Agno natively loads Agent Skills through LocalSkills with browse/load/reference progressive disclosure.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
+      "feature": "plugins",
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "Agno Agent has a native name property.",
+      "feature": "name",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content.",
+      "feature": "description",
+      "status": "approximated"
+    },
+    {
+      "agent": "critic",
+      "detail": "The literal Markdown body is stored in Agent.instructions and sent in system context.",
+      "feature": "instructions",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The external binding attests the capability for the injected Agno Model.",
+      "feature": "model.requires.reasoning",
+      "status": "resolved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no skills.",
+      "feature": "skills",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no plugins.",
+      "feature": "plugins",
+      "status": "preserved"
+    },
+    {
+      "agent": "critic",
+      "detail": "The source agent declares no delegates.",
+      "feature": "delegates",
+      "status": "preserved"
+    }
+  ],
+  "has_blocking_loss": true,
+  "has_unsupported": false,
+  "requirements_lock": "compiler/runtime-requirements/agno.lock",
+  "requirements_sha256": "859780b1fd766a23943facea15f64737504bae864c9bad9ae32619904a7cf7b0",
+  "source_entry": "lead-researcher",
+  "strict_mode": {
+    "outcome": "rejected",
+    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
+  },
+  "summary": {
+    "approximated": 4,
+    "omitted-preference": 1,
+    "preserved": 12,
+    "resolved": 6
+  },
+  "target": "agno",
+  "tested_distribution": "agno",
+  "tested_version": "3.0.5"
+}

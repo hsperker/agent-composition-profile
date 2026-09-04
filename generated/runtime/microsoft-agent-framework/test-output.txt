@@ -1,0 +1,2 @@
+Installed 32 packages in 14ms
+...                                                                      [100%]

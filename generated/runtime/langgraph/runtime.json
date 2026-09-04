@@ -1,0 +1,36 @@
+{
+  "native_types": {
+    "critic": "langgraph.graph.state.CompiledStateGraph",
+    "explorer": "langgraph.graph.state.CompiledStateGraph",
+    "lead-researcher": "langgraph.graph.state.CompiledStateGraph"
+  },
+  "observations": [
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "delegate": "explorer",
+        "mechanism": "agent-as-tool",
+        "task": "Find primary evidence."
+      },
+      "kind": "delegate-started"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "delegate": "explorer",
+        "result": "Primary evidence with limits."
+      },
+      "kind": "delegate-returned"
+    },
+    {
+      "agent": "lead-researcher",
+      "data": {
+        "result": "Final synthesis from evidence."
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "Final synthesis from evidence.",
+  "probe": "research-team",
+  "target": "langgraph"
+}

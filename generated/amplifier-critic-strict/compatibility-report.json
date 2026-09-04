@@ -1,0 +1,48 @@
+{
+  "target": "amplifier",
+  "source_entry": "critic",
+  "has_unsupported": false,
+  "has_blocking_loss": false,
+  "summary": {
+    "preserved": 5,
+    "resolved": 1
+  },
+  "findings": [
+    {
+      "agent": "critic",
+      "feature": "identity",
+      "status": "preserved",
+      "detail": "Name and discovery description are emitted natively."
+    },
+    {
+      "agent": "critic",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "critic",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability; Amplifier resolves the selected model role through its routing matrix."
+    },
+    {
+      "agent": "critic",
+      "feature": "delegates",
+      "status": "preserved",
+      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+    },
+    {
+      "agent": "critic",
+      "feature": "skills",
+      "status": "preserved",
+      "detail": "The agent declares no skills."
+    },
+    {
+      "agent": "critic",
+      "feature": "plugins",
+      "status": "preserved",
+      "detail": "The agent declares no plugins."
+    }
+  ]
+}

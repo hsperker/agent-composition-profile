@@ -1,0 +1,35 @@
+{
+  "native_types": {
+    "coordinator": "agent_framework._agents.Agent",
+    "worker": "agent_framework._agents.Agent"
+  },
+  "observations": [
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "mechanism": "agent-as-tool-isolated-session",
+        "task": "Analyze this."
+      },
+      "kind": "delegate-started"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "delegate": "worker",
+        "result": "worker result"
+      },
+      "kind": "delegate-returned"
+    },
+    {
+      "agent": "coordinator",
+      "data": {
+        "result": "coordinator used worker result"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "coordinator used worker result",
+  "probe": "delegation",
+  "target": "microsoft-agent-framework"
+}
