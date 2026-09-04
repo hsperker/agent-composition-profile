@@ -213,38 +213,30 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
     observations: list[RuntimeObservation] = []
     tool_servers: dict[str, str] = {}
 
-    async def execute():
-        # Agent.arun connects MCPTools toolkits itself (agno.agent._init.connect_mcp_tools)
-        # and disconnects them afterwards; the discovered functions are read before release.
-        response = await agent.arun(task, stream=False)
-        return response
-
     if not activate_plugins:
         response = agent.run(task, stream=False)
     else:
-        async def execute_with_discovery():
-            toolkits = [tool for tool in (agent.tools or []) if isinstance(tool, MCPTools)]
-            for toolkit in toolkits:
-                try:
-                    await toolkit.connect()
-                except Exception as exc:  # Agent Plugins §7.2.2: report and continue
-                    observations.append(
-                        RuntimeObservation(
-                            "mcp-activation-failed",
-                            entry_name,
-                            {"server": toolkit.name, "error": f"{type(exc).__name__}: {exc}"},
-                        )
-                    )
-                    agent.tools.remove(toolkit)
-                    continue
-                names = sorted(toolkit.functions)
-                tool_servers.update({name: toolkit.name for name in names})
+        toolkits = [tool for tool in (agent.tools or []) if isinstance(tool, MCPTools)]
+        # Agent.arun connects every MCPTools toolkit itself (agno.agent._init.connect_mcp_tools)
+        # and disconnects it afterwards in the same task. Connecting here first would
+        # split the anyio cancel scope across tasks, so discovery is read after the run:
+        # the toolkit keeps its registered functions once the session is released.
+        response = asyncio.run(agent.arun(task, stream=False))
+        for toolkit in toolkits:
+            names = sorted(toolkit.functions)
+            if not names:
                 observations.append(
-                    RuntimeObservation("mcp-tools-discovered", entry_name, {"server": toolkit.name, "tools": names})
+                    RuntimeObservation(
+                        "mcp-activation-failed",
+                        entry_name,
+                        {"server": toolkit.name, "error": "no functions registered after the run"},
+                    )
                 )
-            return await execute()
-
-        response = asyncio.run(execute_with_discovery())
+                continue
+            tool_servers.update({name: toolkit.name for name in names})
+            observations.append(
+                RuntimeObservation("mcp-tools-discovered", entry_name, {"server": toolkit.name, "tools": names})
+            )
         for execution in response.tools or []:
             if execution.tool_name in tool_servers:
                 observations.append(

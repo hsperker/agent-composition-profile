@@ -147,6 +147,18 @@ def activation_model(target: str, ns: dict):
     raise AssertionError(target)
 
 
+def _portable(value):
+    """Replace machine-specific paths so generated evidence is identical across machines."""
+
+    if isinstance(value, str):
+        return value.replace(str(ACTIVATION_PLUGIN_ROOT), "${PLUGIN_ROOT}").replace(str(ROOT), "${REPO_ROOT}")
+    if isinstance(value, list):
+        return [_portable(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _portable(item) for key, item in value.items()}
+    return value
+
+
 def activation_probe(target: str, ns: dict, adapter) -> dict:
     """Activate the plugin-activation fixture end to end and summarize per server."""
 
@@ -209,16 +221,18 @@ def activation_probe(target: str, ns: dict, adapter) -> dict:
     except Exception as exc:  # the probe itself must never hide a failure
         error = f"{type(exc).__name__}: {exc}"
         plugin_findings = {}
-    return {
-        "target": target,
-        "fixture": "examples/runtime-probes/plugin-activation",
-        "chain": ["construct", "handshake", "discover", "invoke", "result"],
-        "construction_findings": plugin_findings,
-        "servers": summary,
-        "output": output,
-        "error": error,
-        "observations": observations,
-    }
+    return _portable(
+        {
+            "target": target,
+            "fixture": "examples/runtime-probes/plugin-activation",
+            "chain": ["construct", "handshake", "discover", "invoke", "result"],
+            "construction_findings": plugin_findings,
+            "servers": summary,
+            "output": output,
+            "error": error,
+            "observations": observations,
+        }
+    )
 
 
 def main() -> None:
