@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "local-echo",
+  "version": "1.0.0",
+  "description": "Local deterministic MCP echo servers over stdio and streamable HTTP for activation probes"
+}

@@ -22,6 +22,7 @@ def source_semantic_features(agent: Agent) -> tuple[str, ...]:
         "skills",
         *(("skills.durability", "skills.resources") if agent.all_skills else ()),
         "plugins",
+        *(("plugins.activation",) if agent.plugins else ()),
         "delegates",
     )
 
@@ -38,6 +39,21 @@ SKILL_RESOURCES_UNVERIFIED: Assessment = (
     "Agent Skills requires references, scripts, and assets to be reachable on demand. "
     "The fixture skills bundle no resources, so on-demand resource access was not exercised.",
 )
+
+
+PLUGIN_ACTIVATION_UNVERIFIED: Assessment = (
+    "unverified",
+    "Native MCP clients were constructed from the plugin configuration, but no handshake, "
+    "tool discovery, or invocation was exercised in this build.",
+)
+
+
+def plugin_activation_assessment(agent: Agent) -> dict[str, Assessment]:
+    """Construction never proves activation; record that explicitly."""
+
+    if not agent.plugins:
+        return {}
+    return {"plugins.activation": PLUGIN_ACTIVATION_UNVERIFIED}
 
 
 def skill_durability_assessment(agent: Agent) -> dict[str, Assessment]:

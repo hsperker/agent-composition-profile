@@ -260,7 +260,7 @@ def _load_mcp_servers(plugin_root: Path) -> tuple[McpServer, ...]:
         raise ProfileError(f"{mcp_file}: expected Agent Plugins 1.0.0 MCP schema")
     servers = data["mcpServers"]
     return tuple(
-        McpServer(name=name, config=dict(config))
+        McpServer(name=name, config=dict(config), plugin_root=plugin_root.resolve())
         for name, config in servers.items()
     )
 

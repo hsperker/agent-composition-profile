@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
-from .common import assess_agent_semantics, enforce_strict_runtime, skill_durability_assessment
+from .common import assess_agent_semantics, enforce_strict_runtime, plugin_activation_assessment, skill_durability_assessment
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
 from .skills import SkillCatalog
 
@@ -209,6 +209,7 @@ def build(
         }
         assessments.update(_capability_assessments(agent, binding))
         assessments.update(skill_durability_assessment(agent))
+        assessments.update(plugin_activation_assessment(agent))
         assess_agent_semantics(report, agent, assessments)
 
     if strict:

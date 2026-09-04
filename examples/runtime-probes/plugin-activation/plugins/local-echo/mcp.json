@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "echostdio": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${PLUGIN_ROOT}/servers/echo_server.py", "--transport", "stdio"],
+      "env": {"PROBE_LABEL": "stdio"},
+      "cwd": "${PLUGIN_ROOT}"
+    },
+    "echohttp": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:8765/mcp",
+      "headers": {"X-Probe-Token": "probe-token"}
+    }
+  }
+}

@@ -36,7 +36,7 @@ def module_of(feature: str) -> str:
         return "model"
     if feature == "skills" or feature.startswith("skills."):
         return "skills"
-    if feature == "plugins":
+    if feature == "plugins" or feature.startswith("plugins."):
         return "plugins"
     if feature == "delegates":
         return "delegates"
@@ -59,6 +59,9 @@ class Skill:
 class McpServer:
     name: str
     config: Mapping[str, Any]
+    # Root of the Agent Plugin that declared the server. Agent Plugins §9 expands
+    # ${PLUGIN_ROOT} against it and requires it in the server environment.
+    plugin_root: Path | None = None
 
 
 @dataclass(frozen=True)
