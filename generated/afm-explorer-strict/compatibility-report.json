@@ -3,16 +3,55 @@
   "source_entry": "explorer",
   "has_unsupported": false,
   "has_blocking_loss": false,
+  "has_unverified": false,
   "summary": {
-    "preserved": 4,
+    "preserved": 5,
     "resolved": 2
+  },
+  "modules": {
+    "core": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "description": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "model": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "skills": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "plugins": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "delegates": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    }
   },
   "findings": [
     {
       "agent": "explorer",
-      "feature": "identity",
+      "feature": "name",
       "status": "preserved",
-      "detail": "Name and discovery description are emitted natively."
+      "detail": "The name is emitted as the native identity field."
+    },
+    {
+      "agent": "explorer",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native discovery metadata."
     },
     {
       "agent": "explorer",

@@ -19,18 +19,15 @@ LEGACY_REPORTS = [
 
 
 def entry_findings(report: dict) -> dict[str, str]:
-    findings = {
+    return {
         finding["feature"]: finding["status"]
         for finding in report["findings"]
         if finding["agent"] == report["source_entry"]
     }
-    # The earlier static compiler reported these together. Its finding detail
-    # explicitly states that both name and discovery description were emitted.
-    if "identity" in findings:
-        findings["name"] = findings["identity"]
-        findings["description"] = findings["identity"]
-        del findings["identity"]
-    return findings
+
+
+def module_outcomes(report: dict) -> dict[str, str]:
+    return {module: value["outcome"] for module, value in report["modules"].items()}
 
 
 def main() -> None:
@@ -62,6 +59,7 @@ def main() -> None:
             }
             for feature in features
         },
+        "modules": {report["target"]: module_outcomes(report) for report in reports},
         "strict_outcomes": {
             report["target"]: (
                 report["strict_mode"]["outcome"]
@@ -85,6 +83,12 @@ def main() -> None:
         [feature, *(matrix["features"][feature][target] for target in matrix["targets"])]
         for feature in matrix["features"]
     ]
+    modules = sorted({module for outcomes in matrix["modules"].values() for module in outcomes})
+    module_headers = ["module", *matrix["targets"]]
+    module_rows = [
+        [module, *(matrix["modules"][target].get(module, "not-declared") for target in matrix["targets"])]
+        for module in modules
+    ]
     markdown = [
         "# Generated compatibility matrix",
         "",
@@ -93,9 +97,20 @@ def main() -> None:
             f"{target}={matrix['evidence_kind'][target]}" for target in matrix["targets"]
         ),
         "",
+        "## Entry-agent classification by source semantic",
+        "",
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join("---" for _ in headers) + " |",
         *("| " + " | ".join(row) + " |" for row in rows),
+        "",
+        "## Strict conformance by module (all agents)",
+        "",
+        "`accepted` means no finding in the module is approximated or unsupported; "
+        "`unverified` findings do not block and are listed in each report.",
+        "",
+        "| " + " | ".join(module_headers) + " |",
+        "| " + " | ".join("---" for _ in module_headers) + " |",
+        *("| " + " | ".join(row) + " |" for row in module_rows),
         "",
         "Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.",
         "",

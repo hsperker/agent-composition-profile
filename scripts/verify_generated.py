@@ -77,12 +77,25 @@ def main() -> None:
 
     runtime_reports = list((GENERATED / "runtime").glob("*/compatibility.json"))
     assert len(runtime_reports) == 8
-    allowed = {"preserved", "resolved", "approximated", "unsupported", "omitted-preference"}
+    allowed = {"preserved", "resolved", "approximated", "unsupported", "omitted-preference", "unverified"}
+    modules = {"core", "description", "model", "skills", "plugins", "delegates"}
+    expected_strict = {
+        "langgraph": "rejected",
+        "crewai": "rejected",
+        "llamaindex": "rejected",
+        "agno": "rejected",
+        "openai-agents": "accepted",
+        "google-adk": "rejected",
+        "pydantic-ai": "accepted",
+        "microsoft-agent-framework": "accepted",
+    }
     for path in runtime_reports:
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["tested_version"]
-        assert payload["strict_mode"]["outcome"] in {"accepted", "rejected"}
+        assert payload["strict_mode"]["outcome"] == expected_strict[payload["target"]], payload["target"]
         assert all(finding["status"] in allowed for finding in payload["findings"])
+        assert set(payload["modules"]) == modules, payload["target"]
+        assert payload["modules"]["skills"]["unverified"], payload["target"]
         test_output = path.with_name("test-output.txt").read_text(encoding="utf-8")
         assert "100%" in test_output
         assert "failed" not in test_output.lower()
@@ -97,6 +110,8 @@ def main() -> None:
         if path.is_file()
     }
     assert matrix["source_fixture_sha256"] == expected_hashes
+    assert set(matrix["modules"]) == set(matrix["targets"])
+    assert all(set(outcomes) == modules for outcomes in matrix["modules"].values())
     assert (GENERATED / "runtime/matrix.md").is_file()
 
     print("generated artifacts verified")

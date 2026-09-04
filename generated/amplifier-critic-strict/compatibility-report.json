@@ -3,16 +3,55 @@
   "source_entry": "critic",
   "has_unsupported": false,
   "has_blocking_loss": false,
+  "has_unverified": false,
   "summary": {
-    "preserved": 5,
+    "preserved": 6,
     "resolved": 1
+  },
+  "modules": {
+    "core": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "description": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "model": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "skills": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "plugins": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "delegates": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    }
   },
   "findings": [
     {
       "agent": "critic",
-      "feature": "identity",
+      "feature": "name",
       "status": "preserved",
-      "detail": "Name and discovery description are emitted natively."
+      "detail": "The name is emitted as the native identity field."
+    },
+    {
+      "agent": "critic",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native discovery metadata."
     },
     {
       "agent": "critic",
