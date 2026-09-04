@@ -20,7 +20,7 @@ def source_semantic_features(agent: Agent) -> tuple[str, ...]:
         *(f"model.requires.{capability}" for capability in sorted(agent.requires)),
         *(f"model.prefers.{capability}" for capability in sorted(agent.prefers)),
         "skills",
-        *(("skills.durability",) if agent.all_skills else ()),
+        *(("skills.durability", "skills.resources") if agent.all_skills else ()),
         "plugins",
         "delegates",
     )
@@ -33,12 +33,22 @@ SKILL_DURABILITY_UNVERIFIED: Assessment = (
 )
 
 
+SKILL_RESOURCES_UNVERIFIED: Assessment = (
+    "unverified",
+    "Agent Skills requires references, scripts, and assets to be reachable on demand. "
+    "The fixture skills bundle no resources, so on-demand resource access was not exercised.",
+)
+
+
 def skill_durability_assessment(agent: Agent) -> dict[str, Assessment]:
-    """The one skills property no runtime experiment exercised."""
+    """The skills properties no runtime experiment exercised."""
 
     if not agent.all_skills:
         return {}
-    return {"skills.durability": SKILL_DURABILITY_UNVERIFIED}
+    return {
+        "skills.durability": SKILL_DURABILITY_UNVERIFIED,
+        "skills.resources": SKILL_RESOURCES_UNVERIFIED,
+    }
 
 
 def assess_agent_semantics(

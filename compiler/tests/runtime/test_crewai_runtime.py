@@ -73,6 +73,7 @@ def test_builds_native_crewai_agents_skills_mcp_and_crew_relationship() -> None:
     assert status(artifact, "lead-researcher", "instructions") == "approximated"
     assert status(artifact, "lead-researcher", "skills") == "preserved"
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
+    assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 

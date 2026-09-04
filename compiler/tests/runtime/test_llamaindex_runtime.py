@@ -56,6 +56,7 @@ def test_builds_native_llamaindex_agents_and_handoff_workflow() -> None:
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
     assert status(artifact, "lead-researcher", "skills") == "resolved"
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
+    assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 

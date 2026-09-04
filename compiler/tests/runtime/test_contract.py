@@ -150,7 +150,7 @@ def test_unverified_is_a_valid_status_that_strict_mode_does_not_block() -> None:
     assert report.to_dict()["has_unverified"] is True
 
 
-def test_agent_with_skills_requires_a_separate_durability_assessment() -> None:
+def test_agent_with_skills_requires_separate_durability_and_resource_assessments() -> None:
     report = CompatibilityReport(target="test-runtime", source_entry="skilled")
     base = {
         "name": ("preserved", "n"),
@@ -161,11 +161,12 @@ def test_agent_with_skills_requires_a_separate_durability_assessment() -> None:
         "delegates": ("preserved", "g"),
     }
 
-    with pytest.raises(ValueError, match="skills.durability"):
+    with pytest.raises(ValueError, match="skills.durability, skills.resources"):
         assess_agent_semantics(report, skilled_agent(), base)
 
     assess_agent_semantics(report, skilled_agent(), {**base, **skill_durability_assessment(skilled_agent())})
     assert [f.status for f in report.findings if f.feature == "skills.durability"] == ["unverified"]
+    assert [f.status for f in report.findings if f.feature == "skills.resources"] == ["unverified"]
     assert skill_durability_assessment(agent()) == {}
 
 
@@ -177,6 +178,7 @@ def test_features_map_to_conformance_modules() -> None:
     assert module_of("model.prefers.vision-input") == "model"
     assert module_of("skills") == "skills"
     assert module_of("skills.durability") == "skills"
+    assert module_of("skills.resources") == "skills"
     assert module_of("plugins") == "plugins"
     assert module_of("delegates") == "delegates"
     with pytest.raises(ValueError):

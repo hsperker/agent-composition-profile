@@ -82,6 +82,7 @@ def test_builds_native_agno_agents_skills_mcp_and_team() -> None:
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
     assert status(artifact, "lead-researcher", "skills") == "preserved"
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
+    assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "approximated"
 

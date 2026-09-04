@@ -111,6 +111,7 @@ def test_builds_native_microsoft_agents_skills_mcp_and_agent_tools() -> None:
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
     assert status(artifact, "lead-researcher", "skills") == "preserved"
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
+    assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "preserved"
 
@@ -157,5 +158,7 @@ def test_strict_microsoft_adapter_accepts_the_full_fixture_with_durability_unver
     assert modules["skills"]["outcome"] == "accepted"
     assert modules["skills"]["unverified"] == [
         "lead-researcher:skills.durability",
+        "lead-researcher:skills.resources",
         "explorer:skills.durability",
+        "explorer:skills.resources",
     ]

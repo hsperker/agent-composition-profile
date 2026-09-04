@@ -81,6 +81,7 @@ def test_builds_real_langgraph_agents_and_reports_semantics_independently() -> N
     assert status(artifact, "explorer", "description") == "resolved"
     assert status(artifact, "lead-researcher", "skills") == "resolved"
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
+    assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
     assert status(artifact, "lead-researcher", "delegates") == "resolved"
     assert status(artifact, "lead-researcher", "model.prefers.vision-input") == "omitted-preference"
