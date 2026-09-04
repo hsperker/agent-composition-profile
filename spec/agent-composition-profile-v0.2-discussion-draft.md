@@ -184,12 +184,12 @@ The profile does not duplicate the Agent Skills file format.
 
 Each `plugins` entry is a relative path to an Agent Plugin package.
 
-A plugin reference requires every valid standard component in that package. A runtime may expand the package into native Agent Skills and MCP clients; it need not retain a native plugin wrapper.
+A plugin reference means the plugin's supported components are made available to the declaring agent. It does not mean they are visible only to that agent; Agent Plugins leaves scoping to the host, and so does this profile. A runtime may expand the package into native Agent Skills and MCP clients; it need not retain a native plugin wrapper.
 
 Preservation requires:
 
 - the plugin's effective Agent Skills to obey section 7;
-- every declared MCP server to remain attached at the same agent scope;
+- every declared MCP server to be made available to the declaring agent, including the Agent Plugins §7.2.1 working directory default for stdio servers;
 - transport, endpoint, headers, environment, working directory, and other standard settings to be retained where declared;
 - activation or authorization failure to block that invocation rather than silently remove the component.
 
@@ -197,7 +197,9 @@ Agent Plugins and MCP retain ownership of their component formats and protocol s
 
 This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance. Agent Plugins permits a client to support only some component types and to ignore the rest. When a profile author declares a plugin as part of this agent, a strict profile host must preserve every component that plugin instance requires or reject this profile; a client that ignores components remains a conforming Agent Plugins client, but not a strict host for this profile.
 
-A host MUST apply Agent Plugins §9 itself: expand `${PLUGIN_ROOT}` and `${PLUGIN_DATA}` in `args`, `env`, and `cwd`, and provide both variables to stdio servers. None of the tested SDKs does this. The profile makes no promise about the tool names a model sees or about mapping a discovered tool back to its server; both varied across the tested runtimes.
+A host MUST apply Agent Plugins §7.2.1 and §9 itself: default an omitted stdio `cwd` to the plugin root, expand `${PLUGIN_ROOT}` and `${PLUGIN_DATA}` in `args`, `env`, and `cwd`, and provide both variables to stdio servers. None of the tested SDKs does this, and two cannot set a working directory at all.
+
+A plugin reference guarantees capability composition, not a stable model-visible tool identifier. Agent Plugins does not standardize how a host names or namespaces MCP tools when presenting them to a model, and the tested runtimes exposed the same tool as `echo_stdio`, `echostdio_echo_stdio`, or a truncated hash. Portable instructions MUST NOT rely on a target-native tool name unless another standard supplies a stable logical reference.
 
 ## 9. Paths and packages
 
@@ -292,7 +294,7 @@ Target-specific settings remain in external bindings. Draft 0.2 defines no `x-<h
 
 ## 14. Evidence status
 
-The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Seven of eight runtime targets accepted the required core; CrewAI's role, goal, and backstory prompt template approximates both name and instructions. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability and resource access unverified; the other four each failed one or two optional fields, most often description or delegates.
+The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Seven of eight runtime targets accepted the required core; CrewAI's role, goal, and backstory prompt template approximates both name and instructions, and its custom template override removes role and goal only by collapsing the prompt into a single user message. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability and resource access unverified; the other four each failed one or two optional fields, most often description or delegates.
 
 The decisive findings were:
 

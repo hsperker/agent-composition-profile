@@ -24,7 +24,7 @@ The classifications are recorded reviewer judgments about each native mechanism,
 | `model.requires` | **INCUBATING** | Declared by the agent author, attested by the host binding. Sound as a concept, but `tool-use` and `reasoning` have no standardized meaning yet. |
 | `model.prefers` | **REMOVE** | Non-binding deployment selection policy; belongs in the host binding. |
 | `skills` | **OPTIONAL** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. Session durability and resource access are unverified everywhere. |
-| `plugins` | **OPTIONAL** | Required expansion of all standard Agent Plugin components into agent-scoped capabilities. |
+| `plugins` | **OPTIONAL** | Every supported component of the plugin is made available to the declaring agent. Composition is guaranteed; a stable model-visible tool identifier is not. |
 | `delegates` | **REMOVE** | One field overloads agent-as-tool, handoff, graph transition, shared-state run, and team collaboration. No agent inventory replaces it; packaging and orchestration are separate concerns. |
 
 ## What ran
@@ -80,7 +80,7 @@ Strict outcome for the required core and for each optional field, across all age
 | plugins | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted |
 | delegates | accepted | rejected | rejected | rejected | accepted | rejected | accepted | accepted |
 
-A rejected combined fixture does not show the core is non-portable. CrewAI is the only runtime whose core is rejected, because its role, goal, and backstory prompt template changes the boundary of both name and instructions. That is a genuinely different agent abstraction, and the portable core should not be contorted to make it pass.
+A rejected combined fixture does not show the core is non-portable. CrewAI is the only runtime whose core is rejected, because its role, goal, and backstory prompt template changes the boundary of both name and instructions, and its template override trades that for a single user message with no persistent system context. That is a genuinely different agent abstraction, and the portable core should not be contorted to make it pass.
 
 ## Field findings
 
@@ -89,7 +89,7 @@ A rejected combined fixture does not show the core is non-portable. CrewAI is th
 Observed mechanisms:
 
 - LangGraph, LlamaIndex, Agno, OpenAI Agents, PydanticAI, and Microsoft have native name fields.
-- CrewAI has a role, not a stable agent identity; using the source name as role changes its semantics.
+- CrewAI has a role, not a stable agent identity; using the source name as role changes its semantics. CrewAI's custom `system_template` and `prompt_template` were probed as a route around this: they do remove role and goal from the prompt, but CrewAI then builds one combined prompt with no system message, so the mechanism does not restore a clean identity plus instructions split.
 - Google ADK rejects `lead-researcher` because names must be valid Python identifiers. The adapter uses `lead_researcher` and retains an explicit source/native identity map.
 - The four static targets have native identity fields.
 
@@ -121,7 +121,7 @@ Observed mechanisms:
 - LangGraph, LlamaIndex, Agno, OpenAI Agents, Google ADK, PydanticAI, Microsoft, and the static targets provide persistent instruction/system-prompt paths.
 - Google ADK's string instructions perform `{state_key}` interpolation; the adapter uses a native instruction callback so arbitrary Markdown remains literal.
 - Microsoft passes instructions through chat options to the client rather than inserting a `system` message itself; the nested runtime recorded the child instructions in those options.
-- CrewAI embeds the body as `backstory` within a generated role/goal/backstory prompt template. The instructions run, but their boundary and authority are changed.
+- CrewAI embeds the body as `backstory` within a generated role/goal/backstory prompt template. The instructions run, but their boundary and authority are changed. With custom templates (`system_template="{backstory}"`, `prompt_template="{input}"`) role and goal disappear, but CrewAI's prompt builder returns a single prompt for any template override and the executor sends it as one user message fused with the task text. The test `test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn` records both message shapes. Neither path yields persistent context distinct from task input, so the `approximated` grade stands.
 
 Intersection: persistent behavioral context applied on every invocation, distinct from ordinary task input and tool output.
 
@@ -175,12 +175,12 @@ Recommendation: retain Agent Skill references as an optional field graded agains
 
 Observed mechanisms:
 
-- CrewAI, Agno, OpenAI Agents, Google ADK, PydanticAI, and Microsoft construct native agent-scoped MCP clients/toolsets from the Agent Plugin MCP server.
+- CrewAI, Agno, OpenAI Agents, Google ADK, PydanticAI, and Microsoft construct native MCP clients/toolsets from the Agent Plugin MCP server and attach them to the declaring agent.
 - LangGraph and LlamaIndex can construct clients, but cannot attach tools to an agent until a handshake succeeds. Against the research fixture's unreachable endpoint they report unsupported rather than inventing tools; against the live probe they attach tools through langchain-mcp-adapters and McpToolSpec respectively.
 - Static Claude, Codex, and AFM mappings resolve supported plugin components; Amplifier still needs a runtime shim.
 - All eight runtimes activated the live probe plugin end to end on both transports. See the activation table below.
 
-Intersection: an Agent Plugin reference is a required package dependency whose standard components expand into the effective agent capability set, and every tested runtime's native MCP client can take the plugin's `mcp.json` entry through handshake, discovery, and invocation.
+Intersection: an Agent Plugin reference is a required package dependency whose supported components are made available to the declaring agent, and every tested runtime's native MCP client can take the plugin's `mcp.json` entry through handshake, discovery, and invocation. Whether the same components are also visible elsewhere is a host decision; the profile promises availability, not isolation.
 
 Important differences: the plugin wrapper disappears after expansion; MCP connection ownership, activation timing, working directory, tool naming, approvals, and tool catalog scope vary. Construction proves representability, not endpoint availability, which is why the research fixture keeps `plugins.activation` unverified and the live probe is reported separately.
 
@@ -202,15 +202,15 @@ The probe fixture declares one plugin whose `mcp.json` has a stdio server (`comm
 Findings from the probe:
 
 - Agent Plugins §9 is the adapter's job, not the SDK's. No SDK expands `${PLUGIN_ROOT}` or provides `PLUGIN_ROOT` and `PLUGIN_DATA`; the shared `effective_server_config` helper does, and every stdio server then saw both variables.
-- `cwd` is lost in two SDKs. CrewAI's `MCPServerStdio` and LlamaIndex's `BasicMCPClient` have no working directory parameter, so their servers ran in the inherited directory. Strict mode already rejected both for the fixture's `cwd`, and the probe confirms the loss is real rather than theoretical.
+- `cwd` is lost in two SDKs. CrewAI's `MCPServerStdio` and LlamaIndex's `BasicMCPClient` have no working directory parameter, so their servers ran in the inherited directory. Agent Plugins §7.2.1 makes the plugin root the required default when `cwd` is omitted, so every stdio server needs it; both adapters therefore grade any stdio server `unsupported`, and strict mode rejects the activation fixture for both. Their `resolved` grade in the research fixture is not a contradiction: that plugin declares only a streamable HTTP server, which neither SDK mishandles. Native MCP support is not Agent Plugins support. The same rule makes AFM 0.4.0 lose every stdio server.
 - Headers survived everywhere. All eight clients sent the configured header; the 401 gate never fired.
-- Tool naming is not portable. Google ADK and Microsoft prefix tools with the server name. CrewAI names tools after the server command or URL, not the Agent Plugins server name, and truncates long sanitized names to a hash, so the model saw `python_users_..._98b36a1f` for `echo_stdio`. A profile author cannot predict the tool name a model will see.
+- Tool naming is not portable. Google ADK and Microsoft prefix tools with the server name. CrewAI names tools after the server command or URL, not the Agent Plugins server name, and truncates long sanitized names to a hash, so the model saw `python_users_..._98b36a1f` for `echo_stdio`. Agent Plugins delegates wire behavior to MCP and does not standardize how a host presents tools to a model. Consequently a plugin reference guarantees capability composition, not a stable model-visible tool identifier. A portable instruction such as "always call `echo_stdio` before answering" is unsafe, because another host may expose the tool as `echostdio_echo_stdio` or a hash. Portable instructions cannot rely on a target-native tool name unless another standard supplies a stable logical reference.
 - Server attribution is not portable. CrewAI exposes no mapping from a discovered tool back to the configured server; the probe attributes results by payload content instead.
 - Lifecycle ownership differs. OpenAI Agents needs an explicit `connect()`; Microsoft and PydanticAI connect when the agent enters its async context; Agno connects inside `arun` and releases in the same task; ADK connects on first tool listing; CrewAI connects inside `kickoff`; LangGraph opens a session per tool call; LlamaIndex binds its HTTP client to the first event loop that uses it.
 - Two servers exposing the same tool name were not tested. Namespacing across servers is client defined and remains an open question.
 - Activation failure reporting per Agent Plugins §7.2.2 is implemented in the adapters but was not exercised, because no server failed.
 
-Recommendation: retain plugin references as optional composition. Strict mode must preserve every valid standard component and agent scope or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §9 themselves and must not promise portable tool names or server attribution.
+Recommendation: retain plugin references as optional composition meaning that the plugin's supported components are available to the declaring agent. Strict mode must preserve every valid standard component, including the §7.2.1 working directory default, or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle, tool naming, or scoping beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §7.2.1 and §9 themselves, and the profile must state that tool names seen by the model are not portable.
 
 ### `delegates` — REMOVE
 

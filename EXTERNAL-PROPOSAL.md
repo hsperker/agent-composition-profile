@@ -10,7 +10,7 @@ The strongest common semantics were:
 - persistent Markdown instructions with instruction authority;
 - optional selection metadata;
 - model requirements as a coherent concept, declared by the author and resolved by the host, though without a standardized capability vocabulary yet;
-- optional Agent Skills and Agent Plugins references, with strict preservation of their lower-layer semantics. Every runtime activated skills through the dedicated-tool pattern of the Agent Skills integration guide; none exercised session durability. A plugin with a local deterministic MCP server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP: handshake, tool discovery, invocation, and result. Two SDKs cannot honor `cwd`, tool naming and server attribution are not portable, and Agent Plugins §9 placeholder expansion had to be implemented by the host adapter because no SDK does it.
+- optional Agent Skills and Agent Plugins references, with strict preservation of their lower-layer semantics. Every runtime activated skills through the dedicated-tool pattern of the Agent Skills integration guide; none exercised session durability. A plugin with a local deterministic MCP server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP: handshake, tool discovery, invocation, and result. Two SDKs cannot honor `cwd`, including the plugin-root default Agent Plugins requires, so their native MCP support is not Agent Plugins support. Tool naming and server attribution are not portable, so a plugin reference guarantees capability composition but not a stable model-visible tool identifier. Agent Plugins §9 placeholder expansion had to be implemented by the host adapter because no SDK does it.
 
 Two proposed areas did not survive as written:
 
@@ -20,7 +20,7 @@ Two proposed areas did not survive as written:
 The proposed incubation direction is:
 
 1. Start with `name` plus persistent Markdown instructions as the core.
-2. Treat `description`, Agent Skills, and Agent Plugins as optional fields with one rule: if present, a strict host preserves their defined semantics or rejects the profile. Profile strictness is a composition-level rule and does not change Agent Plugins' own incremental conformance.
+2. Treat `description`, Agent Skills, and Agent Plugins as optional fields with one rule: if present, a strict host preserves their defined semantics or rejects the profile. A plugin or skill reference means availability to the declaring agent, not isolation; scoping stays with the host. Profile strictness is a composition-level rule and does not change Agent Plugins' own incremental conformance.
 3. Incubate `model.requires` as a host-resolved declaration until the capability vocabulary is standardized; keep model selection, preferences, and attestation in deployment bindings.
 4. Add no agent inventory or relationship field. An Agent Profile describes one agent; packaging and orchestration are separate concerns.
 5. Require compatibility reports to distinguish native construction, activation, and execution using `preserved`, `resolved`, `approximated`, `unsupported`, and `unverified`.
