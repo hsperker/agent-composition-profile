@@ -4,12 +4,15 @@
 
 **Status:** Experimental input to the Agent Plugins Agent Profile incubation discussion. Not an adopted standard and not proposed as a competing standards effort.
 
-> A Markdown document identifies an agent, supplies persistent instructions, and may attach a discovery description, Agent Skills, and Agent Plugins. The host supplies models and orchestration.
+> A Markdown document identifies an agent and supplies persistent instructions. Optional capability modules attach a discovery description, model requirements, Agent Skills, and Agent Plugins. The host selects models and owns orchestration.
 
 ```markdown
 ---
 name: technical-researcher
 description: Investigates technical questions using primary evidence.
+model:
+  requires:
+    tool-use: true
 skills:
   - ./skills/source-evaluation
 plugins:
@@ -23,7 +26,7 @@ Investigate before concluding.
 Cite the evidence behind the final answer.
 ```
 
-This revision follows the runtime evidence in `EVIDENCE.md`. In particular, it removes model policy and local delegation from the portable document.
+This revision follows the runtime evidence in `EVIDENCE.md`. It splits the document into a small core and optional capability modules, keeps model requirements as a host-resolved declaration, moves model selection and preferences to the host, and removes local delegation.
 
 ## 1. Question and evidence
 
@@ -36,8 +39,8 @@ The observed semantic intersection is narrower than draft 0.1:
 - stable logical identity converges;
 - persistent authoritative instructions converge;
 - selection descriptions are common but not universal and are sometimes promoted into behavioral prompt content;
-- Agent Skills and Agent Plugins are coherent optional dependencies, but not every runtime can preserve their scope or authority;
-- model capabilities are external deployment attestations, not common agent-runtime fields;
+- Agent Skills and Agent Plugins are coherent optional dependencies; every runtime could activate skills through the published dedicated-tool pattern, but none exercised session durability;
+- model requirements can be declared portably but are only ever resolved by a host attestation; no SDK verified them natively;
 - delegation, handoff, graph transition, and team collaboration are observably different mechanisms.
 
 ## 2. Goals
@@ -45,7 +48,7 @@ The observed semantic intersection is narrower than draft 0.1:
 A conforming loader or adapter:
 
 1. preserves the document's logical identity and persistent instruction authority;
-2. preserves every declared optional semantic or rejects strict execution;
+2. declares which optional capability modules it implements, and preserves every declared semantic of those modules or rejects strict execution;
 3. reports every source-to-target mapping explicitly;
 4. keeps concrete models, permissions, credentials, and orchestration outside the portable source;
 5. never claims conformance after silently dropping a declaration.
@@ -58,18 +61,21 @@ The profile defines:
 
 ```text
 agent document
-├── logical name
-├── optional selection description
-├── persistent Markdown instructions
-├── optional Agent Skill references
-└── optional Agent Plugin references
+├── core
+│   ├── logical name (required metadata)
+│   └── persistent Markdown instructions (behavioral semantic)
+└── optional capability modules
+    ├── selection description
+    ├── model requirements
+    ├── Agent Skill references
+    └── Agent Plugin references
 ```
 
 The host or deployment defines:
 
 ```text
 runtime binding
-├── model, provider, endpoint, and model capability policy
+├── concrete model, provider, endpoint, capability attestation, and selection preferences
 ├── credentials and authorization
 ├── native tools and ambient capabilities
 ├── agent relationships and orchestration
@@ -88,12 +94,19 @@ The frontmatter fields are:
 
 | Field | Required | Meaning |
 |---|---:|---|
-| `name` | Yes | Stable package-level logical identity. |
-| `description` | No | Human-readable selection or discovery hint. |
-| `skills` | No | Agent Skills available to this agent. |
-| `plugins` | No | Agent Plugins required by this agent. |
+| `name` | Yes | Stable package-level logical identity. Core. |
+| `description` | No | Metadata used to understand, display, discover, or select the agent. Description module. |
+| `model` | No | `requires` only: model capabilities the agent needs, resolved by the host. Model module. |
+| `skills` | No | Agent Skills that must be available to this agent. Skills module. |
+| `plugins` | No | Agent Plugins required by this agent. Plugins module. |
 
-No other top-level field is defined in draft 0.2. Empty optional arrays and empty descriptions are invalid.
+No other top-level field is defined in draft 0.2. Empty optional arrays, empty descriptions, and empty requirement maps are invalid.
+
+### 4.3 Conformance modules
+
+The core is `name` plus the Markdown body. Every other field belongs to an optional capability module. A host declares which modules it implements. A document that uses a module's field requires that module; a host without it MUST reject the document clearly rather than ignore the field. This mirrors Agent Plugins, whose conformance section permits a client to support only some component types.
+
+There is no negotiation protocol. Conformance is reported per module (section 12), so a host can be conformant for the core and the skills module while rejecting plugins.
 
 The companion JSON Schema validates the decoded frontmatter. This text additionally governs safe YAML parsing, Markdown, path containment, and referenced packages.
 
@@ -125,7 +138,9 @@ The profile does not require a particular provider role such as `system` or `dev
 ^[a-z0-9]+(?:-[a-z0-9]+)*$
 ```
 
-The value is the logical package identity. A target whose native grammar is narrower MAY use a deterministic native alias when it:
+The value is the logical package identity. It is required metadata for discovery, diagnostics, and packaging; it does not by itself define runtime behavior. Draft 0.2 has no intra-document references, so no field depends on it.
+
+A target whose native grammar is narrower MAY use a deterministic native alias when it:
 
 - records the source-to-native mapping;
 - detects collisions before execution;
@@ -136,9 +151,11 @@ Such a mapping is `resolved`, not byte-for-byte `preserved`. Google ADK, for exa
 
 ## 6. `description`
 
-`description` is optional selection or discovery metadata describing what the agent does and when it is suitable.
+`description` is human- or model-readable metadata used to understand, display, discover, or select an agent. It MUST NOT be merged into the agent's behavioral instructions without explicit semantics.
 
-A target preserves it when the value remains metadata used for discovery, routing, or tool selection. A target that can only put it into behavioral prompt content MUST report `approximated`. A target with no discovery-description representation reports `unsupported`.
+A target preserves it when the value remains metadata used for discovery, routing, or tool selection. A target that can only put it into behavioral prompt content MUST report `approximated`. A same-named native field is not automatically preservation, and the absence of one is not automatically `unsupported`: a host may retain the description in its own catalog, registry, UI, or diagnostics and report `resolved`, provided the report names that surface. Only a host with no place for the metadata at all reports `unsupported`.
+
+A catalog or distribution profile MAY require `description`; for a directly invoked agent it is optional.
 
 Omission carries no negative capability claim. A host may generate display metadata, but generated text is not part of the portable identity.
 
@@ -146,17 +163,19 @@ Omission carries no negative capability claim. A host may generate display metad
 
 Each `skills` entry is a relative path to an Agent Skill directory containing `SKILL.md`.
 
-The effective skill catalog is agent-private. Preservation requires the semantics of Agent Skills, including:
+A `skills` entry is additive: the listed skills MUST be available to this agent. The profile does not claim they are the only skills the agent may see. Agent Skills does not define skill isolation; exclusivity is host authorization policy and stays outside the document.
 
-1. metadata-first discovery by name and description;
-2. full instruction disclosure only when activated;
-3. activated skill content entering context with instruction authority;
-4. contained and explicit access to referenced resources and scripts;
-5. host authorization remaining the upper bound.
+Preservation requires the activation semantics of the Agent Skills specification and its integration guide:
 
-Reading full skill text into process memory is not itself a disclosure failure. The relevant boundary is what enters model context.
+1. only name and description are disclosed initially;
+2. activation happens on demand, by the model or the user;
+3. the complete skill instructions enter model context on activation;
+4. referenced resources and scripts are reachable on demand and never eagerly loaded;
+5. host authorization remains the upper bound.
 
-A function tool that merely returns `SKILL.md` as ordinary tool output is `approximated`, because tool output does not have persistent instruction authority. Strict execution MUST reject that mapping. Every tested runtime, including the three with native Agent Skills implementations, activated skills through such a tool, so no runtime target preserved this semantic in the experiment.
+The delivery mechanism is secondary. The integration guide names file-read activation and dedicated-tool activation as conforming patterns, and in both the model receives the instructions as a tool result. A native implementation is `preserved`; an adapter that supplies the dedicated activation tool for a framework without a skills concept is `resolved`. Injecting full skill bodies eagerly, or truncating them, is `approximated`.
+
+Session durability is a separate property. The guide asks hosts to protect activated skill content from context compaction. A report that did not exercise compaction MUST record `skills.durability` as `unverified`, not as preserved and not as approximated.
 
 The profile does not duplicate the Agent Skills file format.
 
@@ -190,13 +209,23 @@ Two entries in one field resolving to the same canonical target are duplicates a
 
 Effective skill names across direct skills and plugin-supplied skills MUST be unique for one agent.
 
-## 10. Models belong to the host
+## 10. Model requirements are declared here and resolved by the host
 
-Draft 0.2 has no `model` field.
+`model.requires` is an optional module: a map of capability names to `true`, stating what the agent needs in order to work. The agent author knows this; the deployment knows which concrete model provides it.
 
-The experiments could only satisfy `reasoning`, `tool-use`, and `vision-input` through external binding assertions. The eight SDKs expose no shared, trustworthy capability vocabulary with equivalent operational meaning.
+| Concern | Owner |
+|---|---|
+| Declare required model properties | Agent document |
+| Define the capability vocabulary | External governed registry or a future profile revision |
+| Select a concrete model | Host or deployment |
+| Attest that the model satisfies the requirements | Host or deployment |
+| Choose among otherwise valid models | Host or deployment |
 
-A host binding MAY declare and attest model preconditions or preferences. Those declarations are deployment evidence and MUST remain outside this document. A future portable model requirement would require a governed capability vocabulary and interoperable conformance tests before entering the profile.
+The experiments resolved every requirement through a host attestation such as `tool-use: true`; no SDK exposed a shared, trustworthy capability contract. That shows requirements are host-resolved, not that they are host-authored. A report MUST classify a requirement `resolved` only when the binding attests it and `unsupported` otherwise, and MUST NOT imply that the runtime verified it.
+
+Objectively checkable capabilities such as `tool-use`, `vision-input`, or `structured-output` are the intended vocabulary. `reasoning` has no shared operational definition across SDKs and is at risk of removal or reclassification as a locally attested profile.
+
+Draft 0.2 has no `model.prefers`. A preference that does not affect whether the agent can execute is deployment selection policy and lives in the host binding.
 
 ## 11. Agent relationships belong to orchestration
 
@@ -213,7 +242,9 @@ The tested mechanisms did not converge:
 - catalogs with no per-parent invocation contract;
 - no local equivalent.
 
-These mechanisms differ in control ownership, state sharing, task schemas, result handling, and conversation continuity. An adapter MUST NOT lower one into another while claiming semantic preservation.
+These mechanisms differ in control ownership, state sharing, task schemas, result handling, and conversation continuity. A single generic `delegates` field wrongly suggests they share one semantic; that overload is the reason for removal. An adapter MUST NOT lower one mechanism into another while claiming semantic preservation.
+
+Adapter-authored implementations are not illegitimate in themselves. Where a source contract is explicit, for example a fresh child run with task in, text out, and control returning to the parent, an adapter tool that implements it is `resolved`. A future optional module may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not attempt to cover multi-agent orchestration.
 
 A package or installer MAY maintain a non-behavioral inventory of agent documents. Such an `agents:` manifest is a composition convention, not a promise that any agent can invoke another. Typed relationship mechanisms may be proposed separately when their semantics and evidence are explicit.
 
@@ -229,9 +260,12 @@ For every declared source semantic and every agent, an adapter emits exactly one
 | `resolved` | An explicit mechanical binding or reversible mapping preserves meaning. |
 | `approximated` | The target can run something similar, but observable meaning changes. |
 | `unsupported` | No working mapping was demonstrated. |
+| `unverified` | The mapping exists but a property was not exercised. It asserts no mismatch and never stands in for `approximated`. |
 | `omitted-preference` | Legacy draft 0.1 reports only: a non-binding model preference was not selected. |
 
-Strict mode MUST reject any required source semantic classified `approximated` or `unsupported`. Diagnostic mode MAY construct the representable subset only when the report marks every loss. No mode may silently discard source semantics.
+Strict mode MUST reject any required source semantic classified `approximated` or `unsupported`. `unverified` findings do not block strict mode but MUST be listed in the report. Diagnostic mode MAY construct the representable subset only when the report marks every loss. No mode may silently discard source semantics.
+
+Reports MUST also state an outcome per conformance module: core, description, model, skills, plugins, and, for draft 0.1 documents, delegates. A combined fixture that is rejected does not show that the core is non-portable; it shows which module the target cannot preserve.
 
 Reports SHOULD distinguish:
 
@@ -251,14 +285,14 @@ Target-specific settings remain in external bindings. Draft 0.2 defines no `x-<h
 
 ## 14. Evidence status
 
-The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. No runtime target accepted every draft 0.1 field under strict classification. Microsoft Agent Framework came closest and failed only on skill activation authority. The cross-framework failures caused this revision.
+The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Seven of eight runtime targets accepted the core module; CrewAI's role, goal, and backstory prompt template approximates both name and instructions. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability unverified; the other four each failed one or two optional modules, most often description or delegates.
 
 The decisive findings were:
 
 - native-looking fields can have different authority (`description`, CrewAI `goal`, and `backstory`);
-- progressive skill disclosure is not preserved by returning instructions as ordinary tool output, and the native Agent Skills implementations in CrewAI, Agno, and Microsoft Agent Framework do exactly that;
+- Agent Skills activation converged on the published dedicated-tool pattern in all eight runtimes, while session durability was exercised by none;
 - MCP object construction does not prove endpoint activation;
-- a runnable delegation adapter may still invent control-flow semantics;
+- one generic `delegates` field cannot name the mechanism a target actually uses;
 - dependency isolation is part of a reproducible multi-framework experiment.
 
 The classifications are recorded reviewer judgments about each native mechanism, backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. See `EVIDENCE.md`, individual reports under `generated/runtime/`, and the generated `generated/runtime/matrix.json`.
@@ -271,7 +305,7 @@ Before adoption, the community should require:
 
 1. independent implementations of the narrowed document;
 2. live Agent Plugin/MCP activation against a shared test server;
-3. conformance fixtures for instruction authority and skill disclosure;
+3. conformance fixtures for instruction authority, skill disclosure, and skill durability under compaction;
 4. negative tests for every required failure;
 5. a stable owner, versioning policy, and compatibility process.
 
