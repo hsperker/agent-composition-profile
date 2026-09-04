@@ -10,7 +10,7 @@
 
 The proposed profile is not one coherent portable runtime abstraction.
 
-Two semantics survived as a convincing core: a logical agent identity as required metadata and persistent behavioral instructions as the one core behavioral semantic. Description, model requirements, Agent Skills, and Agent Plugins are optional capability modules: a host declares which it implements and must preserve every declared semantic of those modules or reject strictly. Model requirements are declared by the agent author and resolved by the host. The generic `delegates` field overloads several incompatible mechanisms and should leave the profile.
+Two semantics survived as a convincing core: a logical agent identity as required metadata and persistent behavioral instructions as the one core behavioral semantic. Description, Agent Skills, and Agent Plugins are optional fields with one rule: if present, a strict host must preserve their defined semantics or reject the profile. Model requirements are declared by the agent author and resolved by the host, but without a standardized capability vocabulary they remain incubating. The generic `delegates` field overloads several incompatible mechanisms and should leave the profile.
 
 This is not a majority vote. The recommendations below use the semantic intersection actually observed. A framework accepting similarly named constructor arguments does not count as preservation.
 
@@ -20,12 +20,12 @@ The classifications are recorded reviewer judgments about each native mechanism,
 |---|---|---|
 | `name` | **REQUIRED METADATA** | Stable logical identity for discovery, diagnostics, and packaging, with an explicit reversible native-name resolver where necessary. Not itself a runtime behavior. |
 | Markdown instructions | **CORE** | Persistent authoritative behavioral context on every invocation. |
-| `description` | **OPTIONAL MODULE** | Metadata to understand, display, discover, or select the agent; it must not be merged into behavioral instructions. A catalog profile may require it. |
-| `model.requires` | **OPTIONAL MODULE, HOST RESOLVED** | Declared by the agent author, attested by the host binding. `reasoning` lacks a shared operational definition. |
+| `description` | **OPTIONAL** | Metadata to understand, display, discover, or select the agent; it must not be merged into behavioral instructions. A catalog profile may require it. |
+| `model.requires` | **INCUBATING** | Declared by the agent author, attested by the host binding. Sound as a concept, but `tool-use` and `reasoning` have no standardized meaning yet. |
 | `model.prefers` | **REMOVE** | Non-binding deployment selection policy; belongs in the host binding. |
-| `skills` | **OPTIONAL MODULE** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. Session durability is unverified everywhere. |
-| `plugins` | **OPTIONAL MODULE** | Required expansion of all standard Agent Plugin components into agent-scoped capabilities. |
-| `delegates` | **REMOVE** | One field overloads agent-as-tool, handoff, graph transition, shared-state run, and team collaboration. A typed relationship module may follow separately. |
+| `skills` | **OPTIONAL** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. Session durability and resource access are unverified everywhere. |
+| `plugins` | **OPTIONAL** | Required expansion of all standard Agent Plugin components into agent-scoped capabilities. |
+| `delegates` | **REMOVE** | One field overloads agent-as-tool, handoff, graph transition, shared-state run, and team collaboration. No agent inventory replaces it; packaging and orchestration are separate concerns. |
 
 ## What ran
 
@@ -50,28 +50,28 @@ CrewAI, Agno, and LlamaIndex multi-agent objects were constructed but their team
 
 This table summarizes the entry agent. Machine-readable agent-by-agent details and explanations remain authoritative.
 
-| Target | name | description | instructions | requires | prefers | skills | durability | plugins | delegates |
-|---|---|---|---|---|---|---|---|---|---|
-| LangGraph | preserved | resolved | preserved | resolved | omitted | resolved | unverified | unsupported | resolved |
-| CrewAI | approximated | approximated | approximated | resolved | omitted | preserved | unverified | resolved | approximated |
-| LlamaIndex | preserved | preserved | preserved | resolved | omitted | resolved | unverified | unsupported | approximated |
-| Agno | preserved | approximated | preserved | resolved | omitted | preserved | unverified | resolved | approximated |
-| OpenAI Agents | preserved | preserved | preserved | resolved | omitted | resolved | unverified | resolved | preserved |
-| Google ADK | resolved | preserved | preserved | resolved | omitted | resolved | unverified | resolved | approximated |
-| PydanticAI | preserved | preserved | preserved | resolved | omitted | resolved | unverified | resolved | resolved |
-| Microsoft Agent Framework | preserved | preserved | preserved | resolved | omitted | preserved | unverified | resolved | preserved |
-| Amplifier (static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | unsupported | preserved |
-| Claude Code (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | resolved | preserved |
-| Codex (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | resolved | resolved |
-| AFM 0.4.0 (static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | resolved | unsupported |
+| Target | name | description | instructions | requires | prefers | skills | durability | resources | plugins | delegates |
+|---|---|---|---|---|---|---|---|---|---|---|
+| LangGraph | preserved | resolved | preserved | resolved | omitted | resolved | unverified | unverified | unsupported | resolved |
+| CrewAI | approximated | approximated | approximated | resolved | omitted | preserved | unverified | unverified | resolved | approximated |
+| LlamaIndex | preserved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | unsupported | approximated |
+| Agno | preserved | approximated | preserved | resolved | omitted | preserved | unverified | unverified | resolved | approximated |
+| OpenAI Agents | preserved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | resolved | preserved |
+| Google ADK | resolved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | resolved | approximated |
+| PydanticAI | preserved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | resolved | resolved |
+| Microsoft Agent Framework | preserved | preserved | preserved | resolved | omitted | preserved | unverified | unverified | resolved | preserved |
+| Amplifier (static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | n/a | unsupported | preserved |
+| Claude Code (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
+| Codex (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
+| AFM 0.4.0 (static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
-`requires` combines the fixture's `reasoning` and `tool-use` rows; every runtime result is a binding attestation, not native capability proof. `prefers` abbreviates `omitted-preference` for runtime targets. The earlier static targets used a binding that selected the preferred capability, so their result is `resolved`. `durability` is the `skills.durability` finding; static targets were never executed, so it is not declared for them.
+`requires` combines the fixture's `reasoning` and `tool-use` rows; every runtime result is a binding attestation, not native capability proof. `prefers` abbreviates `omitted-preference` for runtime targets. The earlier static targets used a binding that selected the preferred capability, so their result is `resolved`. `durability` and `resources` are the `skills.durability` and `skills.resources` findings; static targets were never executed, so neither is declared for them.
 
-### Conformance by module
+### Conformance by field
 
-Strict outcome per module across all agents of the fixture, from `generated/runtime/matrix.md`. `accepted` means no finding in the module is `approximated` or `unsupported`; `unverified` findings do not block.
+Strict outcome for the required core and for each optional field, across all agents of the fixture, from `generated/runtime/matrix.md` (the JSON key is `modules`). `accepted` means no finding in the group is `approximated` or `unsupported`; `unverified` findings do not block.
 
-| Module | LangGraph | CrewAI | LlamaIndex | Agno | OpenAI Agents | Google ADK | PydanticAI | Microsoft |
+| Field | LangGraph | CrewAI | LlamaIndex | Agno | OpenAI Agents | Google ADK | PydanticAI | Microsoft |
 |---|---|---|---|---|---|---|---|---|
 | core | accepted | rejected | accepted | accepted | accepted | accepted | accepted | accepted |
 | description | accepted | rejected | accepted | rejected | accepted | accepted | accepted | accepted |
@@ -80,7 +80,7 @@ Strict outcome per module across all agents of the fixture, from `generated/runt
 | plugins | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted |
 | delegates | accepted | rejected | rejected | rejected | accepted | rejected | accepted | accepted |
 
-A rejected combined fixture does not show the core is non-portable. CrewAI is the only runtime whose core is rejected, because its role, goal, and backstory prompt template changes the boundary of both name and instructions.
+A rejected combined fixture does not show the core is non-portable. CrewAI is the only runtime whose core is rejected, because its role, goal, and backstory prompt template changes the boundary of both name and instructions. That is a genuinely different agent abstraction, and the portable core should not be contorted to make it pass.
 
 ## Field findings
 
@@ -129,7 +129,7 @@ Important difference: exact provider message role is not portable. Instruction a
 
 Recommendation: keep the Markdown body in the core. Define semantic preservation by persistence and authority, not by a required provider message role or byte-identical final prompt.
 
-### `model.requires` — OPTIONAL MODULE, HOST RESOLVED
+### `model.requires` — INCUBATING, HOST RESOLVED
 
 Observed mechanism in all eight runtime adapters: the profile parser exposes capability names, but the framework model objects do not provide a common, trustworthy capability contract. Every successful result came from an external binding assertion such as `tool-use: true`.
 
@@ -141,7 +141,7 @@ Important differences:
 - `reasoning` has no shared operational definition across the SDKs.
 - Capability names, evidence, and fallback policy are deployment concerns.
 
-Recommendation: keep `model.requires` in the profile as an optional module so deployments do not have to rediscover an agent's intrinsic needs. Declaration lives in the document; vocabulary governance lives outside it; selection and attestation live in the host binding. Reports classify a requirement `resolved` only on recorded attestation and must not imply the SDK verified it. `reasoning` should be removed or reclassified as a locally attested profile until it has a shared operational definition.
+Recommendation: keep `model.requires` as an incubating field so deployments do not have to rediscover an agent's intrinsic needs. Declaration lives in the document; vocabulary governance lives outside it; selection and attestation live in the host binding. Reports classify a requirement `resolved` only on recorded attestation and must not imply the SDK verified it. The evidence supports the concept, not a vocabulary: a requirement is interoperable only when its name has a standardized meaning, and `reasoning` clearly does not. Do not force the field into the first normative proposal.
 
 ### `model.prefers` — REMOVE
 
@@ -161,6 +161,7 @@ Observed mechanisms:
 - Claude Code, Codex, and AFM have still-valid static Agent Skills mappings, with scope differences documented in their reports.
 - LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no Agent Skills concept; the adapter supplies the dedicated activation tool with the catalog in its description. That is `resolved`: the pattern is the published one, but the framework did not provide it.
 - No experiment exercised context compaction or summarization, so whether activated skill content stays effective for the session is `unverified` in all eight runtimes.
+- The fixture skills bundle no references, scripts, or assets, so on-demand resource access, which Agent Skills also requires, is `unverified` in all eight runtimes.
 - Agent Skills does not define skill isolation. The `skills` field is additive: the listed skills must be available to the agent. Whether the host also exposes ambient skills is host policy.
 - Amplifier's direct static mapping remains unsupported without a runtime module.
 
@@ -168,7 +169,7 @@ Intersection: a catalog identified by name and description, full instructions di
 
 Important differences: catalog scope, session durability under compaction, approval, resource access, and script execution. The delivery mechanism is not one of them: the integration guide treats a tool result as a conforming way to bring instructions into context.
 
-Recommendation: retain Agent Skill references as an optional capability module graded against the Agent Skills specification and integration guide: metadata first, on-demand activation, full instructions into context, resources on demand. Native implementations are `preserved`, adapter supplied activation tools are `resolved`, eager injection is `approximated`. Session durability is a separate finding and remains `unverified` until a compaction test exists.
+Recommendation: retain Agent Skill references as an optional field graded against the Agent Skills specification and integration guide: metadata first, on-demand activation, full instructions into context, resources on demand. Native implementations are `preserved`, adapter supplied activation tools are `resolved`, eager injection is `approximated`. Session durability and resource access are separate findings and remain `unverified` until a compaction test and a fixture skill with bundled resources exist. Only catalog and activation were tested; complete Agent Skills preservation is not claimed.
 
 ### `plugins` — OPTIONAL
 
@@ -182,7 +183,7 @@ Intersection: an Agent Plugin reference is a required package dependency whose s
 
 Important differences: the plugin wrapper disappears after expansion; MCP connection ownership, activation timing, headers, working directory, approvals, and tool catalog scope vary. Construction proves representability, not endpoint availability. The example endpoint was intentionally not treated as live.
 
-Recommendation: retain plugin references as optional composition. Strict mode must preserve every valid standard component and agent scope or reject. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle beyond what Agent Plugins and MCP already define.
+Recommendation: retain plugin references as optional composition. Strict mode must preserve every valid standard component and agent scope or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle beyond what Agent Plugins and MCP already define. Construction evidence is the current ceiling; a local deterministic MCP server probe covering handshake, tool discovery, and invocation is the next experiment.
 
 ### `delegates` — REMOVE
 
@@ -201,20 +202,20 @@ Intersection: other named agents may be available. There is no shared answer to 
 
 Important difference: these mechanisms change observable behavior. Treating a handoff or shared team as a fresh child function call is not lowering; it is inventing an orchestration policy. An adapter-authored tool that implements an explicit source contract is legitimate; the problem is that one generic field cannot say which contract a target actually honors.
 
-Recommendation: remove the generic `delegates` field from the profile because it is semantically overloaded, not because adapter implementation is illegitimate. If package composition is needed, use a non-behavioral `agents:` inventory convention or an external manifest. A future optional module may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not cover multi-agent orchestration.
+Recommendation: remove the generic `delegates` field from the profile because it is semantically overloaded, not because adapter implementation is illegitimate. Do not add an `agents:` inventory either: an Agent Profile describes one agent, a package may contain several, and orchestration defines their relationships. A future optional field may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not cover multi-agent orchestration.
 
 ## Conformance results
 
-Strict construction rejects any required semantic classified `approximated` or `unsupported`; it never discards one. `omitted-preference` and `unverified` are non-blocking, and every `unverified` finding is listed in the report. Every report contains exactly one finding for every semantic declared by every source agent, and an outcome per module.
+Strict construction rejects any required semantic classified `approximated` or `unsupported`; it never discards one. `omitted-preference` and `unverified` are non-blocking, and every `unverified` finding is listed in the report. Every report contains exactly one finding for every semantic declared by every source agent, and an outcome for the core and for each optional field.
 
-The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework, each with skill durability unverified. Seven of eight runtimes accept the core module. The per-module table above shows which optional module each remaining target cannot preserve: description in CrewAI and Agno, plugins in LangGraph and LlamaIndex, delegates in CrewAI, LlamaIndex, Agno, and Google ADK.
+The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework, each with skill durability and resource access unverified. Seven of eight runtimes accept the required core. The table above shows which optional field each remaining target cannot preserve: description in CrewAI and Agno, plugins in LangGraph and LlamaIndex, delegates in CrewAI, LlamaIndex, Agno, and Google ADK.
 
 ## Proposed profile changes
 
 1. Reduce the core to `name` as required metadata plus Markdown instructions.
-2. Make `description`, `model.requires`, `skills`, and `plugins` optional capability modules. A host declares which modules it implements and reports conformance per module.
-3. Keep `model.requires` in the document as a host-resolved declaration; move `model.prefers`, model selection, and attestation to external target bindings.
-4. Remove `delegates` from the profile because it is overloaded. Allow package inventory as a convention; leave typed relationships to a future module.
+2. Make `description`, `skills`, and `plugins` optional fields with one rule: if present, a strict host preserves their defined semantics or rejects the profile. Report conformance for the core and for each optional field.
+3. Carry `model.requires` as an incubating host-resolved declaration until a capability vocabulary is standardized; move `model.prefers`, model selection, and attestation to external target bindings.
+4. Remove `delegates` from the profile because it is overloaded. Add no agent inventory; leave packaging and orchestration to their own efforts.
 5. Extend the diagnostic vocabulary with `unverified` for properties that were not exercised. Keep `omitted-preference` for legacy reports only.
 6. Require adapters to distinguish construction, activation, and execution evidence.
 7. Continue to forbid in-document host extensions. Target bindings remain external.
@@ -225,5 +226,5 @@ The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, an
 - The fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable. MCP client construction was tested; a live cross-framework server handshake was not claimed.
 - The four earlier targets remain static-lowering evidence only.
 - No conclusion depends on generated answer quality. The experiment tests representation, authority, scope, and control flow.
-- Skill activation was judged against the Agent Skills integration guide, not measured. No test exercises context compaction, so durability of activated skill content is unverified in every runtime.
+- Skill activation was judged against the Agent Skills integration guide, not measured. No test exercises context compaction or bundled resources, so durability and resource access are unverified in every runtime.
 - Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint.

@@ -16,11 +16,11 @@ Eight adapters construct real framework objects and exercise native runtime path
 The original abstraction was too broad.
 
 - `name` as required metadata and persistent Markdown instructions form the portable core.
-- `description`, `model.requires`, Agent Skills, and Agent Plugins are optional capability modules; a host declares which it implements and conformance is reported per module.
-- Model requirements are declared by the agent author and resolved by the host. Model selection and preferences belong in host bindings.
+- `description`, Agent Skills, and Agent Plugins are optional fields. If present, a strict host preserves their defined semantics or rejects the profile. Conformance is reported for the core and for each optional field.
+- Model requirements are declared by the agent author and resolved by the host, but stay incubating until a capability vocabulary is standardized. Model selection and preferences belong in host bindings.
 - `delegates` overloads incompatible mechanisms and should leave the profile.
 
-Read the compatibility classifications as recorded reviewer judgments about each native mechanism, graded against the Agent Skills, Agent Plugins, and MCP contracts and backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. Properties that were not exercised, such as skill durability under context compaction, are reported as `unverified`. Three of eight runtimes accept the combined fixture; seven accept the core.
+Read the compatibility classifications as recorded reviewer judgments about each native mechanism, graded against the Agent Skills, Agent Plugins, and MCP contracts and backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. Properties that were not exercised, such as skill durability under context compaction and on-demand skill resources, are reported as `unverified`. Three of eight runtimes accept the combined fixture; seven accept the core.
 
 See [EVIDENCE.md](EVIDENCE.md) for the field-by-field findings and [the evidence revision](spec/agent-composition-profile-v0.2-discussion-draft.md) for the resulting draft. The concise [external proposal](EXTERNAL-PROPOSAL.md) frames the work as evidence for the existing Agent Plugins incubation effort.
 

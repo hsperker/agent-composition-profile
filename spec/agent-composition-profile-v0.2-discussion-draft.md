@@ -4,7 +4,7 @@
 
 **Status:** Experimental input to the Agent Plugins Agent Profile incubation discussion. Not an adopted standard and not proposed as a competing standards effort.
 
-> A Markdown document identifies an agent and supplies persistent instructions. Optional capability modules attach a discovery description, model requirements, Agent Skills, and Agent Plugins. The host selects models and owns orchestration.
+> A Markdown document identifies an agent and supplies persistent instructions. Optional fields attach a discovery description, Agent Skills, and Agent Plugins; model requirements are incubating. The host selects models and owns orchestration.
 
 ```markdown
 ---
@@ -26,7 +26,7 @@ Investigate before concluding.
 Cite the evidence behind the final answer.
 ```
 
-This revision follows the runtime evidence in `EVIDENCE.md`. It splits the document into a small core and optional capability modules, keeps model requirements as a host-resolved declaration, moves model selection and preferences to the host, and removes local delegation.
+This revision follows the runtime evidence in `EVIDENCE.md`. It reduces the required document to a name and instructions, keeps description, Agent Skills, and Agent Plugins as optional fields, marks host-resolved model requirements as incubating, moves model selection and preferences to the host, and removes local delegation.
 
 ## 1. Question and evidence
 
@@ -48,7 +48,7 @@ The observed semantic intersection is narrower than draft 0.1:
 A conforming loader or adapter:
 
 1. preserves the document's logical identity and persistent instruction authority;
-2. declares which optional capability modules it implements, and preserves every declared semantic of those modules or rejects strict execution;
+2. preserves the defined semantics of every optional field present or rejects strict execution;
 3. reports every source-to-target mapping explicitly;
 4. keeps concrete models, permissions, credentials, and orchestration outside the portable source;
 5. never claims conformance after silently dropping a declaration.
@@ -61,14 +61,15 @@ The profile defines:
 
 ```text
 agent document
-├── core
-│   ├── logical name (required metadata)
-│   └── persistent Markdown instructions (behavioral semantic)
-└── optional capability modules
-    ├── selection description
-    ├── model requirements
-    ├── Agent Skill references
-    └── Agent Plugin references
+├── required
+│   ├── logical name (metadata)
+│   └── persistent Markdown instructions (behavioral core)
+├── optional
+│   ├── selection description
+│   ├── Agent Skill references
+│   └── Agent Plugin references
+└── incubating
+    └── model requirements
 ```
 
 The host or deployment defines:
@@ -94,19 +95,19 @@ The frontmatter fields are:
 
 | Field | Required | Meaning |
 |---|---:|---|
-| `name` | Yes | Stable package-level logical identity. Core. |
-| `description` | No | Metadata used to understand, display, discover, or select the agent. Description module. |
-| `model` | No | `requires` only: model capabilities the agent needs, resolved by the host. Model module. |
-| `skills` | No | Agent Skills that must be available to this agent. Skills module. |
-| `plugins` | No | Agent Plugins required by this agent. Plugins module. |
+| `name` | Yes | Stable package-level logical identity. |
+| `description` | No | Metadata used to understand, display, discover, or select the agent. |
+| `model` | No, incubating | `requires` only: model capabilities the agent needs, resolved by the host. |
+| `skills` | No | Agent Skills that must be available to this agent. |
+| `plugins` | No | Agent Plugins required by this agent. |
 
 No other top-level field is defined in draft 0.2. Empty optional arrays, empty descriptions, and empty requirement maps are invalid.
 
-### 4.3 Conformance modules
+### 4.3 Required and optional fields
 
-The core is `name` plus the Markdown body. Every other field belongs to an optional capability module. A host declares which modules it implements. A document that uses a module's field requires that module; a host without it MUST reject the document clearly rather than ignore the field. This mirrors Agent Plugins, whose conformance section permits a client to support only some component types.
+`name` and the Markdown body are required. Every other field is optional, with one rule: if an optional field is present, a strict host MUST preserve its defined semantics or reject the profile. It MUST NOT ignore the field. A host that does not implement, say, Agent Plugins is still a conforming host for documents that do not use `plugins`.
 
-There is no negotiation protocol. Conformance is reported per module (section 12), so a host can be conformant for the core and the skills module while rejecting plugins.
+There is no negotiation protocol. Conformance is reported for the required core and for each optional field present (section 12).
 
 The companion JSON Schema validates the decoded frontmatter. This text additionally governs safe YAML parsing, Markdown, path containment, and referenced packages.
 
@@ -175,7 +176,7 @@ Preservation requires the activation semantics of the Agent Skills specification
 
 The delivery mechanism is secondary. The integration guide names file-read activation and dedicated-tool activation as conforming patterns, and in both the model receives the instructions as a tool result. A native implementation is `preserved`; an adapter that supplies the dedicated activation tool for a framework without a skills concept is `resolved`. Injecting full skill bodies eagerly, or truncating them, is `approximated`.
 
-Session durability is a separate property. The guide asks hosts to protect activated skill content from context compaction. A report that did not exercise compaction MUST record `skills.durability` as `unverified`, not as preserved and not as approximated.
+Session durability and resource access are separate properties. The guide asks hosts to protect activated skill content from context compaction and to make bundled references, scripts, and assets reachable on demand. A report that did not exercise compaction MUST record `skills.durability` as `unverified`; one whose fixture bundles no resources MUST record `skills.resources` as `unverified`. Neither is preserved and neither is approximated.
 
 The profile does not duplicate the Agent Skills file format.
 
@@ -194,6 +195,8 @@ Preservation requires:
 
 Agent Plugins and MCP retain ownership of their component formats and protocol semantics. This profile adds only the agent-to-plugin composition edge.
 
+This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance. Agent Plugins permits a client to support only some component types and to ignore the rest. When a profile author declares a plugin as part of this agent, a strict profile host must preserve every component that plugin instance requires or reject this profile; a client that ignores components remains a conforming Agent Plugins client, but not a strict host for this profile.
+
 ## 9. Paths and packages
 
 Skill and plugin paths resolve relative to the declaring document.
@@ -211,7 +214,9 @@ Effective skill names across direct skills and plugin-supplied skills MUST be un
 
 ## 10. Model requirements are declared here and resolved by the host
 
-`model.requires` is an optional module: a map of capability names to `true`, stating what the agent needs in order to work. The agent author knows this; the deployment knows which concrete model provides it.
+`model.requires` is an optional, incubating field: a map of capability names to `true`, stating what the agent needs in order to work. The agent author knows this; the deployment knows which concrete model provides it.
+
+The evidence supports portable model requirements as a concept. It does not yet provide a portable capability vocabulary, and a requirement is only interoperable when its name has a standardized meaning. The field therefore stays out of the first normative proposal and is carried here as incubating.
 
 | Concern | Owner |
 |---|---|
@@ -244,9 +249,9 @@ The tested mechanisms did not converge:
 
 These mechanisms differ in control ownership, state sharing, task schemas, result handling, and conversation continuity. A single generic `delegates` field wrongly suggests they share one semantic; that overload is the reason for removal. An adapter MUST NOT lower one mechanism into another while claiming semantic preservation.
 
-Adapter-authored implementations are not illegitimate in themselves. Where a source contract is explicit, for example a fresh child run with task in, text out, and control returning to the parent, an adapter tool that implements it is `resolved`. A future optional module may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not attempt to cover multi-agent orchestration.
+Adapter-authored implementations are not illegitimate in themselves. Where a source contract is explicit, for example a fresh child run with task in, text out, and control returning to the parent, an adapter tool that implements it is `resolved`. A future optional field may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not attempt to cover multi-agent orchestration.
 
-A package or installer MAY maintain a non-behavioral inventory of agent documents. Such an `agents:` manifest is a composition convention, not a promise that any agent can invoke another. Typed relationship mechanisms may be proposed separately when their semantics and evidence are explicit.
+Draft 0.2 defines no agent inventory either. An Agent Profile describes one agent; a package may contain several agents; orchestration defines relationships among them. The latter two are left to packaging and orchestration when a use case emerges.
 
 Remote agents remain the domain of protocols such as A2A.
 
@@ -265,7 +270,7 @@ For every declared source semantic and every agent, an adapter emits exactly one
 
 Strict mode MUST reject any required source semantic classified `approximated` or `unsupported`. `unverified` findings do not block strict mode but MUST be listed in the report. Diagnostic mode MAY construct the representable subset only when the report marks every loss. No mode may silently discard source semantics.
 
-Reports MUST also state an outcome per conformance module: core, description, model, skills, plugins, and, for draft 0.1 documents, delegates. A combined fixture that is rejected does not show that the core is non-portable; it shows which module the target cannot preserve.
+Reports MUST also state an outcome for the required core and for each optional field present: description, model, skills, plugins, and, for draft 0.1 documents, delegates. The reference reports carry these under a `modules` key. A combined fixture that is rejected does not show that the core is non-portable; it shows which optional field the target cannot preserve.
 
 Reports SHOULD distinguish:
 
@@ -285,7 +290,7 @@ Target-specific settings remain in external bindings. Draft 0.2 defines no `x-<h
 
 ## 14. Evidence status
 
-The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Seven of eight runtime targets accepted the core module; CrewAI's role, goal, and backstory prompt template approximates both name and instructions. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability unverified; the other four each failed one or two optional modules, most often description or delegates.
+The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Seven of eight runtime targets accepted the required core; CrewAI's role, goal, and backstory prompt template approximates both name and instructions. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability and resource access unverified; the other four each failed one or two optional fields, most often description or delegates.
 
 The decisive findings were:
 
