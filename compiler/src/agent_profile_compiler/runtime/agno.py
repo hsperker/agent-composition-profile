@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -14,6 +16,7 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 
 
 TARGET = "agno"
@@ -27,14 +30,14 @@ def _skills(agent):
     return Skills(loaders=[LocalSkills(str(skill.root)) for skill in agent.all_skills])
 
 
-def _mcp_tools(agent):
+def _mcp_tools(agent, data_root: Path):
     from agno.tools.mcp import MCPTools
     from mcp import StdioServerParameters
 
     tools = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport in {"streamable-http", "sse"}:
             tools.append(
@@ -81,13 +84,14 @@ def build(
     native_skills: dict[str, Any] = {}
     native_tools: dict[str, list[Any]] = {}
     losses: dict[str, list[str]] = {}
+    data_root = plugin_data_root(binding)
 
     for agent in package.agents.values():
         model = models.get(agent.name, binding.get("model"))
         if model is None:
             raise ValueError(f"Agno binding has no model for agent {agent.name!r}")
         skills = _skills(agent)
-        mcp_tools, mcp_losses = _mcp_tools(agent)
+        mcp_tools, mcp_losses = _mcp_tools(agent, data_root)
         native_skills[agent.name] = skills
         native_tools[agent.name] = mcp_tools
         losses[agent.name] = mcp_losses
@@ -201,10 +205,64 @@ def build(
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
+    from agno.tools.mcp import MCPTools
+
     entry_name = str(artifact.metadata["entry_name"])
-    response = artifact.native_agents[entry_name].run(task, stream=False)
+    agent = artifact.native_agents[entry_name]
+    observations: list[RuntimeObservation] = []
+    tool_servers: dict[str, str] = {}
+
+    async def execute():
+        # Agent.arun connects MCPTools toolkits itself (agno.agent._init.connect_mcp_tools)
+        # and disconnects them afterwards; the discovered functions are read before release.
+        response = await agent.arun(task, stream=False)
+        return response
+
+    if not activate_plugins:
+        response = agent.run(task, stream=False)
+    else:
+        async def execute_with_discovery():
+            toolkits = [tool for tool in (agent.tools or []) if isinstance(tool, MCPTools)]
+            for toolkit in toolkits:
+                try:
+                    await toolkit.connect()
+                except Exception as exc:  # Agent Plugins §7.2.2: report and continue
+                    observations.append(
+                        RuntimeObservation(
+                            "mcp-activation-failed",
+                            entry_name,
+                            {"server": toolkit.name, "error": f"{type(exc).__name__}: {exc}"},
+                        )
+                    )
+                    agent.tools.remove(toolkit)
+                    continue
+                names = sorted(toolkit.functions)
+                tool_servers.update({name: toolkit.name for name in names})
+                observations.append(
+                    RuntimeObservation("mcp-tools-discovered", entry_name, {"server": toolkit.name, "tools": names})
+                )
+            return await execute()
+
+        response = asyncio.run(execute_with_discovery())
+        for execution in response.tools or []:
+            if execution.tool_name in tool_servers:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked",
+                        entry_name,
+                        {"server": tool_servers[execution.tool_name], "tool": execution.tool_name, "arguments": dict(execution.tool_args or {})},
+                    )
+                )
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": tool_servers[execution.tool_name], "tool": execution.tool_name, "result": str(execution.result)},
+                    )
+                )
     output = str(response.content)
     observation = RuntimeObservation("runtime-output", entry_name, {"result": output})
-    artifact.observations.append(observation)
-    return RuntimeRun(output, (observation,))
+    observations.append(observation)
+    artifact.observations.extend(observations)
+    return RuntimeRun(output, tuple(observations))
