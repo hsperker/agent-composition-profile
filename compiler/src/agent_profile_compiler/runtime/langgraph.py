@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Mapping
 from typing import Any
 
 from ..model import CompatibilityReport, Package
 from .common import assess_agent_semantics, enforce_strict_runtime, plugin_activation_assessment, skill_durability_assessment
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 from .skills import SkillCatalog
 
 
@@ -44,6 +46,56 @@ def _capability_assessments(agent, binding: Mapping[str, Any]) -> dict[str, tupl
     return assessments
 
 
+def _connection(config: dict[str, Any]) -> dict[str, Any]:
+    """Map one Agent Plugins MCP entry to a langchain-mcp-adapters connection."""
+
+    transport = config["type"]
+    if transport == "stdio":
+        connection: dict[str, Any] = {"transport": "stdio", "command": config["command"], "args": list(config.get("args", []))}
+        if config.get("env"):
+            connection["env"] = dict(config["env"])
+        if config.get("cwd"):
+            connection["cwd"] = config["cwd"]
+        return connection
+    if transport in {"streamable-http", "sse"}:
+        connection = {"transport": "streamable_http" if transport == "streamable-http" else "sse", "url": config["url"]}
+        if config.get("headers"):
+            connection["headers"] = dict(config["headers"])
+        return connection
+    raise ValueError(f"unsupported transport {transport!r}")
+
+
+def _activate_plugins(source, data_root, observations, tool_servers) -> tuple[list[Any], list[str]]:
+    """Connect each plugin MCP server through langchain-mcp-adapters and load its tools."""
+
+    from langchain_mcp_adapters.client import MultiServerMCPClient
+
+    tools: list[Any] = []
+    failures: list[str] = []
+    for server in source.mcp_servers:
+        config = effective_server_config(server, data_root=data_root)
+        client = MultiServerMCPClient({server.name: _connection(config)})
+        try:
+            loaded = asyncio.run(client.get_tools(server_name=server.name))
+        except Exception as exc:  # Agent Plugins §7.2.2: report and continue
+            failures.append(f"{server.name}: {type(exc).__name__}: {exc}")
+            observations.append(
+                RuntimeObservation(
+                    "mcp-activation-failed",
+                    source.name,
+                    {"server": server.name, "error": f"{type(exc).__name__}: {exc}"},
+                )
+            )
+            continue
+        names = [tool.name for tool in loaded]
+        tool_servers.update({name: server.name for name in names})
+        tools.extend(loaded)
+        observations.append(
+            RuntimeObservation("mcp-tools-discovered", source.name, {"server": server.name, "tools": names})
+        )
+    return tools, failures
+
+
 def build(
     package: Package,
     binding: Mapping[str, Any],
@@ -56,6 +108,10 @@ def build(
     models = binding.get("models", {})
     if not isinstance(models, Mapping):
         models = {}
+    activate = bool(binding.get("activate_plugins"))
+    data_root = plugin_data_root(binding)
+    tool_servers: dict[str, str] = {}
+    activation_failures: dict[str, list[str]] = {}
 
     report = CompatibilityReport(target=TARGET, source_entry=package.entry_name)
     observations: list[RuntimeObservation] = []
@@ -135,6 +191,11 @@ def build(
                 )
             )
 
+        if activate and source.mcp_servers:
+            mcp_tools, failures = _activate_plugins(source, data_root, observations, tool_servers)
+            activation_failures[name] = failures
+            tools.extend(mcp_tools)
+
         model = models.get(name)
         if model is None:
             # A concrete model belongs to the target binding, never the profile.
@@ -192,8 +253,20 @@ def build(
             ),
             "plugins": (
                 (
-                    "unsupported",
-                    "The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted.",
+                    (
+                        "unsupported",
+                        "Plugin MCP activation failed: " + "; ".join(activation_failures[agent.name]),
+                    )
+                    if activation_failures.get(agent.name)
+                    else (
+                        "resolved",
+                        "Each plugin MCP server was connected through langchain-mcp-adapters and its tools attached to this agent's graph; the plugin wrapper is not retained.",
+                    )
+                    if activate
+                    else (
+                        "unsupported",
+                        "The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted.",
+                    )
                 )
                 if agent.plugins
                 else ("preserved", "The source agent declares no plugins.")
@@ -226,6 +299,7 @@ def build(
                 agent.name: {"name": agent.name, "description": agent.description}
                 for agent in package.agents.values()
             },
+            "mcp_tool_servers": tool_servers,
         },
     )
 
@@ -242,14 +316,44 @@ def _message_text(message: Any) -> str:
     return str(content)
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
+    from langchain_core.messages import AIMessage, ToolMessage
+
     entry_name = str(artifact.metadata["entry_name"])
+    graph = artifact.native_agents[entry_name]
+    tool_servers: dict[str, str] = dict(artifact.metadata.get("mcp_tool_servers", {}))
     start = len(artifact.observations)
-    result = artifact.native_agents[entry_name].invoke(
-        {"messages": [{"role": "user", "content": task}]}
-    )
+    payload = {"messages": [{"role": "user", "content": task}]}
+    if activate_plugins:
+        # MCP tools from langchain-mcp-adapters are coroutine-only; use the async graph path.
+        result = asyncio.run(graph.ainvoke(payload))
+    else:
+        result = graph.invoke(payload)
+    observations: list[RuntimeObservation] = [
+        item for item in artifact.observations[:start] if item.kind == "mcp-tools-discovered"
+    ] if activate_plugins else []
+    calls: dict[str, str] = {}
+    for message in result["messages"]:
+        if isinstance(message, AIMessage):
+            for call in message.tool_calls:
+                if call["name"] in tool_servers:
+                    calls[call["id"]] = call["name"]
+                    observations.append(
+                        RuntimeObservation(
+                            "mcp-tool-invoked",
+                            entry_name,
+                            {"server": tool_servers[call["name"]], "tool": call["name"], "arguments": dict(call["args"])},
+                        )
+                    )
+        if isinstance(message, ToolMessage) and message.tool_call_id in calls:
+            name = calls[message.tool_call_id]
+            observations.append(
+                RuntimeObservation(
+                    "mcp-tool-result",
+                    entry_name,
+                    {"server": tool_servers[name], "tool": name, "result": _message_text(message)},
+                )
+            )
     output = _message_text(result["messages"][-1])
-    artifact.observations.append(
-        RuntimeObservation("runtime-output", entry_name, {"result": output})
-    )
-    return RuntimeRun(output=output, observations=tuple(artifact.observations[start:]))
+    artifact.observations.append(RuntimeObservation("runtime-output", entry_name, {"result": output}))
+    return RuntimeRun(output=output, observations=tuple(observations) + tuple(artifact.observations[start:]))

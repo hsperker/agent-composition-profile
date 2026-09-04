@@ -9,9 +9,14 @@ from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import langgraph as adapter
 from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
 
+from langchain_core.language_models import BaseChatModel
+from langchain_core.outputs import ChatGeneration, ChatResult
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
 
 ROOT = Path(__file__).parents[3]
 EXAMPLE = ROOT / "examples" / "research-team"
+PROBE = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+PLUGIN_ROOT = (PROBE / "plugins" / "local-echo").resolve()
 
 
 class RecordingToolModel(FakeMessagesListChatModel):
@@ -131,3 +136,52 @@ def test_strict_langgraph_rejects_only_the_unactivated_plugin() -> None:
 
     with pytest.raises(RuntimeCompatibilityError, match="plugins"):
         adapter.build(package, bindings(), strict=True)
+
+
+class EchoCallingModel(BaseChatModel):
+    """Calls every bound echo tool once, one per turn, then finishes."""
+
+    bound: list = []
+    called: list = []
+
+    def bind_tools(self, tools, *, tool_choice=None, **kwargs):
+        self.bound = [tool.name for tool in tools]
+        return self
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        remaining = sorted(name for name in self.bound if "echo" in name and name not in self.called)
+        if remaining:
+            self.called.append(remaining[0])
+            message = AIMessage(
+                content="",
+                tool_calls=[{"name": remaining[0], "args": {"text": ECHO_TASK}, "id": f"call-{len(self.called)}", "type": "tool_call"}],
+            )
+        else:
+            message = AIMessage(content="echo done")
+        return ChatResult(generations=[ChatGeneration(message=message)])
+
+    @property
+    def _llm_type(self) -> str:
+        return "echo-calling"
+
+def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> None:
+    package = load_package(PROBE / "agent.agent.md", PROBE)
+    binding = {"capabilities": {}, "models": {"plugin-user": EchoCallingModel()}, "activate_plugins": True}
+
+    with echo_http_server(PLUGIN_ROOT):
+        artifact = adapter.build(package, binding, strict=True)
+        assert status(artifact, "plugin-user", "plugins") == "resolved"
+        result = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+
+    assert result.output == "echo done"
+    # BasicMCPClient-style cwd loss does not apply here: langchain-mcp-adapters passes cwd through.
+    assert parse_echo_result(next(o.data["result"] for o in result.observations if o.kind == "mcp-tool-result" and o.data["server"] == "echostdio"))["cwd"] == str(PLUGIN_ROOT)
+    discovered = {o.data["server"]: o.data["tools"] for o in result.observations if o.kind == "mcp-tools-discovered"}
+    assert set(discovered) == {"echostdio", "echohttp"}, result.observations
+    assert all(any("echo" in name for name in names) for names in discovered.values())
+    results = {o.data["server"]: parse_echo_result(o.data["result"]) for o in result.observations if o.kind == "mcp-tool-result"}
+    assert set(results) == {"echostdio", "echohttp"}, result.observations
+    stdio, http = results["echostdio"], results["echohttp"]
+    assert stdio["label"] == "stdio" and stdio["plugin_root_env"] is True and stdio["plugin_data_env"] is True
+    assert http["label"] == "http" and http["plugin_root_env"] is False
+    assert [o.kind for o in result.observations if o.kind == "mcp-activation-failed"] == []
