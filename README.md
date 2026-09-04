@@ -20,6 +20,8 @@ The original abstraction was too broad.
 - Model requirements and preferences belong in host/deployment bindings.
 - `delegates` conflates incompatible mechanisms and should leave the portable core.
 
+Read the compatibility classifications as recorded reviewer judgments about each native mechanism, backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces, and no framework accepted the full fixture in strict mode.
+
 See [EVIDENCE.md](EVIDENCE.md) for the field-by-field findings and [the evidence revision](spec/agent-composition-profile-v0.2-discussion-draft.md) for the resulting draft. The concise [external proposal](EXTERNAL-PROPOSAL.md) frames the work as evidence for the existing Agent Plugins incubation effort.
 
 ## Reproduce

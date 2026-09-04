@@ -1,6 +1,6 @@
 # Runtime evidence for the Agent Plugins Agent Profile incubation
 
-We tested the current Agent Composition Profile hypothesis against eight stable Python SDKs: LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework. The experiment instantiated native agents, exercised framework runners with deterministic models, and classified every declared semantic without silently discarding failures. Earlier static-lowering evidence for Amplifier, Claude Code, Codex, and AFM remains labeled separately.
+We tested the current Agent Composition Profile hypothesis against eight stable Python SDKs: LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework. The experiment instantiated native agents, exercised framework runners with scripted deterministic models, and classified every declared semantic without silently discarding failures. The classifications are recorded reviewer judgments about each native mechanism, backed by construction tests and runtime smoke tests, not measurements derived from traces. No framework accepted the full fixture in strict mode; every one activated Agent Skills through a tool whose output lacks instruction authority. Earlier static-lowering evidence for Amplifier, Claude Code, Codex, and AFM remains labeled separately.
 
 The result argues for a smaller Agent Profile inside the existing Agent Plugins incubation effort, not a competing standard.
 

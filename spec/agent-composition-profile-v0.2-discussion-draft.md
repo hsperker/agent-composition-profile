@@ -156,7 +156,7 @@ The effective skill catalog is agent-private. Preservation requires the semantic
 
 Reading full skill text into process memory is not itself a disclosure failure. The relevant boundary is what enters model context.
 
-A function tool that merely returns `SKILL.md` as ordinary tool output is `approximated`, because tool output does not have persistent instruction authority. Strict execution MUST reject that mapping.
+A function tool that merely returns `SKILL.md` as ordinary tool output is `approximated`, because tool output does not have persistent instruction authority. Strict execution MUST reject that mapping. Every tested runtime, including the three with native Agent Skills implementations, activated skills through such a tool, so no runtime target preserved this semantic in the experiment.
 
 The profile does not duplicate the Agent Skills file format.
 
@@ -251,17 +251,17 @@ Target-specific settings remain in external bindings. Draft 0.2 defines no `x-<h
 
 ## 14. Evidence status
 
-The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. Only Microsoft Agent Framework accepted every draft 0.1 field under strict runtime classification. That does not validate draft 0.1 as portable; the cross-framework failures caused this revision.
+The shared research fixture produced machine-readable reports for twelve targets. Eight targets used real SDK objects and native runners; four retained static-lowering evidence. No runtime target accepted every draft 0.1 field under strict classification. Microsoft Agent Framework came closest and failed only on skill activation authority. The cross-framework failures caused this revision.
 
 The decisive findings were:
 
 - native-looking fields can have different authority (`description`, CrewAI `goal`, and `backstory`);
-- progressive skill disclosure is not preserved by returning instructions as ordinary tool output;
+- progressive skill disclosure is not preserved by returning instructions as ordinary tool output, and the native Agent Skills implementations in CrewAI, Agno, and Microsoft Agent Framework do exactly that;
 - MCP object construction does not prove endpoint activation;
 - a runnable delegation adapter may still invent control-flow semantics;
 - dependency isolation is part of a reproducible multi-framework experiment.
 
-See `EVIDENCE.md`, individual reports under `generated/runtime/`, and the generated `generated/runtime/matrix.json`.
+The classifications are recorded reviewer judgments about each native mechanism, backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. See `EVIDENCE.md`, individual reports under `generated/runtime/`, and the generated `generated/runtime/matrix.json`.
 
 ## 15. Adoption path
 

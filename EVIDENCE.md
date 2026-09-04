@@ -14,6 +14,8 @@ Two semantics survived as a convincing core: a logical agent identity and persis
 
 This is not a majority vote. The recommendations below use the semantic intersection actually observed. A framework accepting similarly named constructor arguments does not count as preservation.
 
+The classifications are recorded reviewer judgments about each native mechanism. Each adapter states its grade and rationale explicitly, the tests assert those grades, and the construction and runtime observations back them. The grades are not derived from the traces by measurement. The runtime runs use scripted deterministic models, so they prove that instructions, tool calls, and returns travel through the real framework code paths, not that any model behaves differently as a result. Read the matrix as a structured, reproducible assessment, not as an instrument reading.
+
 | Source semantic | Recommendation | Narrow semantic that survived |
 |---|---|---|
 | `name` | **CORE** | Stable logical identity, with an explicit reversible native-name resolver where necessary. |
@@ -38,7 +40,7 @@ Each environment is independently locked because a single environment is impossi
 | OpenAI Agents SDK | 0.22.0 | `Agent`, MCP servers, agent tools | Parent → child `Agent.as_tool` → parent | Rejected |
 | Google ADK | 2.8.0 | `LlmAgent`, `AgentTool`, `McpToolset` | Parent → nested AgentTool → parent | Rejected |
 | PydanticAI | 2.38.0 | `Agent`, `Tool`, `MCPToolset` | Parent → async adapter tool → child → parent | Rejected |
-| Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | Parent → child `Agent.as_tool` → parent | Accepted |
+| Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | Parent → child `Agent.as_tool` → parent | Rejected |
 
 The runtime traces are under `generated/runtime/<target>/runtime.json`; each directory also contains `test-output.txt`. Individual compatibility reports are under `generated/runtime/<target>/compatibility.json`. `generated/runtime/matrix.json` and `matrix.md` are generated from those eight reports plus the still-valid static-lowering reports for Amplifier, Claude Code, Codex, and AFM. The matrix labels evidence kind; static lowering is not presented as runtime certification. It also records hashes for every unchanged research-fixture file.
 
@@ -50,14 +52,14 @@ This table summarizes the entry agent. Machine-readable agent-by-agent details a
 
 | Target | name | description | instructions | requires | prefers | skills | plugins | delegates |
 |---|---|---|---|---|---|---|---|---|
-| LangGraph | preserved | unsupported | preserved | resolved | omitted | approximated | unsupported | preserved |
-| CrewAI | approximated | approximated | approximated | resolved | omitted | preserved | resolved | approximated |
+| LangGraph | preserved | unsupported | preserved | resolved | omitted | approximated | unsupported | approximated |
+| CrewAI | approximated | approximated | approximated | resolved | omitted | approximated | resolved | approximated |
 | LlamaIndex | preserved | preserved | preserved | resolved | omitted | approximated | unsupported | approximated |
-| Agno | preserved | approximated | preserved | resolved | omitted | preserved | resolved | approximated |
+| Agno | preserved | approximated | preserved | resolved | omitted | approximated | resolved | approximated |
 | OpenAI Agents | preserved | preserved | preserved | resolved | omitted | approximated | resolved | preserved |
 | Google ADK | resolved | preserved | preserved | resolved | omitted | approximated | resolved | approximated |
-| PydanticAI | preserved | preserved | preserved | resolved | omitted | approximated | resolved | resolved |
-| Microsoft Agent Framework | preserved | preserved | preserved | resolved | omitted | preserved | resolved | preserved |
+| PydanticAI | preserved | preserved | preserved | resolved | omitted | approximated | resolved | approximated |
+| Microsoft Agent Framework | preserved | preserved | preserved | resolved | omitted | approximated | resolved | preserved |
 | Amplifier (static) | preserved | preserved | preserved | resolved | resolved | unsupported | unsupported | preserved |
 | Claude Code (static) | preserved | preserved | preserved | resolved | resolved | resolved | resolved | preserved |
 | Codex (static) | preserved | preserved | preserved | resolved | resolved | resolved | resolved | resolved |
@@ -140,16 +142,17 @@ Recommendation: remove `model.prefers` from the portable agent document. Put mod
 
 Observed mechanisms:
 
-- CrewAI, Agno, and Microsoft have native Agent Skills implementations. Tests proved metadata-only discovery and then invoked the native loader to reveal full instructions.
+- CrewAI, Agno, and Microsoft have native Agent Skills implementations. Tests proved metadata-only discovery and then invoked the native loader. In all three the loader is a framework-provided tool (CrewAI `LoadSkillTool`, Agno `get_skill_instructions`, Microsoft `SkillsProvider` `load_skill`) and the activated body returns as tool output. Microsoft additionally gates `load_skill` behind approval by default; the adapter disables that gate and reports it.
 - Claude Code, Codex, and AFM have still-valid static Agent Skills mappings, with scope differences documented in their reports.
-- LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI can expose an activation tool, but its result is ordinary tool output. That does not give the loaded body persistent instruction authority.
+- LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no native Agent Skills support; the adapter exposes an activation tool with the same tool-output result.
+- Whether the framework or the adapter authored the tool does not change what enters model context. All eight runtime targets are therefore `approximated`. The native implementations add resource access, script execution, events, and approvals, which is real value, but not instruction authority.
 - Amplifier's direct static mapping remains unsupported without a runtime module.
 
 Intersection: an agent-private catalog identified by name and description, with full instructions disclosed only when activated.
 
 Important differences: catalog scope, activation persistence, instruction authority, approval, resource access, and script execution. Loading a file into process memory is not the relevant disclosure boundary; putting its body into model context is.
 
-Recommendation: retain Agent Skill references as an optional composed capability. Preservation requires Agent Skills semantics, including metadata-first disclosure and instruction-authority activation. A tool that merely returns `SKILL.md` text is an approximation and blocks strict execution.
+Recommendation: retain Agent Skill references as an optional composed capability. Preservation requires Agent Skills semantics, including metadata-first disclosure and instruction-authority activation. A tool that merely returns `SKILL.md` text is an approximation and blocks strict execution. No tested runtime met that bar; only the static Claude Code, Codex, and AFM mappings did, and those are unexecuted.
 
 ### `plugins` — OPTIONAL
 
@@ -169,9 +172,9 @@ Recommendation: retain plugin references as optional composition. Strict mode mu
 
 Observed mechanisms:
 
-- LangGraph: adapter-authored `StructuredTool` starts a fresh child graph and returns text.
+- LangGraph: no agent relationship primitive; an adapter-authored `StructuredTool` starts a fresh child graph and returns text. Graded `approximated`, because the adapter, not the framework, chose that policy.
 - OpenAI Agents and Microsoft: native agent-as-tool; Microsoft explicitly defaults to an independent child session.
-- PydanticAI: no agent relationship primitive; an async adapter `Tool` can reproduce bounded text-in/text-out behavior. A first synchronous implementation failed at runtime because nested `run_sync()` is forbidden.
+- PydanticAI: no agent relationship primitive; an async adapter `Tool` can reproduce bounded text-in/text-out behavior, graded `approximated` for the same reason as LangGraph. A first synchronous implementation failed at runtime because nested `run_sync()` is forbidden.
 - Google ADK: `AgentTool` creates a child session but copies parent state and propagates child state deltas back.
 - LlamaIndex: `AgentWorkflow.can_handoff_to` transfers active control through shared workflow state.
 - Agno: `Team` expresses team/member collaboration.
@@ -188,7 +191,7 @@ Recommendation: remove `delegates` and its fresh text-in/text-out contract from 
 
 Strict construction rejects any required semantic classified `approximated` or `unsupported`; it never discards one. `omitted-preference` is non-blocking. Every report contains exactly one finding for every semantic declared by every source agent.
 
-Only Microsoft Agent Framework accepted the full research fixture under the tested classifications. That is not a portability win by itself. The other failures reveal where the proposed declaration demands semantics their targets do not share.
+No runtime target accepted the full research fixture. Microsoft Agent Framework came closest and was rejected only because skill activation returns tool output. The failures reveal where the proposed declaration demands semantics their targets do not share.
 
 ## Proposed profile changes
 
@@ -206,3 +209,5 @@ Only Microsoft Agent Framework accepted the full research fixture under the test
 - The fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable. MCP client construction was tested; a live cross-framework server handshake was not claimed.
 - The four earlier targets remain static-lowering evidence only.
 - No conclusion depends on generated answer quality. The experiment tests representation, authority, scope, and control flow.
+- Instruction authority was judged from each framework's mechanism, not measured. No test observes whether activated skill text changes model behavior differently from a system prompt.
+- Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint.
