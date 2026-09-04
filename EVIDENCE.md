@@ -18,13 +18,13 @@ The classifications are recorded reviewer judgments about each native mechanism,
 
 | Source semantic | Recommendation | Narrow semantic that survived |
 |---|---|---|
-| `name` | **REQUIRED METADATA** | Stable logical identity for discovery, diagnostics, and packaging, with an explicit reversible native-name resolver where necessary. Not itself a runtime behavior. |
-| Markdown instructions | **CORE** | Persistent authoritative behavioral context on every invocation. |
+| `name` | **REQUIRED METADATA** | Stable logical identity for discovery, diagnostics, and packaging. A host may translate it to a target-specific identifier only if it retains a collision-free mapping back to the logical name. Not itself a runtime behavior. |
+| Markdown instructions | **CORE** | Persistent agent-level behavioral instructions applied on every invocation and kept distinct from ordinary task input. |
 | `description` | **OPTIONAL** | Metadata to understand, display, discover, or select the agent; it must not be merged into behavioral instructions. A catalog profile may require it. |
 | `model.requires` | **INCUBATING** | Declared by the agent author, attested by the host binding. Sound as a concept, but `tool-use` and `reasoning` have no standardized meaning yet. |
 | `model.prefers` | **REMOVE** | Non-binding deployment selection policy; belongs in the host binding. |
-| `skills` | **OPTIONAL** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. Session durability and resource access are unverified everywhere. |
-| `plugins` | **OPTIONAL** | Every supported component of the plugin is made available to the declaring agent. Composition is guaranteed; a stable model-visible tool identifier is not. |
+| `skills` | **OPTIONAL** | Additive Agent Skills declaration with metadata-first, on-demand activation per the Agent Skills integration guide. The experiment verified catalog disclosure and activation; it did not verify behavior under context compaction or access to bundled resources. |
+| `plugins` | **OPTIONAL** | A referenced Agent Plugin contributes all standard components it contains; a strict host makes them available to the declaring agent or rejects the profile. Composition is guaranteed; a stable model-visible tool identifier is not. |
 | `delegates` | **REMOVE** | One field overloads agent-as-tool, handoff, graph transition, shared-state run, and team collaboration. No agent inventory replaces it; packaging and orchestration are separate concerns. |
 
 ## What ran
@@ -97,7 +97,7 @@ Intersection: a stable logical identity is necessary for references, diagnostics
 
 Important difference: a runtime identifier may have a stricter grammar or may double as prompt content.
 
-Recommendation: keep `name` as required metadata, define it as the package-level logical identity, and permit only deterministic, collision-checked, reversible native-name resolution. Do not claim byte-for-byte native preservation when a resolver is used. With `delegates` removed there are no intra-document references, so the name defines discovery and diagnostics, not runtime behavior.
+Recommendation: keep `name` as required metadata and define it as the package-level logical identity. A host may translate it to a target-specific identifier only if it retains a collision-free mapping back to the logical name. Do not claim byte-for-byte native preservation when a translation is used. With `delegates` removed there are no intra-document references, so the name defines discovery and diagnostics, not runtime behavior.
 
 ### `description` — OPTIONAL
 
@@ -121,13 +121,13 @@ Observed mechanisms:
 - LangGraph, LlamaIndex, Agno, OpenAI Agents, Google ADK, PydanticAI, Microsoft, and the static targets provide persistent instruction/system-prompt paths.
 - Google ADK's string instructions perform `{state_key}` interpolation; the adapter uses a native instruction callback so arbitrary Markdown remains literal.
 - Microsoft passes instructions through chat options to the client rather than inserting a `system` message itself; the nested runtime recorded the child instructions in those options.
-- CrewAI embeds the body as `backstory` within a generated role/goal/backstory prompt template. The instructions run, but their boundary and authority are changed. With custom templates (`system_template="{backstory}"`, `prompt_template="{input}"`) role and goal disappear, but CrewAI's prompt builder returns a single prompt for any template override and the executor sends it as one user message fused with the task text. The test `test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn` records both message shapes. Neither path yields persistent context distinct from task input, so the `approximated` grade stands.
+- CrewAI embeds the body as `backstory` within a generated role/goal/backstory prompt template. The instructions run, but they are no longer separate from role and goal text. With custom templates (`system_template="{backstory}"`, `prompt_template="{input}"`) role and goal disappear, but CrewAI's prompt builder returns a single prompt for any template override and the executor sends it as one user message fused with the task text. The test `test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn` records both message shapes. Neither path yields persistent context distinct from task input, so the `approximated` grade stands.
 
 Intersection: persistent behavioral context applied on every invocation, distinct from ordinary task input and tool output.
 
-Important difference: exact provider message role is not portable. Instruction authority is.
+Important difference: exact provider message role is not portable. Persistence and separation from task input are.
 
-Recommendation: keep the Markdown body in the core. Define semantic preservation by persistence and authority, not by a required provider message role or byte-identical final prompt.
+Recommendation: keep the Markdown body in the core. Define semantic preservation by persistence and separation from ordinary task input, not by a required provider message role or byte-identical final prompt.
 
 ### `model.requires` — INCUBATING, HOST RESOLVED
 
@@ -210,7 +210,7 @@ Findings from the probe:
 - Two servers exposing the same tool name were not tested. Namespacing across servers is client defined and remains an open question.
 - Activation failure reporting per Agent Plugins §7.2.2 is implemented in the adapters but was not exercised, because no server failed.
 
-Recommendation: retain plugin references as optional composition meaning that the plugin's supported components are available to the declaring agent. Strict mode must preserve every valid standard component, including the §7.2.1 working directory default, or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle, tool naming, or scoping beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §7.2.1 and §9 themselves, and the profile must state that tool names seen by the model are not portable.
+Recommendation: retain plugin references as optional composition. A referenced Agent Plugin contributes all standard components it contains; a strict host must make those components available to the declaring agent, including the §7.2.1 working directory default, or reject the profile. This is an Agent Profile composition rule, not a change to Agent Plugins conformance, which permits clients with partial component-type support. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle, tool naming, or scoping beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §7.2.1 and §9 themselves, and the profile must state that tool names seen by the model are not portable.
 
 ### `delegates` — REMOVE
 
@@ -252,7 +252,7 @@ The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, an
 - Deterministic fake/model subclasses avoided paid network inference but used each framework's real agent, tool, workflow/team, and runner code paths.
 - The research fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable, so its `plugins.activation` finding stays unverified. Live activation was exercised only through the separate plugin-activation probe, against a local echo server rather than a shared reference server.
 - The four earlier targets remain static-lowering evidence only.
-- No conclusion depends on generated answer quality. The experiment tests representation, authority, scope, and control flow.
+- No conclusion depends on generated answer quality. The experiment tests representation, persistence, separation from task input, scope, and control flow.
 - Skill activation was judged against the Agent Skills integration guide, not measured. No test exercises context compaction or bundled resources, so durability and resource access are unverified in every runtime.
 - Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint; the activation probe used a two-server fixture with no skills or delegates.
 - The activation probe did not test SSE, OAuth, two servers with colliding tool names, or activation failure reporting.

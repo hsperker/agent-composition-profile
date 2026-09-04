@@ -6,8 +6,8 @@ The result argues for a smaller Agent Profile inside the existing Agent Plugins 
 
 The strongest common semantics were:
 
-- a stable logical agent name as required metadata, allowing explicit reversible native aliases;
-- persistent Markdown instructions with instruction authority;
+- a stable logical agent name as required metadata, translatable to a target-specific identifier only with a collision-free mapping back;
+- persistent agent-level Markdown instructions, applied on every invocation and kept distinct from task input;
 - optional selection metadata;
 - model requirements as a coherent concept, declared by the author and resolved by the host, though without a standardized capability vocabulary yet;
 - optional Agent Skills and Agent Plugins references, with strict preservation of their lower-layer semantics. Every runtime activated skills through the dedicated-tool pattern of the Agent Skills integration guide; none exercised session durability. A plugin with a local deterministic MCP server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP: handshake, tool discovery, invocation, and result. Two SDKs cannot honor `cwd`, including the plugin-root default Agent Plugins requires, so their native MCP support is not Agent Plugins support. Tool naming and server attribution are not portable, so a plugin reference guarantees capability composition but not a stable model-visible tool identifier. Agent Plugins §9 placeholder expansion had to be implemented by the host adapter because no SDK does it.

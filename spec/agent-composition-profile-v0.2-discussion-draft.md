@@ -37,7 +37,7 @@ The accompanying experiment constructed native agents in LangGraph, CrewAI, Llam
 The observed semantic intersection is narrower than draft 0.1:
 
 - stable logical identity converges;
-- persistent authoritative instructions converge;
+- persistent agent-level instructions, kept distinct from task input, converge;
 - selection descriptions are common but not universal and are sometimes promoted into behavioral prompt content;
 - Agent Skills and Agent Plugins are coherent optional dependencies; every runtime could activate skills through the published dedicated-tool pattern, but none exercised session durability;
 - model requirements can be declared portably but are only ever resolved by a host attestation; no SDK verified them natively;
@@ -47,7 +47,7 @@ The observed semantic intersection is narrower than draft 0.1:
 
 A conforming loader or adapter:
 
-1. preserves the document's logical identity and persistent instruction authority;
+1. preserves the document's logical identity and its persistent agent-level instructions;
 2. preserves the defined semantics of every optional field present or rejects strict execution;
 3. reports every source-to-target mapping explicitly;
 4. keeps concrete models, permissions, credentials, and orchestration outside the portable source;
@@ -127,7 +127,7 @@ Comments carry no semantics.
 
 The body after frontmatter is the agent's persistent instructions. It MUST contain non-whitespace text.
 
-Loaders MUST treat the body as literal Markdown. A target may translate it into a native instruction representation, but preservation requires that it remain authoritative behavioral context on every invocation. Ordinary task input, tool output, delegate output, and description text MUST NOT be silently promoted to equivalent instruction authority.
+Loaders MUST treat the body as literal Markdown. A target may translate it into a native instruction representation, but preservation requires that it remain persistent agent-level behavioral instructions applied on every invocation and kept distinct from ordinary task input. Ordinary task input, tool output, delegate output, and description text MUST NOT be silently merged into those instructions.
 
 The profile does not require a particular provider role such as `system` or `developer`.
 
@@ -141,14 +141,9 @@ The profile does not require a particular provider role such as `system` or `dev
 
 The value is the logical package identity. It is required metadata for discovery, diagnostics, and packaging; it does not by itself define runtime behavior. Draft 0.2 has no intra-document references, so no field depends on it.
 
-A target whose native grammar is narrower MAY use a deterministic native alias when it:
+A host MAY translate the name to a target-specific native identifier only if it retains a collision-free mapping back to the logical name and exposes the logical name in diagnostics. The profile does not define the translation.
 
-- records the source-to-native mapping;
-- detects collisions before execution;
-- resolves all internal references through the same mapping;
-- exposes the logical source name in diagnostics.
-
-Such a mapping is `resolved`, not byte-for-byte `preserved`. Google ADK, for example, requires Python identifiers and cannot accept a legal source name containing a hyphen.
+Such a translation is `resolved`, not byte-for-byte `preserved`. Google ADK, for example, requires Python identifiers and cannot accept a legal source name containing a hyphen.
 
 ## 6. `description`
 
@@ -184,7 +179,7 @@ The profile does not duplicate the Agent Skills file format.
 
 Each `plugins` entry is a relative path to an Agent Plugin package.
 
-A plugin reference means the plugin's supported components are made available to the declaring agent. It does not mean they are visible only to that agent; Agent Plugins leaves scoping to the host, and so does this profile. A runtime may expand the package into native Agent Skills and MCP clients; it need not retain a native plugin wrapper.
+A referenced Agent Plugin contributes all standard components it contains. A strict host MUST make those components available to the declaring agent or reject the profile. Availability does not mean visibility only to that agent; Agent Plugins leaves scoping to the host, and so does this profile. A runtime may expand the package into native Agent Skills and MCP clients; it need not retain a native plugin wrapper.
 
 Preservation requires:
 
@@ -195,7 +190,7 @@ Preservation requires:
 
 Agent Plugins and MCP retain ownership of their component formats and protocol semantics. This profile adds only the agent-to-plugin composition edge.
 
-This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance. Agent Plugins permits a client to support only some component types and to ignore the rest. When a profile author declares a plugin as part of this agent, a strict profile host must preserve every component that plugin instance requires or reject this profile; a client that ignores components remains a conforming Agent Plugins client, but not a strict host for this profile.
+This is an Agent Profile composition rule, not a change to Agent Plugins conformance, which permits clients with partial component-type support. A client that ignores component types remains a conforming Agent Plugins client, but not a strict host for a profile that references a plugin containing them.
 
 A host MUST apply Agent Plugins §7.2.1 and §9 itself: default an omitted stdio `cwd` to the plugin root, expand `${PLUGIN_ROOT}` and `${PLUGIN_DATA}` in `args`, `env`, and `cwd`, and provide both variables to stdio servers. None of the tested SDKs does this, and two cannot set a working directory at all.
 
@@ -266,7 +261,7 @@ For every declared source semantic and every agent, an adapter emits exactly one
 | Status | Meaning |
 |---|---|
 | `preserved` | The target has materially the same native semantic. |
-| `resolved` | An explicit mechanical binding or reversible mapping preserves meaning. |
+| `resolved` | An explicit mechanical binding or collision-free mapping preserves meaning. |
 | `approximated` | The target can run something similar, but observable meaning changes. |
 | `unsupported` | No working mapping was demonstrated. |
 | `unverified` | The mapping exists but a property was not exercised. It asserts no mismatch and never stands in for `approximated`. |
@@ -298,7 +293,7 @@ The shared research fixture produced machine-readable reports for twelve targets
 
 The decisive findings were:
 
-- native-looking fields can have different authority (`description`, CrewAI `goal`, and `backstory`);
+- native-looking fields can carry different roles (`description`, CrewAI `goal`, and `backstory`), so a same-named field is not preservation;
 - Agent Skills activation converged on the published dedicated-tool pattern in all eight runtimes, while session durability was exercised by none;
 - MCP object construction does not prove endpoint activation; a separate live probe activated one plugin over stdio and header-gated streamable HTTP in all eight runtimes, with two SDKs unable to honor `cwd` and non-portable tool naming;
 - one generic `delegates` field cannot name the mechanism a target actually uses;
@@ -314,7 +309,7 @@ Before adoption, the community should require:
 
 1. independent implementations of the narrowed document;
 2. live Agent Plugin/MCP activation against a shared reference server, extending the local echo probe to SSE, OAuth, and colliding tool names;
-3. conformance fixtures for instruction authority, skill disclosure, and skill durability under compaction;
+3. conformance fixtures for instruction persistence and separation from task input, skill disclosure, and skill behavior under compaction;
 4. negative tests for every required failure;
 5. a stable owner, versioning policy, and compatibility process.
 
