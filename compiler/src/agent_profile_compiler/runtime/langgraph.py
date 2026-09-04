@@ -203,8 +203,8 @@ def build(
             ),
             "delegates": (
                 (
-                    "preserved",
-                    "Each declared specialist is a native StructuredTool that starts a fresh child graph invocation and returns text to the parent.",
+                    "approximated",
+                    "LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic.",
                 )
                 if agent.delegate_names
                 else ("preserved", "The source agent declares no delegates.")

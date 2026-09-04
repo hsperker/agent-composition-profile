@@ -80,7 +80,7 @@ def test_builds_real_langgraph_agents_and_reports_semantics_independently() -> N
     assert status(artifact, "explorer", "description") == "resolved"
     assert status(artifact, "lead-researcher", "skills") == "approximated"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
-    assert status(artifact, "lead-researcher", "delegates") == "preserved"
+    assert status(artifact, "lead-researcher", "delegates") == "approximated"
     assert status(artifact, "lead-researcher", "model.prefers.vision-input") == "omitted-preference"
 
 
@@ -123,8 +123,8 @@ def test_native_langgraph_runtime_returns_control_after_specialist_tool_call() -
     )
 
 
-def test_strict_langgraph_rejects_required_description_skill_and_plugin_losses() -> None:
+def test_strict_langgraph_rejects_description_skill_plugin_and_delegate_losses() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
-    with pytest.raises(RuntimeCompatibilityError, match="description.*skills.*plugins"):
+    with pytest.raises(RuntimeCompatibilityError, match="description.*skills.*plugins.*delegates"):
         adapter.build(package, bindings(), strict=True)
