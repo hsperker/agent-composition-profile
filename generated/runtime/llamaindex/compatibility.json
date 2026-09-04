@@ -70,9 +70,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -112,9 +118,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -173,19 +185,61 @@
   ],
   "has_blocking_loss": true,
   "has_unsupported": true,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [
+        "lead-researcher:delegates"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [
+        "lead-researcher:plugins",
+        "explorer:plugins"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/llamaindex.lock",
   "requirements_sha256": "a3a3de17c3c20b7339b53b91fb868f42abebeae2958ff6e80210ec1c782a3a76",
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for llamaindex: approximated lead-researcher:skills: A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context. | unsupported lead-researcher:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable. | approximated lead-researcher:delegates: AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent. | approximated explorer:skills: A FunctionTool reveals skill text on demand, but returns it as tool output rather than adding instruction-authority context. | unsupported explorer:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable."
+    "reason": "strict runtime construction would lose required semantics for llamaindex: unsupported lead-researcher:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable. | approximated lead-researcher:delegates: AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent. | unsupported explorer:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable."
   },
   "summary": {
-    "approximated": 3,
+    "approximated": 1,
     "omitted-preference": 1,
     "preserved": 13,
-    "resolved": 4,
-    "unsupported": 2
+    "resolved": 6,
+    "unsupported": 2,
+    "unverified": 2
   },
   "target": "llamaindex",
   "tested_distribution": "llama-index-core",

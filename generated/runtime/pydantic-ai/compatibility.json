@@ -73,9 +73,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -85,9 +91,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "PydanticAI has no agent relationship primitive; the adapter authors Tool objects that run a child Agent and return text. That is an adapter-chosen orchestration policy, not a framework semantic.",
+      "detail": "PydanticAI has no agent relationship primitive. The adapter-authored Tool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
       "feature": "delegates",
-      "status": "approximated"
+      "status": "resolved"
     },
     {
       "agent": "explorer",
@@ -115,9 +121,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -174,20 +186,55 @@
       "status": "preserved"
     }
   ],
-  "has_blocking_loss": true,
+  "has_blocking_loss": false,
   "has_unsupported": false,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/pydantic-ai.lock",
   "requirements_sha256": "f4c8296ee6af3091d232e53118dd0cfe866b3f2df5a6b19624bc78aa0fc35652",
   "source_entry": "lead-researcher",
   "strict_mode": {
-    "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for pydantic-ai: approximated lead-researcher:skills: A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority. | approximated lead-researcher:delegates: PydanticAI has no agent relationship primitive; the adapter authors Tool objects that run a child Agent and return text. That is an adapter-chosen orchestration policy, not a framework semantic. | approximated explorer:skills: A function tool progressively reveals skill text, but the result has tool-output instead of instruction authority."
+    "outcome": "accepted"
   },
   "summary": {
-    "approximated": 3,
     "omitted-preference": 1,
     "preserved": 13,
-    "resolved": 6
+    "resolved": 9,
+    "unverified": 2
   },
   "target": "pydantic-ai",
   "tested_distribution": "pydantic-ai",

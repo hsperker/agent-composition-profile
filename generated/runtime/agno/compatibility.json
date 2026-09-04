@@ -84,9 +84,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
+      "detail": "Agno's native Agent Skills implementation: catalog metadata in the system prompt, then get_skill_instructions delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -126,9 +132,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
+      "detail": "Agno's native Agent Skills implementation: catalog metadata in the system prompt, then get_skill_instructions delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -187,18 +199,61 @@
   ],
   "has_blocking_loss": true,
   "has_unsupported": false,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [
+        "lead-researcher:delegates"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [
+        "lead-researcher:description",
+        "explorer:description",
+        "critic:description"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/agno.lock",
   "requirements_sha256": "859780b1fd766a23943facea15f64737504bae864c9bad9ae32619904a7cf7b0",
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:skills: Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated explorer:skills: Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
+    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
   },
   "summary": {
-    "approximated": 6,
+    "approximated": 4,
     "omitted-preference": 1,
-    "preserved": 10,
-    "resolved": 6
+    "preserved": 12,
+    "resolved": 6,
+    "unverified": 2
   },
   "target": "agno",
   "tested_distribution": "agno",

@@ -6,9 +6,9 @@ tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mc
 tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mcp_and_crew_relationship
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:399: DeprecationWarning: function_calling_llm is deprecated and will be removed in a future release.
     if self.function_calling_llm and not isinstance(
 
@@ -18,9 +18,9 @@ tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mc
 tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mcp_and_crew_relationship
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:407: DeprecationWarning: deprecated
     if self.allow_code_execution:
 
@@ -30,15 +30,15 @@ tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mc
 tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mcp_and_crew_relationship
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/agent/core.py:418: DeprecationWarning: deprecated
     if self.reasoning and self.planning_config is None:
 
 tests/runtime/test_crewai_runtime.py::test_builds_native_crewai_agents_skills_mcp_and_crew_relationship
 tests/runtime/test_crewai_runtime.py::test_runs_a_real_crewai_leaf_agent_with_its_own_prompt
-tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_skill_and_team_semantic_changes
+tests/runtime/test_crewai_runtime.py::test_strict_crewai_rejects_role_prompt_and_team_semantic_changes
   /private/tmp/uv-cache-agent-composition-profile/archive-v0/ukm2sm6e2mP6jzJg/lib/python3.13/site-packages/crewai/crew.py:647: DeprecationWarning: function_calling_llm is deprecated and will be removed in a future release.
     if self.function_calling_llm and not isinstance(self.function_calling_llm, LLM):
 

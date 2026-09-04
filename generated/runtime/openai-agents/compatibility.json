@@ -73,9 +73,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "A function tool discloses skill text on demand, but the result has tool-output authority instead of instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -115,9 +121,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "A function tool discloses skill text on demand, but the result has tool-output authority instead of instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -174,20 +186,55 @@
       "status": "preserved"
     }
   ],
-  "has_blocking_loss": true,
+  "has_blocking_loss": false,
   "has_unsupported": false,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/openai-agents.lock",
   "requirements_sha256": "6f33fb697f447db17d5e4bfc7b84dae84716bb6c4a70d2321fd535f239dc3b12",
   "source_entry": "lead-researcher",
   "strict_mode": {
-    "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for openai-agents: approximated lead-researcher:skills: A function tool discloses skill text on demand, but the result has tool-output authority instead of instruction authority. | approximated explorer:skills: A function tool discloses skill text on demand, but the result has tool-output authority instead of instruction authority."
+    "outcome": "accepted"
   },
   "summary": {
-    "approximated": 2,
     "omitted-preference": 1,
     "preserved": 14,
-    "resolved": 6
+    "resolved": 8,
+    "unverified": 2
   },
   "target": "openai-agents",
   "tested_distribution": "openai-agents",

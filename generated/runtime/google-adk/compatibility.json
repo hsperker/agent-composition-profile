@@ -67,9 +67,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -109,9 +115,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -170,18 +182,57 @@
   ],
   "has_blocking_loss": true,
   "has_unsupported": false,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [
+        "lead-researcher:delegates"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/google-adk.lock",
   "requirements_sha256": "63983fdd4362e25b41efdaaf6e70944dc9a6e133af5c6cb8f490dd566501e5e1",
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for google-adk: approximated lead-researcher:skills: An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority. | approximated lead-researcher:delegates: AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back. | approximated explorer:skills: An ADK function tool progressively reveals skill text, but the result has tool-output rather than instruction authority."
+    "reason": "strict runtime construction would lose required semantics for google-adk: approximated lead-researcher:delegates: AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back."
   },
   "summary": {
-    "approximated": 3,
+    "approximated": 1,
     "omitted-preference": 1,
     "preserved": 12,
-    "resolved": 7
+    "resolved": 9,
+    "unverified": 2
   },
   "target": "google-adk",
   "tested_distribution": "google-adk",

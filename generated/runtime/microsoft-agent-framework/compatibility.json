@@ -73,9 +73,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource.",
+      "detail": "SkillsProvider is a native Agent Skills implementation: catalog metadata first, then load_skill delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide. The adapter disables the provider's default approval gate on load_skill and read_skill_resource, which is host policy rather than a semantic change.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "preserved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -115,9 +121,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource.",
+      "detail": "SkillsProvider is a native Agent Skills implementation: catalog metadata first, then load_skill delivers the full body on demand as a tool result, the dedicated tool activation pattern of the Agent Skills integration guide. The adapter disables the provider's default approval gate on load_skill and read_skill_resource, which is host policy rather than a semantic change.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "preserved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -174,20 +186,55 @@
       "status": "preserved"
     }
   ],
-  "has_blocking_loss": true,
+  "has_blocking_loss": false,
   "has_unsupported": false,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/microsoft-agent-framework.lock",
   "requirements_sha256": "37bb54ceebecbf342e0d6dc3606d7c74f89c20396e39b1dea5dfaf714d97cb3f",
   "source_entry": "lead-researcher",
   "strict_mode": {
-    "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for microsoft-agent-framework: approximated lead-researcher:skills: SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource. | approximated explorer:skills: SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource."
+    "outcome": "accepted"
   },
   "summary": {
-    "approximated": 2,
     "omitted-preference": 1,
-    "preserved": 14,
-    "resolved": 6
+    "preserved": 16,
+    "resolved": 6,
+    "unverified": 2
   },
   "target": "microsoft-agent-framework",
   "tested_distribution": "agent-framework-core",

@@ -22,11 +22,11 @@
       "codex": "resolved",
       "crewai": "approximated",
       "google-adk": "approximated",
-      "langgraph": "approximated",
+      "langgraph": "resolved",
       "llamaindex": "approximated",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
-      "pydantic-ai": "approximated"
+      "pydantic-ai": "resolved"
     },
     "description": {
       "afm": "preserved",
@@ -36,7 +36,7 @@
       "codex": "preserved",
       "crewai": "approximated",
       "google-adk": "preserved",
-      "langgraph": "unsupported",
+      "langgraph": "resolved",
       "llamaindex": "preserved",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
@@ -128,17 +128,129 @@
     },
     "skills": {
       "afm": "preserved",
-      "agno": "approximated",
+      "agno": "preserved",
       "amplifier": "unsupported",
       "claude-code": "resolved",
       "codex": "resolved",
-      "crewai": "approximated",
-      "google-adk": "approximated",
-      "langgraph": "approximated",
-      "llamaindex": "approximated",
-      "microsoft-agent-framework": "approximated",
-      "openai-agents": "approximated",
-      "pydantic-ai": "approximated"
+      "crewai": "preserved",
+      "google-adk": "resolved",
+      "langgraph": "resolved",
+      "llamaindex": "resolved",
+      "microsoft-agent-framework": "preserved",
+      "openai-agents": "resolved",
+      "pydantic-ai": "resolved"
+    },
+    "skills.durability": {
+      "afm": "not-declared",
+      "agno": "unverified",
+      "amplifier": "not-declared",
+      "claude-code": "not-declared",
+      "codex": "not-declared",
+      "crewai": "unverified",
+      "google-adk": "unverified",
+      "langgraph": "unverified",
+      "llamaindex": "unverified",
+      "microsoft-agent-framework": "unverified",
+      "openai-agents": "unverified",
+      "pydantic-ai": "unverified"
+    }
+  },
+  "modules": {
+    "afm": {
+      "core": "accepted",
+      "delegates": "rejected",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "agno": {
+      "core": "accepted",
+      "delegates": "rejected",
+      "description": "rejected",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "amplifier": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "rejected",
+      "skills": "rejected"
+    },
+    "claude-code": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "codex": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "crewai": {
+      "core": "rejected",
+      "delegates": "rejected",
+      "description": "rejected",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "google-adk": {
+      "core": "accepted",
+      "delegates": "rejected",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "langgraph": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "rejected",
+      "skills": "accepted"
+    },
+    "llamaindex": {
+      "core": "accepted",
+      "delegates": "rejected",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "rejected",
+      "skills": "accepted"
+    },
+    "microsoft-agent-framework": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "openai-agents": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
+    },
+    "pydantic-ai": {
+      "core": "accepted",
+      "delegates": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted"
     }
   },
   "source_fixture": "examples/research-team/lead.agent.md",
@@ -161,9 +273,9 @@
     "google-adk": "rejected",
     "langgraph": "rejected",
     "llamaindex": "rejected",
-    "microsoft-agent-framework": "rejected",
-    "openai-agents": "rejected",
-    "pydantic-ai": "rejected"
+    "microsoft-agent-framework": "accepted",
+    "openai-agents": "accepted",
+    "pydantic-ai": "accepted"
   },
   "targets": [
     "agno",

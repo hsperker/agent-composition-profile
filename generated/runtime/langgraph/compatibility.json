@@ -40,9 +40,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "A standalone LangChain compiled agent has no native discovery-description property.",
+      "detail": "A compiled LangGraph agent has no description property. The adapter retains the description in its agent catalog (artifact metadata) for discovery and diagnostics; it never enters the prompt.",
       "feature": "description",
-      "status": "unsupported"
+      "status": "resolved"
     },
     {
       "agent": "lead-researcher",
@@ -70,9 +70,15 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "lead-researcher",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "lead-researcher",
@@ -82,9 +88,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic.",
+      "detail": "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
       "feature": "delegates",
-      "status": "approximated"
+      "status": "resolved"
     },
     {
       "agent": "explorer",
@@ -112,9 +118,15 @@
     },
     {
       "agent": "explorer",
-      "detail": "A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority.",
+      "detail": "The framework has no Agent Skills concept. The adapter supplies the dedicated tool activation pattern of the Agent Skills integration guide: catalog in the tool description, full body returned on demand as a tool result.",
       "feature": "skills",
-      "status": "approximated"
+      "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Activated skill content enters context as a tool result. Whether it survives context compaction or summarization for the rest of the session was not exercised.",
+      "feature": "skills.durability",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -173,19 +185,58 @@
   ],
   "has_blocking_loss": true,
   "has_unsupported": true,
+  "has_unverified": true,
+  "modules": {
+    "core": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "delegates": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "description": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "model": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
+    },
+    "plugins": {
+      "blocking": [
+        "lead-researcher:plugins",
+        "explorer:plugins"
+      ],
+      "outcome": "rejected",
+      "unverified": []
+    },
+    "skills": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": [
+        "lead-researcher:skills.durability",
+        "explorer:skills.durability"
+      ]
+    }
+  },
   "requirements_lock": "compiler/runtime-requirements/langgraph.lock",
   "requirements_sha256": "a0e356ce017dd2b66cea5e8e343f00bb403a87bf88a78512a6c72c12cf3ba62c",
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for langgraph: unsupported lead-researcher:description: A standalone LangChain compiled agent has no native discovery-description property. | approximated lead-researcher:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported lead-researcher:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted. | approximated lead-researcher:delegates: LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic. | approximated explorer:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported explorer:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted."
+    "reason": "strict runtime construction would lose required semantics for langgraph: unsupported lead-researcher:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted. | unsupported explorer:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted."
   },
   "summary": {
-    "approximated": 3,
     "omitted-preference": 1,
     "preserved": 10,
-    "resolved": 6,
-    "unsupported": 3
+    "resolved": 10,
+    "unsupported": 2,
+    "unverified": 2
   },
   "target": "langgraph",
   "tested_distribution": "langchain",
