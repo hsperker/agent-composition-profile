@@ -1,1 +1,7 @@
-...                                                                      [100%]
+....                                                                     [100%]
+=============================== warnings summary ===============================
+tests/runtime/test_agno_runtime.py::test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http
+  /Users/hans-christian.sperker/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/contextlib.py:109: DeprecationWarning: Use `streamable_http_client` instead.
+    self.gen = func(*args, **kwds)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

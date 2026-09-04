@@ -19,6 +19,7 @@ The original abstraction was too broad.
 - `description`, Agent Skills, and Agent Plugins are optional fields. If present, a strict host preserves their defined semantics or rejects the profile. Conformance is reported for the core and for each optional field.
 - Model requirements are declared by the agent author and resolved by the host, but stay incubating until a capability vocabulary is standardized. Model selection and preferences belong in host bindings.
 - `delegates` overloads incompatible mechanisms and should leave the profile.
+- One Agent Plugin with a local MCP echo server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP. Two SDKs cannot honor `cwd`, tool naming is not portable, and Agent Plugins §9 expansion had to be implemented by the adapter.
 
 Read the compatibility classifications as recorded reviewer judgments about each native mechanism, graded against the Agent Skills, Agent Plugins, and MCP contracts and backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. Properties that were not exercised, such as skill durability under context compaction and on-demand skill resources, are reported as `unverified`. Three of eight runtimes accept the combined fixture; seven accept the core.
 
@@ -50,6 +51,7 @@ compiler/tests/runtime/                       native construction/runtime tests
 compiler/runtime-requirements/                per-framework pins and hash locks
 examples/research-team/                       unchanged falsification fixture
 examples/runtime-probes/delegation/           minimal offline control-flow probe
+examples/runtime-probes/plugin-activation/    one plugin, local MCP echo server, stdio and streamable HTTP
 generated/runtime/                            reports and traces
 EVIDENCE.md                                   conclusions
 spec/                                         evidence-revised discussion draft

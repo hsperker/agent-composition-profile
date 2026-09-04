@@ -197,6 +197,8 @@ Agent Plugins and MCP retain ownership of their component formats and protocol s
 
 This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance. Agent Plugins permits a client to support only some component types and to ignore the rest. When a profile author declares a plugin as part of this agent, a strict profile host must preserve every component that plugin instance requires or reject this profile; a client that ignores components remains a conforming Agent Plugins client, but not a strict host for this profile.
 
+A host MUST apply Agent Plugins §9 itself: expand `${PLUGIN_ROOT}` and `${PLUGIN_DATA}` in `args`, `env`, and `cwd`, and provide both variables to stdio servers. None of the tested SDKs does this. The profile makes no promise about the tool names a model sees or about mapping a discovered tool back to its server; both varied across the tested runtimes.
+
 ## 9. Paths and packages
 
 Skill and plugin paths resolve relative to the declaring document.
@@ -296,7 +298,7 @@ The decisive findings were:
 
 - native-looking fields can have different authority (`description`, CrewAI `goal`, and `backstory`);
 - Agent Skills activation converged on the published dedicated-tool pattern in all eight runtimes, while session durability was exercised by none;
-- MCP object construction does not prove endpoint activation;
+- MCP object construction does not prove endpoint activation; a separate live probe activated one plugin over stdio and header-gated streamable HTTP in all eight runtimes, with two SDKs unable to honor `cwd` and non-portable tool naming;
 - one generic `delegates` field cannot name the mechanism a target actually uses;
 - dependency isolation is part of a reproducible multi-framework experiment.
 
@@ -309,7 +311,7 @@ This draft should be discussed as implementation evidence for the existing Agent
 Before adoption, the community should require:
 
 1. independent implementations of the narrowed document;
-2. live Agent Plugin/MCP activation against a shared test server;
+2. live Agent Plugin/MCP activation against a shared reference server, extending the local echo probe to SSE, OAuth, and colliding tool names;
 3. conformance fixtures for instruction authority, skill disclosure, and skill durability under compaction;
 4. negative tests for every required failure;
 5. a stable owner, versioning policy, and compatibility process.

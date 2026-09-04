@@ -97,6 +97,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "Agent.as_tool(propagate_session=False) is a native bounded child run with an independent session that returns text to the caller.",
       "feature": "delegates",
       "status": "preserved"
@@ -148,6 +154,12 @@
       "detail": "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -225,7 +237,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -248,7 +263,7 @@
     "omitted-preference": 1,
     "preserved": 16,
     "resolved": 6,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "microsoft-agent-framework",
   "tested_distribution": "agent-framework-core",

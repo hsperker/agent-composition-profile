@@ -1,7 +1,1 @@
-...                                                                      [100%]
-=============================== warnings summary ===============================
-tests/runtime/test_pydantic_ai_runtime.py::test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent
-  /private/tmp/uv-cache-agent-composition-profile/archive-v0/MikfQ1Qj1JJjABJJ/lib/python3.13/site-packages/pydantic_graph/_utils.py:67: DeprecationWarning: There is no current event loop
-    event_loop = asyncio.get_event_loop()
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+....                                                                     [100%]

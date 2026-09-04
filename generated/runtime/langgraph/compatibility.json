@@ -94,6 +94,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
       "feature": "delegates",
       "status": "resolved"
@@ -145,6 +151,12 @@
       "detail": "The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted.",
       "feature": "plugins",
       "status": "unsupported"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -225,7 +237,10 @@
         "explorer:plugins"
       ],
       "outcome": "rejected",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -250,7 +265,7 @@
     "preserved": 10,
     "resolved": 10,
     "unsupported": 2,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "langgraph",
   "tested_distribution": "langchain",

@@ -91,6 +91,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back.",
       "feature": "delegates",
       "status": "approximated"
@@ -142,6 +148,12 @@
       "detail": "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -221,7 +233,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -246,7 +261,7 @@
     "omitted-preference": 1,
     "preserved": 12,
     "resolved": 9,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "google-adk",
   "tested_distribution": "google-adk",

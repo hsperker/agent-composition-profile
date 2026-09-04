@@ -97,6 +97,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "Agent.as_tool starts the specialist as a nested run with its own instructions/model and returns text without transferring the conversation.",
       "feature": "delegates",
       "status": "preserved"
@@ -148,6 +154,12 @@
       "detail": "Agent Plugin MCP configuration expands into this Agent's native MCPServer objects; the plugin package wrapper is not retained.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -225,7 +237,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -248,7 +263,7 @@
     "omitted-preference": 1,
     "preserved": 14,
     "resolved": 8,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "openai-agents",
   "tested_distribution": "openai-agents",

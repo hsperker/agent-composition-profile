@@ -126,6 +126,20 @@
       "openai-agents": "resolved",
       "pydantic-ai": "resolved"
     },
+    "plugins.activation": {
+      "afm": "not-declared",
+      "agno": "unverified",
+      "amplifier": "not-declared",
+      "claude-code": "not-declared",
+      "codex": "not-declared",
+      "crewai": "unverified",
+      "google-adk": "unverified",
+      "langgraph": "unverified",
+      "llamaindex": "unverified",
+      "microsoft-agent-framework": "unverified",
+      "openai-agents": "unverified",
+      "pydantic-ai": "unverified"
+    },
     "skills": {
       "afm": "preserved",
       "agno": "preserved",
@@ -265,6 +279,130 @@
       "model": "accepted",
       "plugins": "accepted",
       "skills": "accepted"
+    }
+  },
+  "plugin_activation": {
+    "agno": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "crewai": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "tool_attribution": "CrewAI names MCP tools after the server command or URL",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": false,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "tool_attribution": "CrewAI names MCP tools after the server command or URL",
+        "transport": "stdio"
+      }
+    },
+    "google-adk": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "langgraph": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "llamaindex": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": false,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "microsoft-agent-framework": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "openai-agents": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
+    },
+    "pydantic-ai": {
+      "echohttp": {
+        "error": null,
+        "header_honored": true,
+        "status": "activated",
+        "transport": "streamable-http"
+      },
+      "echostdio": {
+        "cwd_honored": true,
+        "env_honored": true,
+        "error": null,
+        "status": "activated",
+        "transport": "stdio"
+      }
     }
   },
   "source_fixture": "examples/research-team/lead.agent.md",

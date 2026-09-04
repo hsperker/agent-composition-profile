@@ -94,6 +94,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent.",
       "feature": "delegates",
       "status": "approximated"
@@ -145,6 +151,12 @@
       "detail": "A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable.",
       "feature": "plugins",
       "status": "unsupported"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -227,7 +239,10 @@
         "explorer:plugins"
       ],
       "outcome": "rejected",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -253,7 +268,7 @@
     "preserved": 13,
     "resolved": 6,
     "unsupported": 2,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "llamaindex",
   "tested_distribution": "llama-index-core",

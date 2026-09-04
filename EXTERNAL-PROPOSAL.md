@@ -10,7 +10,7 @@ The strongest common semantics were:
 - persistent Markdown instructions with instruction authority;
 - optional selection metadata;
 - model requirements as a coherent concept, declared by the author and resolved by the host, though without a standardized capability vocabulary yet;
-- optional Agent Skills and Agent Plugins references, with strict preservation of their lower-layer semantics. Every runtime activated skills through the dedicated-tool pattern of the Agent Skills integration guide; none exercised session durability.
+- optional Agent Skills and Agent Plugins references, with strict preservation of their lower-layer semantics. Every runtime activated skills through the dedicated-tool pattern of the Agent Skills integration guide; none exercised session durability. A plugin with a local deterministic MCP server activated end to end in all eight runtimes over stdio and header-gated streamable HTTP: handshake, tool discovery, invocation, and result. Two SDKs cannot honor `cwd`, tool naming and server attribution are not portable, and Agent Plugins §9 placeholder expansion had to be implemented by the host adapter because no SDK does it.
 
 Two proposed areas did not survive as written:
 

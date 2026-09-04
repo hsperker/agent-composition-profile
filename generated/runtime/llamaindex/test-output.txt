@@ -1,18 +1,18 @@
-...                                                                      [100%]
+....                                                                     [100%]
 =============================== warnings summary ===============================
-tests/runtime/test_llamaindex_runtime.py: 18 warnings
+tests/runtime/test_llamaindex_runtime.py: 41 warnings
   /Users/hans-christian.sperker/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/inspect.py:602: PydanticDeprecatedSince20: The `__fields__` attribute is deprecated, use the `model_fields` class property instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     value = getter(object, key)
 
-tests/runtime/test_llamaindex_runtime.py: 18 warnings
+tests/runtime/test_llamaindex_runtime.py: 41 warnings
   /Users/hans-christian.sperker/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/inspect.py:602: PydanticDeprecatedSince20: The `__fields_set__` attribute is deprecated, use `model_fields_set` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
     value = getter(object, key)
 
-tests/runtime/test_llamaindex_runtime.py: 18 warnings
+tests/runtime/test_llamaindex_runtime.py: 41 warnings
   /Users/hans-christian.sperker/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/inspect.py:602: PydanticDeprecatedSince211: Accessing the 'model_computed_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
     value = getter(object, key)
 
-tests/runtime/test_llamaindex_runtime.py: 18 warnings
+tests/runtime/test_llamaindex_runtime.py: 41 warnings
   /Users/hans-christian.sperker/.local/share/uv/python/cpython-3.13-macos-aarch64-none/lib/python3.13/inspect.py:602: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
     value = getter(object, key)
 

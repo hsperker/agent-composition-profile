@@ -103,6 +103,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation.",
       "feature": "delegates",
       "status": "approximated"
@@ -154,6 +160,12 @@
       "detail": "Agent Plugin MCP servers are mechanically expanded into this agent's native mcps list; plugin packaging itself is not retained.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -244,7 +256,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -269,7 +284,7 @@
     "omitted-preference": 1,
     "preserved": 6,
     "resolved": 6,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "crewai",
   "tested_distribution": "crewai",

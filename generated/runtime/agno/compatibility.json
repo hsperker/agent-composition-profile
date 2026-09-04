@@ -108,6 +108,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent.",
       "feature": "delegates",
       "status": "approximated"
@@ -159,6 +165,12 @@
       "detail": "Each Agent Plugin MCP server becomes an agent-scoped native MCPTools toolkit with transport configuration preserved.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -242,7 +254,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -267,7 +282,7 @@
     "omitted-preference": 1,
     "preserved": 12,
     "resolved": 6,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "agno",
   "tested_distribution": "agno",

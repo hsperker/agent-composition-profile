@@ -4,7 +4,7 @@
 
 **Portable fixture:** `examples/research-team/` (unchanged)
 
-**Additional probe:** `examples/runtime-probes/delegation/` (only isolates delegation from the fixture's intentionally unreachable MCP endpoint)
+**Additional probes:** `examples/runtime-probes/delegation/` (isolates delegation from the fixture's intentionally unreachable MCP endpoint) and `examples/runtime-probes/plugin-activation/` (one Agent Plugin with a local deterministic MCP echo server over stdio and header-gated streamable HTTP)
 
 ## Result
 
@@ -176,14 +176,41 @@ Recommendation: retain Agent Skill references as an optional field graded agains
 Observed mechanisms:
 
 - CrewAI, Agno, OpenAI Agents, Google ADK, PydanticAI, and Microsoft construct native agent-scoped MCP clients/toolsets from the Agent Plugin MCP server.
-- LangGraph and LlamaIndex can construct clients, but the experiment could not attach usable native tools without activating the deliberately unavailable fixture endpoint. They report unsupported rather than inventing tools.
+- LangGraph and LlamaIndex can construct clients, but cannot attach tools to an agent until a handshake succeeds. Against the research fixture's unreachable endpoint they report unsupported rather than inventing tools; against the live probe they attach tools through langchain-mcp-adapters and McpToolSpec respectively.
 - Static Claude, Codex, and AFM mappings resolve supported plugin components; Amplifier still needs a runtime shim.
+- All eight runtimes activated the live probe plugin end to end on both transports. See the activation table below.
 
-Intersection: an Agent Plugin reference is a required package dependency whose standard components expand into the effective agent capability set.
+Intersection: an Agent Plugin reference is a required package dependency whose standard components expand into the effective agent capability set, and every tested runtime's native MCP client can take the plugin's `mcp.json` entry through handshake, discovery, and invocation.
 
-Important differences: the plugin wrapper disappears after expansion; MCP connection ownership, activation timing, headers, working directory, approvals, and tool catalog scope vary. Construction proves representability, not endpoint availability. The example endpoint was intentionally not treated as live.
+Important differences: the plugin wrapper disappears after expansion; MCP connection ownership, activation timing, working directory, tool naming, approvals, and tool catalog scope vary. Construction proves representability, not endpoint availability, which is why the research fixture keeps `plugins.activation` unverified and the live probe is reported separately.
 
-Recommendation: retain plugin references as optional composition. Strict mode must preserve every valid standard component and agent scope or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle beyond what Agent Plugins and MCP already define. Construction evidence is the current ceiling; a local deterministic MCP server probe covering handshake, tool discovery, and invocation is the next experiment.
+#### Plugin activation probe
+
+The probe fixture declares one plugin whose `mcp.json` has a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. The same echo server script runs under MCP SDK 1.x and 2.x, because the eight environments pin three different `mcp` releases. A deterministic model calls every echo tool once; the echo result reports the working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` were provided, and which server answered. Per target results are in `generated/runtime/<target>/plugin-activation.json`, summarized in `generated/runtime/matrix.md`.
+
+| Target | stdio | streamable HTTP with header | stdio cwd honored | stdio env honored | Tool naming |
+|---|---|---|---|---|---|
+| LangGraph | activated | activated | yes | yes | tool name as published |
+| CrewAI | activated | activated | no | yes | derived from command or URL, hashed when long |
+| LlamaIndex | activated | activated | no | yes | tool name as published |
+| Agno | activated | activated | yes | yes | tool name as published |
+| OpenAI Agents | activated | activated | yes | yes | tool name as published |
+| Google ADK | activated | activated | yes | yes | `<server>_<tool>` |
+| PydanticAI | activated | activated | yes | yes | tool name as published |
+| Microsoft Agent Framework | activated | activated | yes | yes | `<server>_<tool>` |
+
+Findings from the probe:
+
+- Agent Plugins §9 is the adapter's job, not the SDK's. No SDK expands `${PLUGIN_ROOT}` or provides `PLUGIN_ROOT` and `PLUGIN_DATA`; the shared `effective_server_config` helper does, and every stdio server then saw both variables.
+- `cwd` is lost in two SDKs. CrewAI's `MCPServerStdio` and LlamaIndex's `BasicMCPClient` have no working directory parameter, so their servers ran in the inherited directory. Strict mode already rejected both for the fixture's `cwd`, and the probe confirms the loss is real rather than theoretical.
+- Headers survived everywhere. All eight clients sent the configured header; the 401 gate never fired.
+- Tool naming is not portable. Google ADK and Microsoft prefix tools with the server name. CrewAI names tools after the server command or URL, not the Agent Plugins server name, and truncates long sanitized names to a hash, so the model saw `python_users_..._98b36a1f` for `echo_stdio`. A profile author cannot predict the tool name a model will see.
+- Server attribution is not portable. CrewAI exposes no mapping from a discovered tool back to the configured server; the probe attributes results by payload content instead.
+- Lifecycle ownership differs. OpenAI Agents needs an explicit `connect()`; Microsoft and PydanticAI connect when the agent enters its async context; Agno connects inside `arun` and releases in the same task; ADK connects on first tool listing; CrewAI connects inside `kickoff`; LangGraph opens a session per tool call; LlamaIndex binds its HTTP client to the first event loop that uses it.
+- Two servers exposing the same tool name were not tested. Namespacing across servers is client defined and remains an open question.
+- Activation failure reporting per Agent Plugins §7.2.2 is implemented in the adapters but was not exercised, because no server failed.
+
+Recommendation: retain plugin references as optional composition. Strict mode must preserve every valid standard component and agent scope or reject. This strictness is a composition-level rule of the Agent Profile, not a change to Agent Plugins conformance, which permits incremental clients that ignore unsupported component types. Runtime activation failures remain invocation failures. The profile must not standardize plugin lifecycle beyond what Agent Plugins and MCP already define. Hosts must implement Agent Plugins §9 themselves and must not promise portable tool names or server attribution.
 
 ### `delegates` — REMOVE
 
@@ -217,14 +244,15 @@ The combined draft 0.1 fixture was accepted by OpenAI Agents SDK, PydanticAI, an
 3. Carry `model.requires` as an incubating host-resolved declaration until a capability vocabulary is standardized; move `model.prefers`, model selection, and attestation to external target bindings.
 4. Remove `delegates` from the profile because it is overloaded. Add no agent inventory; leave packaging and orchestration to their own efforts.
 5. Extend the diagnostic vocabulary with `unverified` for properties that were not exercised. Keep `omitted-preference` for legacy reports only.
-6. Require adapters to distinguish construction, activation, and execution evidence.
+6. Require adapters to distinguish construction, activation, and execution evidence, and hosts to implement Agent Plugins §9 placeholder expansion and reserved variables.
 7. Continue to forbid in-document host extensions. Target bindings remain external.
 
 ## Limits
 
 - Deterministic fake/model subclasses avoided paid network inference but used each framework's real agent, tool, workflow/team, and runner code paths.
-- The fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable. MCP client construction was tested; a live cross-framework server handshake was not claimed.
+- The research fixture's `https://research.example.com/mcp` endpoint is illustrative and unreachable, so its `plugins.activation` finding stays unverified. Live activation was exercised only through the separate plugin-activation probe, against a local echo server rather than a shared reference server.
 - The four earlier targets remain static-lowering evidence only.
 - No conclusion depends on generated answer quality. The experiment tests representation, authority, scope, and control flow.
 - Skill activation was judged against the Agent Skills integration guide, not measured. No test exercises context compaction or bundled resources, so durability and resource access are unverified in every runtime.
-- Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint.
+- Strict acceptance or rejection of the full fixture is a construction result. No full-fixture run reached a live MCP endpoint; the activation probe used a two-server fixture with no skills or delegates.
+- The activation probe did not test SSE, OAuth, two servers with colliding tool names, or activation failure reporting.

@@ -1,0 +1,121 @@
+{
+  "chain": [
+    "construct",
+    "handshake",
+    "discover",
+    "invoke",
+    "result"
+  ],
+  "construction_findings": {
+    "plugins": "unsupported",
+    "plugins.activation": "unverified"
+  },
+  "error": null,
+  "fixture": "examples/runtime-probes/plugin-activation",
+  "observations": [
+    {
+      "agent": "plugin-user",
+      "data": {
+        "server": "echostdio",
+        "tools": [
+          "echo_stdio"
+        ]
+      },
+      "kind": "mcp-tools-discovered"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "server": "echohttp",
+        "tools": [
+          "echo_http"
+        ]
+      },
+      "kind": "mcp-tools-discovered"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "arguments": {
+          "text": "probe"
+        },
+        "server": "echohttp",
+        "tool": "echo_http"
+      },
+      "kind": "mcp-tool-invoked"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "result": "meta=None content=[TextContent(type='text', text='{\"cwd\": \"${REPO_ROOT}\", \"label\": \"http\", \"plugin_data_env\": false, \"plugin_root_env\": false, \"text\": \"probe\"}', annotations=None, meta=None)] structured_content={'result': '{\"cwd\": \"${REPO_ROOT}\", \"label\": \"http\", \"plugin_data_env\": false, \"plugin_root_env\": false, \"text\": \"probe\"}'} is_error=False result_type='complete'",
+        "server": "echohttp",
+        "tool": "echo_http"
+      },
+      "kind": "mcp-tool-result"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "arguments": {
+          "text": "probe"
+        },
+        "server": "echostdio",
+        "tool": "echo_stdio"
+      },
+      "kind": "mcp-tool-invoked"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "result": "meta=None content=[TextContent(type='text', text='{\"cwd\": \"${REPO_ROOT}\", \"label\": \"stdio\", \"plugin_data_env\": true, \"plugin_root_env\": true, \"text\": \"probe\"}', annotations=None, meta=None)] structured_content={'result': '{\"cwd\": \"${REPO_ROOT}\", \"label\": \"stdio\", \"plugin_data_env\": true, \"plugin_root_env\": true, \"text\": \"probe\"}'} is_error=False result_type='complete'",
+        "server": "echostdio",
+        "tool": "echo_stdio"
+      },
+      "kind": "mcp-tool-result"
+    },
+    {
+      "agent": "plugin-user",
+      "data": {
+        "result": "echo done"
+      },
+      "kind": "runtime-output"
+    }
+  ],
+  "output": "echo done",
+  "servers": {
+    "echohttp": {
+      "error": null,
+      "header_honored": true,
+      "result": {
+        "cwd": "${REPO_ROOT}",
+        "label": "http",
+        "plugin_data_env": false,
+        "plugin_root_env": false,
+        "text": "probe"
+      },
+      "status": "activated",
+      "tools_as_seen": [
+        "echo_http"
+      ],
+      "transport": "streamable-http"
+    },
+    "echostdio": {
+      "cwd_honored": false,
+      "env_honored": true,
+      "error": null,
+      "result": {
+        "cwd": "${REPO_ROOT}",
+        "label": "stdio",
+        "plugin_data_env": true,
+        "plugin_root_env": true,
+        "text": "probe"
+      },
+      "status": "activated",
+      "tools_as_seen": [
+        "echo_stdio"
+      ],
+      "transport": "stdio"
+    }
+  },
+  "target": "llamaindex"
+}

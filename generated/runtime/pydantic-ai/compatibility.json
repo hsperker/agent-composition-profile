@@ -97,6 +97,12 @@
     },
     {
       "agent": "lead-researcher",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
+    },
+    {
+      "agent": "lead-researcher",
       "detail": "PydanticAI has no agent relationship primitive. The adapter-authored Tool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
       "feature": "delegates",
       "status": "resolved"
@@ -148,6 +154,12 @@
       "detail": "Agent Plugin MCP servers become agent-scoped MCPToolset objects with explicit FastMCP transports.",
       "feature": "plugins",
       "status": "resolved"
+    },
+    {
+      "agent": "explorer",
+      "detail": "Native MCP clients were constructed from the plugin configuration, but no handshake, tool discovery, or invocation was exercised in this build.",
+      "feature": "plugins.activation",
+      "status": "unverified"
     },
     {
       "agent": "explorer",
@@ -225,7 +237,10 @@
     "plugins": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
+      "unverified": [
+        "lead-researcher:plugins.activation",
+        "explorer:plugins.activation"
+      ]
     },
     "skills": {
       "blocking": [],
@@ -248,7 +263,7 @@
     "omitted-preference": 1,
     "preserved": 13,
     "resolved": 9,
-    "unverified": 4
+    "unverified": 6
   },
   "target": "pydantic-ai",
   "tested_distribution": "pydantic-ai",
