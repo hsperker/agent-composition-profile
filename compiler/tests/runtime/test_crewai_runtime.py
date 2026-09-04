@@ -10,9 +10,14 @@ from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime import crewai as adapter
 from agent_profile_compiler.runtime.common import RuntimeCompatibilityError
 
+import json
+from agent_profile_compiler.runtime.mcp_probe import ECHO_TASK, echo_http_server, parse_echo_result
+
 
 ROOT = Path(__file__).parents[3]
 EXAMPLE = ROOT / "examples" / "research-team"
+PROBE = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+PLUGIN_ROOT = (PROBE / "plugins" / "local-echo").resolve()
 
 
 class FixedCrewLLM(BaseLLM):
@@ -100,3 +105,53 @@ def test_strict_crewai_rejects_role_prompt_and_team_semantic_changes() -> None:
 
     with pytest.raises(RuntimeCompatibilityError, match="name.*description.*instructions.*delegates"):
         adapter.build(package, binding(), strict=True)
+
+
+class EchoCallingCrewLLM(BaseLLM):
+    """Calls every echo tool offered in the native tool schemas, one per turn, then finishes."""
+
+    called: list = []
+    seen_tool_names: list = []
+
+    def supports_function_calling(self) -> bool:
+        return True
+
+    def call(self, messages, tools=None, callbacks=None, available_functions=None, **kwargs):
+        names = sorted(tool.get("function", tool).get("name") for tool in (tools or []))
+        self.seen_tool_names.append(names)
+        # CrewAI truncates long sanitized names to a hash, so the echo identity can be
+        # absent from what the model sees. The probe agent has only MCP tools, so call each once.
+        remaining = [name for name in names if name not in self.called]
+        if remaining:
+            self.called.append(remaining[0])
+            return [
+                {
+                    "id": f"call-{len(self.called)}",
+                    "type": "function",
+                    "function": {"name": remaining[0], "arguments": json.dumps({"text": ECHO_TASK})},
+                }
+            ]
+        return "echo done"
+
+
+def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> None:
+    package = load_package(PROBE / "agent.agent.md", PROBE)
+    llm = EchoCallingCrewLLM(model="echo-caller")
+    artifact = adapter.build(package, {"capabilities": {}, "models": {"plugin-user": llm}}, strict=False)
+
+    with echo_http_server(PLUGIN_ROOT):
+        result = adapter.run(artifact, ECHO_TASK, activate_plugins=True)
+
+    assert result.output == "echo done", (result.output, llm.seen_tool_names)
+    discovered = next(o.data["tools"] for o in result.observations if o.kind == "mcp-tools-discovered")
+    # CrewAI names MCP tools after the server command or URL, not the configured server name.
+    assert any(name.endswith("echo_stdio") for name in discovered), discovered
+    assert any(name.endswith("echo_http") for name in discovered), discovered
+    assert not any(name.startswith(("echostdio", "echohttp")) for name in discovered), discovered
+    results = [parse_echo_result(o.data["result"]) for o in result.observations if o.kind == "mcp-tool-result"]
+    by_label = {payload.get("label"): payload for payload in results}
+    assert set(by_label) == {"stdio", "http"}, (results, llm.seen_tool_names)
+    assert by_label["stdio"]["plugin_root_env"] is True and by_label["stdio"]["plugin_data_env"] is True
+    # MCPServerStdio has no cwd field, so the server runs in the inherited working directory.
+    assert by_label["stdio"]["cwd"] != str(PLUGIN_ROOT)
+    assert by_label["http"]["plugin_root_env"] is False

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from ..model import CompatibilityReport, Package
@@ -14,18 +16,19 @@ from .common import (
     skill_durability_assessment,
 )
 from .model import RuntimeArtifact, RuntimeObservation, RuntimeRun
+from .plugins import effective_server_config, plugin_data_root
 
 
 TARGET = "crewai"
 
 
-def _mcp_configs(agent):
+def _mcp_configs(agent, data_root: Path):
     from crewai.mcp.config import MCPServerHTTP, MCPServerSSE, MCPServerStdio
 
     mapped = []
     losses: list[str] = []
     for server in agent.mcp_servers:
-        config = dict(server.config)
+        config = effective_server_config(server, data_root=data_root)
         transport = config.pop("type")
         if transport == "streamable-http":
             mapped.append(
@@ -69,12 +72,13 @@ def build(
     observations: list[RuntimeObservation] = []
     native_agents: dict[str, CrewAgent] = {}
     mcp_losses: dict[str, list[str]] = {}
+    data_root = plugin_data_root(binding)
 
     for agent in package.agents.values():
         model = models.get(agent.name, binding.get("model"))
         if model is None:
             raise ValueError(f"CrewAI binding has no model for agent {agent.name!r}")
-        mcps, losses = _mcp_configs(agent)
+        mcps, losses = _mcp_configs(agent, data_root)
         mcp_losses[agent.name] = losses
         native = CrewAgent(
             role=agent.name,
@@ -175,12 +179,55 @@ def build(
     )
 
 
-def run(artifact: RuntimeArtifact, task: str) -> RuntimeRun:
+def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False) -> RuntimeRun:
     entry_name = str(artifact.metadata["entry_name"])
+    native = artifact.native_agents[entry_name]
     start = len(artifact.observations)
-    response = artifact.native_agents[entry_name].kickoff(task)
+    observations: list[RuntimeObservation] = []
+    before = {id(tool) for tool in (native.tools or [])}
+    # CrewAI resolves and connects every configured MCP server inside kickoff
+    # (MCPToolResolver); there is no separate activation step to call.
+    response = native.kickoff(task)
+    if activate_plugins:
+        discovered = [tool for tool in (native.tools or []) if id(tool) not in before]
+        names = [tool.name for tool in discovered]
+        # CrewAI derives tool names from the server command or URL, not from the
+        # Agent Plugins server name, so tools cannot be attributed to a server.
+        observations.append(
+            RuntimeObservation(
+                "mcp-tools-discovered",
+                entry_name,
+                {"server": "unattributed", "tools": names, "note": "CrewAI names MCP tools after the server command or URL"},
+            )
+        )
+        calls: dict[str, str] = {}
+        for message in getattr(response, "messages", None) or []:
+            if not isinstance(message, Mapping):
+                continue
+            for call in message.get("tool_calls") or []:
+                function = call.get("function", call) if isinstance(call, Mapping) else getattr(call, "function", call)
+                name = function.get("name") if isinstance(function, Mapping) else getattr(function, "name", "")
+                arguments = function.get("arguments") if isinstance(function, Mapping) else getattr(function, "arguments", "{}")
+                call_id = call.get("id") if isinstance(call, Mapping) else getattr(call, "id", name)
+                calls[call_id] = name
+                try:
+                    parsed = json.loads(arguments) if isinstance(arguments, str) else dict(arguments or {})
+                except json.JSONDecodeError:
+                    parsed = {"raw": arguments}
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-invoked", entry_name, {"server": "unattributed", "tool": name, "arguments": parsed}
+                    )
+                )
+            if message.get("role") == "tool" and message.get("tool_call_id") in calls:
+                observations.append(
+                    RuntimeObservation(
+                        "mcp-tool-result",
+                        entry_name,
+                        {"server": "unattributed", "tool": calls[message["tool_call_id"]], "result": str(message.get("content"))},
+                    )
+                )
     output = str(getattr(response, "raw", response))
-    artifact.observations.append(
-        RuntimeObservation("runtime-output", entry_name, {"result": output})
-    )
-    return RuntimeRun(output, tuple(artifact.observations[start:]))
+    observations.append(RuntimeObservation("runtime-output", entry_name, {"result": output}))
+    artifact.observations.extend(observations)
+    return RuntimeRun(output, tuple(observations))
