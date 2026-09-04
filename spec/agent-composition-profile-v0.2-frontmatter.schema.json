@@ -4,7 +4,9 @@
   "description": "Companion schema. The normative draft also defines Markdown, safe YAML, path containment, Agent Skill, and Agent Plugin checks.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["name"],
+  "required": [
+    "name"
+  ],
   "properties": {
     "name": {
       "type": "string",
@@ -17,8 +19,31 @@
       "minLength": 1,
       "maxLength": 1024
     },
-    "skills": {"$ref": "#/$defs/pathList"},
-    "plugins": {"$ref": "#/$defs/pathList"}
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requires"
+      ],
+      "properties": {
+        "requires": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "const": true
+          }
+        }
+      }
+    },
+    "skills": {
+      "$ref": "#/$defs/pathList"
+    },
+    "plugins": {
+      "$ref": "#/$defs/pathList"
+    }
   },
   "$defs": {
     "pathList": {
