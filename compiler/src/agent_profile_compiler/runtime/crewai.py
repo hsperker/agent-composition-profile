@@ -119,8 +119,8 @@ def build(
             ),
             "skills": (
                 (
-                    "preserved",
-                    "CrewAI 1.15 loads Agent Skills natively with progressive disclosure.",
+                    "approximated",
+                    "CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context.",
                 )
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
