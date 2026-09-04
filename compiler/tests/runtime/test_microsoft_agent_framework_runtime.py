@@ -111,7 +111,7 @@ def test_builds_native_microsoft_agents_skills_mcp_and_agent_tools() -> None:
     assert status(artifact, "lead-researcher", "name") == "preserved"
     assert status(artifact, "lead-researcher", "description") == "preserved"
     assert status(artifact, "lead-researcher", "instructions") == "preserved"
-    assert status(artifact, "lead-researcher", "skills") == "preserved"
+    assert status(artifact, "lead-researcher", "skills") == "approximated"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
     assert status(artifact, "lead-researcher", "delegates") == "preserved"
 
@@ -143,13 +143,12 @@ def test_microsoft_runtime_executes_native_agent_as_tool_with_isolated_session()
     ]
 
 
-def test_strict_microsoft_adapter_accepts_the_full_research_profile() -> None:
+def test_strict_microsoft_adapter_rejects_skill_tool_output_authority() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     clients = {
         name: ScriptedChatClient([text_response(f"unused-{name}")])
         for name in package.agents
     }
 
-    artifact = adapter.build(package, binding(clients), strict=True)
-
-    assert not artifact.report.has_blocking_loss
+    with pytest.raises(RuntimeCompatibilityError, match="skills"):
+        adapter.build(package, binding(clients), strict=True)

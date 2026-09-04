@@ -142,12 +142,12 @@ def build(
             ),
             "instructions": (
                 "preserved",
-                "The Markdown is stored as native Agent instructions and emitted as a system message on every run.",
+                "The Markdown is stored as native Agent instructions and passed through chat options to the client on every run.",
             ),
             "skills": (
                 (
-                    "preserved",
-                    "SkillsProvider natively implements Agent Skills metadata advertisement, load_skill, and resource disclosure.",
+                    "approximated",
+                    "SkillsProvider advertises metadata natively, but load_skill is a FunctionTool whose result is tool output rather than instruction-authority context. The adapter also disables the provider's default approval gate on load_skill and read_skill_resource.",
                 )
                 if agent.all_skills
                 else ("preserved", "The source agent declares no skills.")
