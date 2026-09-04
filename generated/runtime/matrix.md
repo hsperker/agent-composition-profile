@@ -4,7 +4,7 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 
 | semantic | agno | crewai | google-adk | langgraph | llamaindex | microsoft-agent-framework | openai-agents | pydantic-ai | amplifier | claude-code | codex | afm |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| delegates | approximated | approximated | approximated | preserved | approximated | preserved | preserved | resolved | preserved | preserved | resolved | unsupported |
+| delegates | approximated | approximated | approximated | approximated | approximated | preserved | preserved | approximated | preserved | preserved | resolved | unsupported |
 | description | approximated | approximated | preserved | unsupported | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved |
 | instructions | preserved | approximated | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved |
 | model.prefers.vision-input | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | resolved | resolved | resolved | resolved |
@@ -12,6 +12,6 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 | model.requires.tool-use | resolved | resolved | resolved | resolved | resolved | resolved | resolved | resolved | resolved | resolved | resolved | resolved |
 | name | preserved | approximated | resolved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved |
 | plugins | resolved | resolved | resolved | unsupported | unsupported | resolved | resolved | resolved | unsupported | resolved | resolved | resolved |
-| skills | preserved | preserved | approximated | approximated | approximated | preserved | approximated | approximated | unsupported | resolved | resolved | preserved |
+| skills | approximated | approximated | approximated | approximated | approximated | approximated | approximated | approximated | unsupported | resolved | resolved | preserved |
 
 Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.

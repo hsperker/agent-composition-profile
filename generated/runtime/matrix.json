@@ -22,11 +22,11 @@
       "codex": "resolved",
       "crewai": "approximated",
       "google-adk": "approximated",
-      "langgraph": "preserved",
+      "langgraph": "approximated",
       "llamaindex": "approximated",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
-      "pydantic-ai": "resolved"
+      "pydantic-ai": "approximated"
     },
     "description": {
       "afm": "preserved",
@@ -128,15 +128,15 @@
     },
     "skills": {
       "afm": "preserved",
-      "agno": "preserved",
+      "agno": "approximated",
       "amplifier": "unsupported",
       "claude-code": "resolved",
       "codex": "resolved",
-      "crewai": "preserved",
+      "crewai": "approximated",
       "google-adk": "approximated",
       "langgraph": "approximated",
       "llamaindex": "approximated",
-      "microsoft-agent-framework": "preserved",
+      "microsoft-agent-framework": "approximated",
       "openai-agents": "approximated",
       "pydantic-ai": "approximated"
     }
@@ -161,7 +161,7 @@
     "google-adk": "rejected",
     "langgraph": "rejected",
     "llamaindex": "rejected",
-    "microsoft-agent-framework": "accepted",
+    "microsoft-agent-framework": "rejected",
     "openai-agents": "rejected",
     "pydantic-ai": "rejected"
   },

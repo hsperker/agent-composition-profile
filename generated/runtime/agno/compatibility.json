@@ -84,9 +84,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agno natively loads Agent Skills through LocalSkills with browse/load/reference progressive disclosure.",
+      "detail": "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
       "feature": "skills",
-      "status": "preserved"
+      "status": "approximated"
     },
     {
       "agent": "lead-researcher",
@@ -126,9 +126,9 @@
     },
     {
       "agent": "explorer",
-      "detail": "Agno natively loads Agent Skills through LocalSkills with browse/load/reference progressive disclosure.",
+      "detail": "Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context.",
       "feature": "skills",
-      "status": "preserved"
+      "status": "approximated"
     },
     {
       "agent": "explorer",
@@ -192,12 +192,12 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
+    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:skills: Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated explorer:skills: Agno's native Skills toolkit advertises metadata in the system prompt, but get_skill_instructions returns the activated body as JSON tool output rather than instruction-authority context. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
   },
   "summary": {
-    "approximated": 4,
+    "approximated": 6,
     "omitted-preference": 1,
-    "preserved": 12,
+    "preserved": 10,
     "resolved": 6
   },
   "target": "agno",

@@ -82,9 +82,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Each declared specialist is a native StructuredTool that starts a fresh child graph invocation and returns text to the parent.",
+      "detail": "LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic.",
       "feature": "delegates",
-      "status": "preserved"
+      "status": "approximated"
     },
     {
       "agent": "explorer",
@@ -178,12 +178,12 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for langgraph: unsupported lead-researcher:description: A standalone LangChain compiled agent has no native discovery-description property. | approximated lead-researcher:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported lead-researcher:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted. | approximated explorer:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported explorer:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted."
+    "reason": "strict runtime construction would lose required semantics for langgraph: unsupported lead-researcher:description: A standalone LangChain compiled agent has no native discovery-description property. | approximated lead-researcher:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported lead-researcher:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted. | approximated lead-researcher:delegates: LangGraph has no agent relationship primitive; the adapter authors a StructuredTool that runs a fresh child graph and returns text. That is an adapter-chosen orchestration policy, not a framework semantic. | approximated explorer:skills: A native tool progressively returns skill text, but its result has tool-output authority rather than instruction authority. | unsupported explorer:plugins: The remote research MCP server was not activated during deterministic construction; no plugin tool is silently substituted."
   },
   "summary": {
-    "approximated": 2,
+    "approximated": 3,
     "omitted-preference": 1,
-    "preserved": 11,
+    "preserved": 10,
     "resolved": 6,
     "unsupported": 3
   },

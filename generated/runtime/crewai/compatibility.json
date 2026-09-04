@@ -79,9 +79,9 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "CrewAI 1.15 loads Agent Skills natively with progressive disclosure.",
+      "detail": "CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context.",
       "feature": "skills",
-      "status": "preserved"
+      "status": "approximated"
     },
     {
       "agent": "lead-researcher",
@@ -121,9 +121,9 @@
     },
     {
       "agent": "explorer",
-      "detail": "CrewAI 1.15 loads Agent Skills natively with progressive disclosure.",
+      "detail": "CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context.",
       "feature": "skills",
-      "status": "preserved"
+      "status": "approximated"
     },
     {
       "agent": "explorer",
@@ -187,12 +187,12 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for crewai: approximated lead-researcher:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated lead-researcher:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated lead-researcher:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated lead-researcher:delegates: CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation. | approximated explorer:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated explorer:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated explorer:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated critic:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated critic:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated critic:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field."
+    "reason": "strict runtime construction would lose required semantics for crewai: approximated lead-researcher:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated lead-researcher:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated lead-researcher:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated lead-researcher:skills: CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context. | approximated lead-researcher:delegates: CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation. | approximated explorer:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated explorer:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated explorer:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated explorer:skills: CrewAI's native LoadSkillTool advertises skill metadata first, but the activated SKILL.md body returns as ordinary tool output rather than instruction-authority context. | approximated critic:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated critic:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated critic:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field."
   },
   "summary": {
-    "approximated": 10,
+    "approximated": 12,
     "omitted-preference": 1,
-    "preserved": 6,
+    "preserved": 4,
     "resolved": 6
   },
   "target": "crewai",

@@ -1,15 +1,14 @@
-Installed 61 packages in 30ms
 ...                                                                      [100%]
 =============================== warnings summary ===============================
 <frozen abc>:106
   <frozen abc>:106: DeprecationWarning: BaseAgentConfig is deprecated and will be removed in future versions. Config is now loaded via reflection so the separate config class is no longer needed.
 
-../../../../tmp/acp-uv-cache/archive-v0/39qrHr2N8s8uOeI8/lib/python3.13/site-packages/google/adk/features/_feature_decorator.py:71
-  /tmp/acp-uv-cache/archive-v0/39qrHr2N8s8uOeI8/lib/python3.13/site-packages/google/adk/features/_feature_decorator.py:71: UserWarning: [EXPERIMENTAL] feature FeatureName.PLUGGABLE_AUTH is enabled.
+../../../../private/tmp/uv-cache-agent-composition-profile/archive-v0/hdWP8syha9dLJEaD/lib/python3.13/site-packages/google/adk/features/_feature_decorator.py:71
+  /private/tmp/uv-cache-agent-composition-profile/archive-v0/hdWP8syha9dLJEaD/lib/python3.13/site-packages/google/adk/features/_feature_decorator.py:71: UserWarning: [EXPERIMENTAL] feature FeatureName.PLUGGABLE_AUTH is enabled.
     check_feature_enabled()
 
 tests/runtime/test_google_adk_runtime.py::test_adk_runner_executes_nested_agent_tool_and_returns_to_parent
-  /tmp/acp-uv-cache/archive-v0/39qrHr2N8s8uOeI8/lib/python3.13/site-packages/google/adk/models/llm_request.py:298: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  /private/tmp/uv-cache-agent-composition-profile/archive-v0/hdWP8syha9dLJEaD/lib/python3.13/site-packages/google/adk/models/llm_request.py:298: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
     declaration = tool._get_declaration()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
