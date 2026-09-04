@@ -168,7 +168,7 @@ def build(
                 else (
                     (
                         "resolved",
-                        "Agent Plugin MCP servers become agent-owned MCP tools with the configured transport and lifecycle.",
+                        "Agent Plugin MCP servers become MCP tools available to the declaring agent, with the configured transport and lifecycle.",
                     )
                     if agent.plugins
                     else ("preserved", "The source agent declares no plugins.")

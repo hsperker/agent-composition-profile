@@ -54,6 +54,12 @@ def test_relative_cwd_resolves_against_the_plugin_root(tmp_path: Path) -> None:
     assert effective_server_config(server, data_root=tmp_path / "d")["cwd"] == str(tmp_path / "bin")
 
 
+def test_omitted_cwd_defaults_to_the_plugin_root(tmp_path: Path) -> None:
+    server = McpServer(name="s", config={"type": "stdio", "command": "x"}, plugin_root=tmp_path)
+
+    assert effective_server_config(server, data_root=tmp_path / "d")["cwd"] == str(tmp_path)
+
+
 def test_http_servers_are_returned_unchanged(tmp_path: Path) -> None:
     config = {"type": "streamable-http", "url": "http://x/mcp", "headers": {"H": "${PLUGIN_ROOT}"}}
     server = McpServer(name="s", config=config, plugin_root=tmp_path)

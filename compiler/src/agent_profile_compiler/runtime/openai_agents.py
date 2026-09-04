@@ -108,7 +108,7 @@ def build(
                     make_activate_skill(catalog),
                     name_override="activate_skill",
                     description_override=(
-                        "Activate one agent-private skill. Available metadata: "
+                        "Activate one skill from this agent's catalog. Available metadata: "
                         + catalog.discovery_text()
                     ),
                 )

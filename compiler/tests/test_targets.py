@@ -254,3 +254,15 @@ def test_strict_compilation_rejects_approximated_semantics(monkeypatch: pytest.M
 
     with pytest.raises(CompilationError, match="approximated"):
         compile_package(package, "approximate-target", {}, strict=True)
+
+
+def test_afm_stdio_servers_always_lose_the_required_working_directory() -> None:
+    from agent_profile_compiler.model import McpServer
+    from agent_profile_compiler.targets.common import map_agent_plugin_mcp_to_afm
+
+    mapped, losses = map_agent_plugin_mcp_to_afm(
+        McpServer(name="local", config={"type": "stdio", "command": "python"}, plugin_root=Path("/plugin"))
+    )
+
+    assert mapped == {"name": "local", "transport": {"type": "stdio", "command": "python"}}
+    assert len(losses) == 1 and "plugin-root default" in losses[0]

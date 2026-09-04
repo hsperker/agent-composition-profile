@@ -143,7 +143,7 @@ def build(
                     activate_skill,
                     name="activate_skill",
                     description=(
-                        "Activate one skill from this agent-private catalog. Available metadata: "
+                        "Activate one skill from this agent's catalog. Available metadata: "
                         + catalog.discovery_text()
                     ),
                 )

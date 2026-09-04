@@ -50,8 +50,9 @@ def map_agent_plugin_mcp_to_afm(server: McpServer) -> tuple[dict[str, Any] | Non
     """Lower one Agent Plugins MCP server to AFM 0.4.0.
 
     AFM supports stdio and streamable HTTP, but not Agent Plugins' SSE transport,
-    arbitrary HTTP headers, or stdio cwd. Diagnostic compilation may still emit
-    the representable subset, while the caller reports the loss.
+    arbitrary HTTP headers, or a stdio working directory (which Agent Plugins
+    requires, defaulting to the plugin root). Diagnostic compilation may still
+    emit the representable subset, while the caller reports the loss.
     """
     config = dict(server.config)
     transport_type = config.pop("type")
@@ -66,8 +67,9 @@ def map_agent_plugin_mcp_to_afm(server: McpServer) -> tuple[dict[str, Any] | Non
         for key in ("command", "args", "env"):
             if key in config:
                 transport[key] = config[key]
-        if "cwd" in config:
-            losses.append("AFM 0.4.0 stdio transport has no cwd field")
+        # Agent Plugins §7.2.1 requires the plugin root as the default working
+        # directory, so every stdio server needs cwd, and AFM cannot express it.
+        losses.append("AFM 0.4.0 stdio transport has no cwd field; the Agent Plugins plugin-root default cannot be honored")
     else:
         if "url" in config:
             transport["url"] = config["url"]

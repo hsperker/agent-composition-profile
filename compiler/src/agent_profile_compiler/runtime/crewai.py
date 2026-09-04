@@ -48,8 +48,11 @@ def _mcp_configs(agent, data_root: Path):
                     env=config.get("env"),
                 )
             )
-            if "cwd" in config:
-                losses.append(f"{server.name}: CrewAI MCPServerStdio has no cwd field")
+            # cwd is always set after Agent Plugins §7.2.1 defaulting; CrewAI cannot honor it.
+            losses.append(
+                f"{server.name}: CrewAI MCPServerStdio has no cwd field, so neither a declared cwd "
+                "nor the required plugin-root default can be honored"
+            )
         else:
             losses.append(f"{server.name}: unsupported transport {transport!r}")
     return mapped, losses

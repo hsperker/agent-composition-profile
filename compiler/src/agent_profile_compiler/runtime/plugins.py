@@ -44,9 +44,10 @@ def effective_server_config(server: McpServer, *, data_root: Path) -> dict[str, 
     """Return the client-facing configuration for one Agent Plugin MCP server.
 
     HTTP servers pass through unchanged. For stdio servers this applies Agent
-    Plugins §9: placeholders are expanded in args, env values, and cwd (never in
-    the command or keys), a ./ cwd resolves against the plugin root, and the
-    reserved PLUGIN_ROOT and PLUGIN_DATA variables are provided to the process.
+    Plugins §7.2.1 and §9: placeholders are expanded in args, env values, and cwd
+    (never in the command or keys), a ./ cwd resolves against the plugin root, an
+    omitted cwd defaults to the plugin root, and the reserved PLUGIN_ROOT and
+    PLUGIN_DATA variables are provided to the process.
     """
 
     config = copy.deepcopy(dict(server.config))
@@ -68,6 +69,9 @@ def effective_server_config(server: McpServer, *, data_root: Path) -> dict[str, 
         if cwd.startswith("./"):
             cwd = str(server.plugin_root / cwd[2:])
         config["cwd"] = cwd
+    else:
+        # Agent Plugins §7.2.1: when cwd is omitted the plugin root is the working directory.
+        config["cwd"] = root
     return config
 
 
@@ -80,7 +84,7 @@ class PluginServer:
 
 
 class PluginCatalog:
-    """Agent-owned view of every MCP component contributed by its plugins."""
+    """The MCP components an agent's plugins make available to it."""
 
     def __init__(self, owner: str, servers: list[PluginServer]) -> None:
         self.owner = owner

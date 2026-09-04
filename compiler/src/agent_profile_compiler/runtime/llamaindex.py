@@ -52,8 +52,11 @@ def _mcp_clients(agent, data_root: Path):
                     ),
                 )
             )
-            if "cwd" in config:
-                losses.append(f"{server.name}: BasicMCPClient has no cwd parameter")
+            # cwd is always set after Agent Plugins §7.2.1 defaulting; BasicMCPClient cannot honor it.
+            losses.append(
+                f"{server.name}: BasicMCPClient has no cwd parameter, so neither a declared cwd "
+                "nor the required plugin-root default can be honored"
+            )
         else:
             losses.append(f"{server.name}: unsupported transport {transport!r}")
     return clients, losses
@@ -130,7 +133,7 @@ def build(
                     make_activate_skill(catalog),
                     name="activate_skill",
                     description=(
-                        "Activate one agent-private skill. Available metadata: "
+                        "Activate one skill from this agent's catalog. Available metadata: "
                         + catalog.discovery_text()
                     ),
                 )

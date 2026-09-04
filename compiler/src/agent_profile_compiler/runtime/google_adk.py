@@ -50,7 +50,7 @@ def _activate_skill_tool(catalog: SkillCatalog):
         return catalog.activate(skill_name)
 
     activate_skill.__doc__ = (
-        "Load one agent-private skill on demand. Available metadata: "
+        "Load one skill from this agent's catalog on demand. Available metadata: "
         + catalog.discovery_text()
     )
     return activate_skill
@@ -198,7 +198,7 @@ def build(
                 else (
                     (
                         "resolved",
-                        "Agent Plugin MCP servers become agent-owned native McpToolset objects with transport configuration preserved.",
+                        "Agent Plugin MCP servers become native McpToolset objects available to the declaring agent, with transport configuration preserved.",
                     )
                     if agent.plugins
                     else ("preserved", "The source agent declares no plugins.")

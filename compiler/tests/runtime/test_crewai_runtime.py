@@ -155,3 +155,47 @@ def test_activates_agent_plugin_mcp_servers_over_stdio_and_streamable_http() -> 
     # MCPServerStdio has no cwd field, so the server runs in the inherited working directory.
     assert by_label["stdio"]["cwd"] != str(PLUGIN_ROOT)
     assert by_label["http"]["plugin_root_env"] is False
+
+
+class SpyCrewLLM(BaseLLM):
+    """Records the exact messages CrewAI delivers and answers with a constant."""
+
+    seen: list = []
+
+    def call(self, messages, tools=None, callbacks=None, available_functions=None, **kwargs):
+        self.seen.append([dict(m) for m in messages] if isinstance(messages, list) else [{"role": "user", "content": messages}])
+        return "final answer"
+
+
+def test_custom_templates_drop_role_and_goal_but_merge_instructions_into_the_user_turn() -> None:
+    """CrewAI's template override was probed as a route to core preservation.
+
+    It removes role and goal from the prompt, but CrewAI then builds one combined
+    prompt with no system message, so the instructions arrive fused with the task
+    text. Persistent context distinct from task input is therefore not available.
+    """
+    instructions = "# Instructions\n\nTry to falsify the tentative conclusion."
+
+    default_llm = SpyCrewLLM(model="spy")
+    CrewAgent(role="critic", goal="critic", backstory=instructions, llm=default_llm, verbose=False).kickoff("Challenge this.")
+    templated_llm = SpyCrewLLM(model="spy")
+    CrewAgent(
+        role="critic",
+        goal="critic",
+        backstory=instructions,
+        llm=templated_llm,
+        verbose=False,
+        system_template="{backstory}",
+        prompt_template="{input}",
+    ).kickoff("Challenge this.")
+
+    default_roles = [m["role"] for m in default_llm.seen[0]]
+    assert default_roles == ["system", "user"]
+    assert "You are critic." in default_llm.seen[0][0]["content"]
+    assert "Your personal goal is: critic" in default_llm.seen[0][0]["content"]
+
+    templated_roles = [m["role"] for m in templated_llm.seen[0]]
+    assert templated_roles == ["user"]
+    only = templated_llm.seen[0][0]["content"]
+    assert instructions in only and "Challenge this." in only
+    assert "You are critic" not in only and "personal goal" not in only
