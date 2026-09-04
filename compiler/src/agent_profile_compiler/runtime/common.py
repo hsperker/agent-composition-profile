@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from ..model import Agent, CompatibilityReport, VALID_COMPATIBILITY_STATUSES
+from ..model import Agent, BLOCKING_STATUSES, CompatibilityReport, VALID_COMPATIBILITY_STATUSES
 
 
 Assessment = tuple[str, str]
@@ -20,9 +20,25 @@ def source_semantic_features(agent: Agent) -> tuple[str, ...]:
         *(f"model.requires.{capability}" for capability in sorted(agent.requires)),
         *(f"model.prefers.{capability}" for capability in sorted(agent.prefers)),
         "skills",
+        *(("skills.durability",) if agent.all_skills else ()),
         "plugins",
         "delegates",
     )
+
+
+SKILL_DURABILITY_UNVERIFIED: Assessment = (
+    "unverified",
+    "Activated skill content enters context as a tool result. Whether it survives "
+    "context compaction or summarization for the rest of the session was not exercised.",
+)
+
+
+def skill_durability_assessment(agent: Agent) -> dict[str, Assessment]:
+    """The one skills property no runtime experiment exercised."""
+
+    if not agent.all_skills:
+        return {}
+    return {"skills.durability": SKILL_DURABILITY_UNVERIFIED}
 
 
 def assess_agent_semantics(
@@ -83,7 +99,7 @@ def enforce_strict_runtime(report: CompatibilityReport) -> None:
         finding
         for finding in report.findings
         if not finding.feature.startswith("model.prefers.")
-        and finding.status in {"approximated", "unsupported"}
+        and finding.status in BLOCKING_STATUSES
     ]
     if not blocking:
         return

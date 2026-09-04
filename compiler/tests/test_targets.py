@@ -33,7 +33,8 @@ def test_amplifier_preserves_leaf_identity_instructions_and_model_role() -> None
     assert frontmatter["meta"]["model_role"] == "reasoning"
     assert frontmatter["agents"] == "none"
     assert "Try to falsify the tentative conclusion." in generated
-    assert statuses(result, "identity", "critic") == {"preserved"}
+    assert statuses(result, "name", "critic") == {"preserved"}
+    assert statuses(result, "description", "critic") == {"preserved"}
     assert statuses(result, "model.requires.reasoning", "critic") == {"resolved"}
 
 
