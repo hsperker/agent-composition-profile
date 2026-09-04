@@ -53,4 +53,8 @@ UV_CACHE_DIR="$CACHE_DIR" uv run \
   --extra test \
   python "$ROOT/scripts/build_runtime_matrix.py"
 
-python "$ROOT/scripts/verify_generated.py"
+UV_CACHE_DIR="$CACHE_DIR" uv run \
+  --python 3.13 \
+  --project "$ROOT/compiler" \
+  --extra test \
+  python "$ROOT/scripts/verify_generated.py"
