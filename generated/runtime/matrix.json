@@ -447,6 +447,42 @@
       }
     }
   },
+  "product_probes": {
+    "claude-code/plugin-activation": {
+      "entry_instructions_in_system_prompt": true,
+      "exit_code": 0,
+      "mcp_tools_offered": [
+        "mcp__echohttp__echo_http",
+        "mcp__echostdio__echo_stdio"
+      ],
+      "skill_activated": null,
+      "skill_body_absent_before_activation": false,
+      "skill_body_in_context_after_activation": false,
+      "skill_body_persisted_in_later_turns": false,
+      "skill_catalog_advertised_before_activation": [],
+      "subagent_called": null,
+      "subagent_ran_with_own_instructions": false,
+      "subagent_result_returned_to_caller": false,
+      "version": "2.1.277 (Claude Code)"
+    },
+    "claude-code/research-team": {
+      "entry_instructions_in_system_prompt": true,
+      "exit_code": 0,
+      "mcp_tools_offered": [],
+      "skill_activated": "source-evaluation",
+      "skill_body_absent_before_activation": true,
+      "skill_body_in_context_after_activation": true,
+      "skill_body_persisted_in_later_turns": true,
+      "skill_catalog_advertised_before_activation": [
+        "source-evaluation",
+        "query-planning"
+      ],
+      "subagent_called": "explorer",
+      "subagent_ran_with_own_instructions": true,
+      "subagent_result_returned_to_caller": true,
+      "version": "2.1.277 (Claude Code)"
+    }
+  },
   "source_fixture": "examples/research-team/lead.agent.md",
   "source_fixture_sha256": {
     "examples/research-team/agents/critic.agent.md": "9248f7de5bbda4386e6d2207aed774ccab4ac4bdf146244fcbdabd1159ee46d0",

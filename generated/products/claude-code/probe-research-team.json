@@ -1,0 +1,32 @@
+{
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/research-team",
+  "mcp_results": [],
+  "mcp_tools_offered": [],
+  "notes": [
+    "subagent_stats spawned=1 completed=1"
+  ],
+  "product": "claude-code",
+  "requests": 5,
+  "skill_activated": "source-evaluation",
+  "skill_body_absent_before_activation": true,
+  "skill_body_in_context_after_activation": true,
+  "skill_body_persisted_in_later_turns": true,
+  "skill_catalog_advertised_before_activation": [
+    "source-evaluation",
+    "query-planning"
+  ],
+  "subagent_called": "explorer",
+  "subagent_ran_with_own_instructions": true,
+  "subagent_result_returned_to_caller": true,
+  "subagent_tools_offered": [
+    "Skill"
+  ],
+  "tools_offered_to_entry": [
+    "Skill",
+    "Agent"
+  ],
+  "version": "2.1.277 (Claude Code)"
+}

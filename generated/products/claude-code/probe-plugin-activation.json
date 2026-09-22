@@ -1,0 +1,39 @@
+{
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/runtime-probes/plugin-activation",
+  "mcp_results": [
+    {
+      "result": "{\"result\":\"{\\\"cwd\\\": \\\"${PROJECT_DIR}\\\", \\\"label\\\": \\\"stdio\\\", \\\"plugin_data_env\\\": true, \\\"plugin_root_env\\\": true, \\\"text\\\": \\\"probe\\\"}\"}",
+      "tool": "mcp__echostdio__echo_stdio"
+    },
+    {
+      "result": "{\"result\":\"{\\\"cwd\\\": \\\"${REPO_ROOT}\\\", \\\"label\\\": \\\"http\\\", \\\"plugin_data_env\\\": false, \\\"plugin_root_env\\\": false, \\\"text\\\": \\\"probe\\\"}\"}",
+      "tool": "mcp__echohttp__echo_http"
+    }
+  ],
+  "mcp_tools_offered": [
+    "mcp__echohttp__echo_http",
+    "mcp__echostdio__echo_stdio"
+  ],
+  "notes": [
+    "subagent_stats spawned=0 completed=0"
+  ],
+  "product": "claude-code",
+  "requests": 3,
+  "skill_activated": null,
+  "skill_body_absent_before_activation": false,
+  "skill_body_in_context_after_activation": false,
+  "skill_body_persisted_in_later_turns": false,
+  "skill_catalog_advertised_before_activation": [],
+  "subagent_called": null,
+  "subagent_ran_with_own_instructions": false,
+  "subagent_result_returned_to_caller": false,
+  "subagent_tools_offered": [],
+  "tools_offered_to_entry": [
+    "mcp__echostdio__echo_stdio",
+    "mcp__echohttp__echo_http"
+  ],
+  "version": "2.1.277 (Claude Code)"
+}

@@ -47,4 +47,11 @@ Fixture `examples/runtime-probes/plugin-activation`: one plugin, one stdio serve
 | openai-agents | activated | activated | true | true | by server name |
 | pydantic-ai | activated | activated | true | true | by server name |
 
+## Product probes (executed headless against a scripted model endpoint)
+
+| product / fixture | version | instructions in system prompt | skills: catalog first, body on activation, persists | subagent: called, own instructions, result returned | MCP tools offered |
+| --- | --- | --- | --- | --- | --- |
+| claude-code/plugin-activation | 2.1.277 (Claude Code) | true | no skills in fixture | no subagents in fixture | mcp__echohttp__echo_http, mcp__echostdio__echo_stdio |
+| claude-code/research-team | 2.1.277 (Claude Code) | true | true, true, true | explorer, true, true | none |
+
 Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.
