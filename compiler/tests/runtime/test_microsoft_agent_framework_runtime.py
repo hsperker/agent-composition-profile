@@ -117,7 +117,7 @@ def test_builds_native_microsoft_agents_skills_mcp_and_agent_tools() -> None:
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "preserved"
+    assert status(artifact, "lead-researcher", "subagents") == "preserved"
 
 
 def test_microsoft_runtime_executes_native_agent_as_tool_with_isolated_session() -> None:
@@ -141,8 +141,8 @@ def test_microsoft_runtime_executes_native_agent_as_tool_with_isolated_session()
     assert len(worker_client.seen_messages) == 1
     assert worker_client.seen_options[0]["instructions"] == package.agents["worker"].instructions
     assert [event.kind for event in result.observations] == [
-        "delegate-started",
-        "delegate-returned",
+        "subagent-started",
+        "subagent-returned",
         "runtime-output",
     ]
 

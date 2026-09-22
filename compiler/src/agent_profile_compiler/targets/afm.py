@@ -79,15 +79,15 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         else:
             report.add(agent.name, "plugins", "preserved", "The agent declares no plugins.")
 
-        if agent.delegate_names:
+        if agent.subagent_names:
             report.add(
                 agent.name,
-                "delegates",
+                "subagents",
                 "unsupported",
-                "AFM 0.4.0 does not define local delegate composition; its future-work section points to remote multi-agent interaction through A2A.",
+                "AFM 0.4.0 defines no local subagent relation; its future-work section points to remote multi-agent interaction through A2A.",
             )
         else:
-            report.add(agent.name, "delegates", "preserved", "The agent declares no delegates.")
+            report.add(agent.name, "subagents", "preserved", "The agent declares no subagents.")
 
         body = (
             f"# Role\n\n{agent.description.strip()}\n\n"

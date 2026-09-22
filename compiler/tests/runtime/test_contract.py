@@ -23,7 +23,7 @@ def agent() -> Agent:
         instructions="# Instructions\n\nUse the specialist.",
         requires=frozenset({"reasoning", "tool-use"}),
         prefers=frozenset({"vision-input"}),
-        delegate_names=("explorer",),
+        subagent_names=("explorer",),
     )
 
 
@@ -45,7 +45,7 @@ def test_assessment_records_each_source_semantic_separately() -> None:
             ),
             "skills": ("unsupported", "No progressive disclosure."),
             "plugins": ("resolved", "MCP tools are agent-scoped."),
-            "delegates": ("approximated", "Control transfers."),
+            "subagents": ("approximated", "Control transfers."),
         },
     )
 
@@ -58,7 +58,7 @@ def test_assessment_records_each_source_semantic_separately() -> None:
         "model.prefers.vision-input",
         "skills",
         "plugins",
-        "delegates",
+        "subagents",
     ]
 
 
@@ -80,7 +80,7 @@ def test_assessment_rejects_a_silent_or_unknown_source_semantic() -> None:
                     "Unavailable.",
                 ),
                 "skills": ("unsupported", "Unavailable."),
-                "delegates": ("unsupported", "Unavailable."),
+                "subagents": ("unsupported", "Unavailable."),
             },
         )
 
@@ -90,8 +90,8 @@ def test_strict_runtime_rejects_required_approximations_but_not_omitted_preferen
     report.add("lead-researcher", "model.prefers.vision-input", "omitted-preference", "Unavailable.")
     enforce_strict_runtime(report)
 
-    report.add("lead-researcher", "delegates", "approximated", "Control transfers.")
-    with pytest.raises(RuntimeCompatibilityError, match="delegates"):
+    report.add("lead-researcher", "subagents", "approximated", "Control transfers.")
+    with pytest.raises(RuntimeCompatibilityError, match="subagents"):
         enforce_strict_runtime(report)
 
 
@@ -116,14 +116,14 @@ def test_compatibility_report_rejects_unknown_status() -> None:
 
 def test_runtime_observation_json_is_stable_and_contains_framework_event_data() -> None:
     observation = RuntimeObservation(
-        kind="delegate-returned",
+        kind="subagent-returned",
         agent="lead-researcher",
-        data={"result": "critique", "delegate": "critic"},
+        data={"result": "critique", "subagent": "critic"},
     )
 
     assert json.dumps(observation.to_dict(), sort_keys=True) == (
-        '{"agent": "lead-researcher", "data": {"delegate": "critic", '
-        '"result": "critique"}, "kind": "delegate-returned"}'
+        '{"agent": "lead-researcher", "data": {"result": "critique", '
+        '"subagent": "critic"}, "kind": "subagent-returned"}'
     )
 
 
@@ -158,7 +158,7 @@ def test_agent_with_skills_requires_separate_durability_and_resource_assessments
         "instructions": ("preserved", "i"),
         "skills": ("preserved", "s"),
         "plugins": ("preserved", "p"),
-        "delegates": ("preserved", "g"),
+        "subagents": ("preserved", "g"),
     }
 
     with pytest.raises(ValueError, match="skills.durability, skills.resources"):
@@ -180,7 +180,7 @@ def test_features_map_to_conformance_modules() -> None:
     assert module_of("skills.durability") == "skills"
     assert module_of("skills.resources") == "skills"
     assert module_of("plugins") == "plugins"
-    assert module_of("delegates") == "delegates"
+    assert module_of("subagents") == "subagents"
     with pytest.raises(ValueError):
         module_of("identity")
 
@@ -206,5 +206,5 @@ def test_module_outcomes_separate_core_from_optional_modules() -> None:
     }
     assert modules["model"]["outcome"] == "accepted"
     assert modules["plugins"]["outcome"] == "not-declared"
-    assert modules["delegates"]["outcome"] == "not-declared"
+    assert modules["subagents"]["outcome"] == "not-declared"
     assert report.to_dict()["modules"] == modules

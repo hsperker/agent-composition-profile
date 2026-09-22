@@ -29,7 +29,7 @@ def test_loads_research_team_and_discovers_standard_components() -> None:
     assert [plugin.name for plugin in lead.plugins] == ["web-research"]
     assert [skill.name for skill in lead.plugins[0].skills] == ["query-planning"]
     assert [server.name for server in lead.plugins[0].mcp_servers] == ["research"]
-    assert lead.delegate_names == ("explorer", "critic")
+    assert lead.subagent_names == ("explorer", "critic")
 
 
 @pytest.mark.parametrize("field", ["spec: portable-agent/0.1", "extensions: {}", "metadata: {}", "license: MIT"])
@@ -66,27 +66,27 @@ def test_rejects_empty_markdown_body(tmp_path: Path) -> None:
         load_package(tmp_path / "agent.md", tmp_path)
 
 
-def test_rejects_delegate_cycles(tmp_path: Path) -> None:
+def test_rejects_subagent_cycles(tmp_path: Path) -> None:
     write_agent(tmp_path / "a.agent.md", """
         name: agent-a
         description: Delegates to B.
-        delegates: [./b.agent.md]
+        subagents: [./b.agent.md]
     """)
     write_agent(tmp_path / "b.agent.md", """
         name: agent-b
         description: Delegates to A.
-        delegates: [./a.agent.md]
+        subagents: [./a.agent.md]
     """)
 
-    with pytest.raises(ProfileError, match="delegate cycle"):
+    with pytest.raises(ProfileError, match="subagent cycle"):
         load_package(tmp_path / "a.agent.md", tmp_path)
 
 
-def test_rejects_duplicate_direct_delegate_names(tmp_path: Path) -> None:
+def test_rejects_duplicate_direct_subagent_names(tmp_path: Path) -> None:
     write_agent(tmp_path / "root.agent.md", """
         name: root-agent
         description: Has ambiguous delegates.
-        delegates: [./a.agent.md, ./b.agent.md]
+        subagents: [./a.agent.md, ./b.agent.md]
     """)
     write_agent(tmp_path / "a.agent.md", """
         name: worker
@@ -97,7 +97,7 @@ def test_rejects_duplicate_direct_delegate_names(tmp_path: Path) -> None:
         description: Second worker.
     """)
 
-    with pytest.raises(ProfileError, match="duplicate direct delegate name"):
+    with pytest.raises(ProfileError, match="duplicate direct subagent name"):
         load_package(tmp_path / "root.agent.md", tmp_path)
 
 
@@ -106,17 +106,17 @@ def test_rejects_duplicate_agent_names_anywhere_in_reachable_package(tmp_path: P
     write_agent(tmp_path / "root.agent.md", """
         name: root-agent
         description: Reaches two branches.
-        delegates: [./left.agent.md, ./right.agent.md]
+        subagents: [./left.agent.md, ./right.agent.md]
     """)
     write_agent(tmp_path / "left.agent.md", """
         name: left-agent
         description: Reaches the first worker.
-        delegates: [./left/worker.agent.md]
+        subagents: [./left/worker.agent.md]
     """)
     write_agent(tmp_path / "right.agent.md", """
         name: right-agent
         description: Reaches the second worker.
-        delegates: [./right/worker.agent.md]
+        subagents: [./right/worker.agent.md]
     """)
     write_agent(tmp_path / "left" / "worker.agent.md", """
         name: worker
@@ -230,3 +230,13 @@ def test_rejects_agent_plugin_mcp_fields_outside_the_1_0_schema(tmp_path: Path) 
 
     with pytest.raises(ProfileError, match="does not conform to Agent Plugins 1.0.0 MCP schema"):
         load_package(tmp_path / "agent.md", tmp_path)
+
+
+def test_delegates_is_accepted_as_the_draft_0_1_alias_but_not_alongside_subagents(tmp_path: Path) -> None:
+    (tmp_path / "w.agent.md").write_text("---\nname: w\ndescription: Worker.\n---\n\n# Instructions\n\nWork.\n", encoding="utf-8")
+    (tmp_path / "both.agent.md").write_text(
+        "---\nname: both\ndescription: Declares both spellings.\nsubagents: [./w.agent.md]\ndelegates: [./w.agent.md]\n---\n\n# Instructions\n\nCoordinate.\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ProfileError, match="either subagents or the draft 0.1 alias delegates"):
+        load_package(tmp_path / "both.agent.md", tmp_path)

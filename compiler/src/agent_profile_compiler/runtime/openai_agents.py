@@ -113,7 +113,7 @@ def build(
                     ),
                 )
             )
-        for delegate_name in source.delegate_names:
+        for delegate_name in source.subagent_names:
             child = build_agent(delegate_name)
             tools.append(
                 child.as_tool(
@@ -180,13 +180,13 @@ def build(
                     else ("preserved", "The source agent declares no plugins.")
                 )
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "preserved",
-                    "Agent.as_tool starts the specialist as a nested run with its own instructions/model and returns text without transferring the conversation.",
+                    "Agent.as_tool runs the listed agent as a bounded task with its own instructions and model, returns text, and leaves control with the caller.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(
@@ -209,8 +209,8 @@ def build(
         observations=observations,
         metadata={
             "entry_name": package.entry_name,
-            "delegate_names": {
-                agent.name: list(agent.delegate_names) for agent in package.agents.values()
+            "subagent_names": {
+                agent.name: list(agent.subagent_names) for agent in package.agents.values()
             },
         },
     )
@@ -256,7 +256,7 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
                 await server.cleanup()
 
     result = asyncio.run(execute())
-    delegates = set(artifact.metadata["delegate_names"].get(entry_name, []))
+    delegates = set(artifact.metadata["subagent_names"].get(entry_name, []))
     pending: dict[str, tuple[str, str]] = {}
     for item in result.new_items:
         raw = getattr(item, "raw_item", None)
@@ -268,9 +268,9 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
                 pending[call_id] = ("delegate", name)
                 observations.append(
                     RuntimeObservation(
-                        "delegate-started",
+                        "subagent-started",
                         entry_name,
-                        {"delegate": name, "mechanism": "agent-as-tool", "task": arguments.get("input", "")},
+                        {"subagent": name, "mechanism": "agent-as-tool", "task": arguments.get("input", "")},
                     )
                 )
             else:
@@ -288,7 +288,7 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
             if kind == "delegate":
                 observations.append(
                     RuntimeObservation(
-                        "delegate-returned", entry_name, {"delegate": name, "result": str(item.output)}
+                        "subagent-returned", entry_name, {"subagent": name, "result": str(item.output)}
                     )
                 )
             else:

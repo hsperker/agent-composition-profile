@@ -119,10 +119,10 @@ def build(
 
     teams: dict[str, Team] = {}
     for agent in package.agents.values():
-        if not agent.delegate_names:
+        if not agent.subagent_names:
             continue
         team = Team(
-            members=[native_agents[name] for name in agent.delegate_names],
+            members=[native_agents[name] for name in agent.subagent_names],
             name=agent.name,
             description=agent.description,
             instructions=agent.instructions,
@@ -138,7 +138,7 @@ def build(
                 agent.name,
                 {
                     "mechanism": "team-member-collaboration",
-                    "members": list(agent.delegate_names),
+                    "members": list(agent.subagent_names),
                 },
             )
         )
@@ -174,13 +174,13 @@ def build(
                     else ("preserved", "The source agent declares no plugins.")
                 )
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "approximated",
-                    "Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent.",
+                    "Agno Team is member collaboration under a team leader, not a bounded call from this agent that returns a result to it.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(

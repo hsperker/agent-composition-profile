@@ -88,7 +88,7 @@ def build(
             goal=agent.description,
             backstory=agent.instructions,
             llm=model,
-            allow_delegation=bool(agent.delegate_names),
+            allow_delegation=bool(agent.subagent_names),
             skills=[load_skill_metadata(skill.root) for skill in agent.all_skills] or None,
             mcps=mcps or None,
             verbose=False,
@@ -151,13 +151,13 @@ def build(
                     else ("preserved", "The source agent declares no plugins.")
                 )
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "approximated",
-                    "CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation.",
+                    "CrewAI delegation is bound to Crew tasks, context, and process, not a bounded call from this agent that returns a result to it.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(

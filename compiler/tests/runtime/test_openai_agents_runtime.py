@@ -51,7 +51,7 @@ def test_builds_native_openai_agents_mcp_and_agent_as_tool() -> None:
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "preserved"
+    assert status(artifact, "lead-researcher", "subagents") == "preserved"
 
 
 def test_native_runner_executes_agent_as_tool_and_returns_control_to_parent() -> None:
@@ -76,8 +76,8 @@ def test_native_runner_executes_agent_as_tool_and_returns_control_to_parent() ->
     assert worker_model.calls[0].system_instructions == package.agents["worker"].instructions
     assert coordinator_model.calls[-1].system_instructions == package.entry.instructions
     assert [event.kind for event in result.observations] == [
-        "delegate-started",
-        "delegate-returned",
+        "subagent-started",
+        "subagent-returned",
         "runtime-output",
     ]
 

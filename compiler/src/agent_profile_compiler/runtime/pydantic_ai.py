@@ -99,17 +99,17 @@ def build(
         tools = []
         if catalog.metadata():
             tools.append(_skill_tool(catalog))
-        for delegate_name in source.delegate_names:
+        for delegate_name in source.subagent_names:
             child = build_agent(delegate_name)
 
             def make_delegate(child_name: str, child_agent: Agent):
                 async def delegate(task: str) -> str:
                     runtime_trace.append(
                         RuntimeObservation(
-                            "delegate-started",
+                            "subagent-started",
                             name,
                             {
-                                "delegate": child_name,
+                                "subagent": child_name,
                                 "mechanism": "adapter-function-tool",
                                 "task": task,
                             },
@@ -118,9 +118,9 @@ def build(
                     result = str((await child_agent.run(task)).output)
                     runtime_trace.append(
                         RuntimeObservation(
-                            "delegate-returned",
+                            "subagent-returned",
                             name,
-                            {"delegate": child_name, "result": result},
+                            {"subagent": child_name, "result": result},
                         )
                     )
                     return result
@@ -193,13 +193,13 @@ def build(
                     else ("preserved", "The source agent declares no plugins.")
                 )
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "resolved",
-                    "PydanticAI has no agent relationship primitive. The adapter-authored Tool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
+                    "PydanticAI has no agent relationship primitive. The adapter-authored Tool implements the subagents contract: own instructions, task in, result out, caller keeps control.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(

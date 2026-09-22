@@ -89,7 +89,7 @@ def test_builds_native_adk_agents_mcp_and_agent_tools() -> None:
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "approximated"
+    assert status(artifact, "lead-researcher", "subagents") == "approximated"
 
 
 def test_adk_runner_executes_nested_agent_tool_and_returns_to_parent() -> None:
@@ -116,8 +116,8 @@ def test_adk_runner_executes_nested_agent_tool_and_returns_to_parent() -> None:
     assert len(worker_model.seen_requests) == 1
     assert len(coordinator_model.seen_requests) == 2
     assert [event.kind for event in result.observations] == [
-        "delegate-started",
-        "delegate-returned",
+        "subagent-started",
+        "subagent-returned",
         "runtime-output",
     ]
 
@@ -129,7 +129,7 @@ def test_strict_adk_rejects_shared_state_delegate_approximation() -> None:
         for name in package.agents
     }
 
-    with pytest.raises(RuntimeCompatibilityError, match="delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="subagents"):
         adapter.build(package, binding(models), strict=True)
 
 

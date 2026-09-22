@@ -4,7 +4,7 @@
 
 **Status:** Experimental input to the Agent Plugins Agent Profile incubation discussion. Not an adopted standard and not proposed as a competing standards effort.
 
-> A Markdown document identifies an agent and supplies persistent instructions. Optional fields attach a discovery description, Agent Skills, and Agent Plugins; model requirements are incubating. The host selects models and owns orchestration.
+> A Markdown document identifies an agent and supplies persistent instructions. Optional fields attach a discovery description, Agent Skills, Agent Plugins, and subagents the agent may call as bounded tasks; model requirements are incubating. The host selects models and owns orchestration.
 
 ```markdown
 ---
@@ -26,7 +26,7 @@ Investigate before concluding.
 Cite the evidence behind the final answer.
 ```
 
-This revision follows the runtime evidence in `EVIDENCE.md`. It reduces the required document to a name and instructions, keeps description, Agent Skills, and Agent Plugins as optional fields, marks host-resolved model requirements as incubating, moves model selection and preferences to the host, and removes local delegation.
+This revision follows the runtime evidence in `EVIDENCE.md`. It reduces the required document to a name and instructions, keeps description, Agent Skills, and Agent Plugins as optional fields, replaces the generic `delegates` field with a narrow optional `subagents` relation, marks host-resolved model requirements as incubating, and moves model selection and preferences to the host.
 
 ## 1. Question and evidence
 
@@ -41,7 +41,7 @@ The observed semantic intersection is narrower than draft 0.1:
 - selection descriptions are common but not universal and are sometimes promoted into behavioral prompt content;
 - Agent Skills and Agent Plugins are coherent optional dependencies; every runtime could activate skills through the published dedicated-tool pattern, but none exercised session durability;
 - model requirements can be declared portably but are only ever resolved by a host attestation; no SDK verified them natively;
-- delegation, handoff, graph transition, and team collaboration are observably different mechanisms.
+- delegation, handoff, graph transition, and team collaboration are observably different mechanisms; only one of them, an allowlisted subagent invoked as a bounded task that returns a result, is shared widely enough to keep, and the products agree on it more than the frameworks do.
 
 ## 2. Goals
 
@@ -67,7 +67,8 @@ agent document
 ├── optional
 │   ├── selection description
 │   ├── Agent Skill references
-│   └── Agent Plugin references
+│   ├── Agent Plugin references
+│   └── subagents callable as bounded tasks
 └── incubating
     └── model requirements
 ```
@@ -79,7 +80,7 @@ runtime binding
 ├── concrete model, provider, endpoint, capability attestation, and selection preferences
 ├── credentials and authorization
 ├── native tools and ambient capabilities
-├── agent relationships and orchestration
+├── orchestration beyond bounded subagent calls: handoffs, workflows, teams, nesting depth
 ├── state, memory, context, and history
 ├── sandbox, approvals, budgets, retries, and timeouts
 └── interfaces, services, and deployment
@@ -100,6 +101,7 @@ The frontmatter fields are:
 | `model` | No, incubating | `requires` only: model capabilities the agent needs, resolved by the host. |
 | `skills` | No | Agent Skills that must be available to this agent. |
 | `plugins` | No | Agent Plugins required by this agent. |
+| `subagents` | No | Agents this agent may invoke as bounded tasks that return a result. |
 
 No other top-level field is defined in draft 0.2. Empty optional arrays, empty descriptions, and empty requirement maps are invalid.
 
@@ -231,28 +233,15 @@ Objectively checkable capabilities such as `tool-use`, `vision-input`, or `struc
 
 Draft 0.2 has no `model.prefers`. A preference that does not affect whether the agent can execute is deployment selection policy and lives in the host binding.
 
-## 11. Agent relationships belong to orchestration
+## 11. `subagents`
 
-Draft 0.2 has no `delegates` field.
+Each `subagents` entry is a relative path to another agent document in the package. The listed agents MUST be available to this agent as bounded tasks: the child runs with its own instructions, receives the task text, returns a result to the caller, and the caller keeps control throughout.
 
-The tested mechanisms did not converge:
+The field is additive, like `skills` and `plugins`: it says which agents must be available, not that they are the only ones. Whether a host also exposes other agents, how deep calls may nest, and what the child can see beyond the task text are host policy.
 
-- bounded agent-as-tool calls;
-- handoff or active-agent transfer;
-- workflow or graph transitions;
-- shared-state nested runs;
-- team/member collaboration;
-- application-authored function tools;
-- catalogs with no per-parent invocation contract;
-- no local equivalent.
+Preservation requires a native mechanism with those four properties. Claude Code's `Agent(...)` allowlist, Copilot's `agents` list, OpenCode's task permission, and agent-as-tool in OpenAI Agents SDK and Microsoft Agent Framework are `preserved`. A project-wide catalog such as Codex's, where the listed agents are available but the allowlist is not enforced per agent, is `resolved`. An adapter tool implementing the four properties on a framework without a relationship primitive is `resolved`. Mechanisms that transfer control (handoffs, workflow transitions), share state between caller and child, or bind the call to a team or task graph are `approximated`; strict mode rejects them.
 
-These mechanisms differ in control ownership, state sharing, task schemas, result handling, and conversation continuity. A single generic `delegates` field wrongly suggests they share one semantic; that overload is the reason for removal. An adapter MUST NOT lower one mechanism into another while claiming semantic preservation.
-
-Adapter-authored implementations are not illegitimate in themselves. Where a source contract is explicit, for example a fresh child run with task in, text out, and control returning to the parent, an adapter tool that implements it is `resolved`. A future optional field may define one explicitly typed relationship such as `agent-as-tool`; draft 0.2 does not attempt to cover multi-agent orchestration.
-
-Draft 0.2 defines no agent inventory either. An Agent Profile describes one agent; a package may contain several agents; orchestration defines relationships among them. The latter two are left to packaging and orchestration when a use case emerges.
-
-Remote agents remain the domain of protocols such as A2A.
+Draft 0.1's `delegates` field is removed. It promised one semantic for handoff, graph transition, shared-state runs, team collaboration, and agent-as-tool alike; the experiment showed those differ in control ownership, state sharing, task schemas, and result handling, and an adapter MUST NOT lower one into another while claiming preservation. Loaders MAY accept `delegates` as a draft 0.1 alias for `subagents`. Draft 0.2 defines no agent inventory: a profile describes one agent, a package may contain several, and orchestration beyond bounded calls stays outside the document.
 
 ## 12. Compatibility reporting
 
@@ -269,7 +258,7 @@ For every declared source semantic and every agent, an adapter emits exactly one
 
 Strict mode MUST reject any required source semantic classified `approximated` or `unsupported`. `unverified` findings do not block strict mode but MUST be listed in the report. Diagnostic mode MAY construct the representable subset only when the report marks every loss. No mode may silently discard source semantics.
 
-Reports MUST also state an outcome for the required core and for each optional field present: description, model, skills, plugins, and, for draft 0.1 documents, delegates. The reference reports carry these under a `modules` key. A combined fixture that is rejected does not show that the core is non-portable; it shows which optional field the target cannot preserve.
+Reports MUST also state an outcome for the required core and for each optional field present: description, model, skills, plugins, and subagents. The reference reports carry these under a `modules` key. A combined fixture that is rejected does not show that the core is non-portable; it shows which optional field the target cannot preserve.
 
 Reports SHOULD distinguish:
 
@@ -296,7 +285,7 @@ The decisive findings were:
 - native-looking fields can carry different roles (`description`, CrewAI `goal`, and `backstory`), so a same-named field is not preservation;
 - Agent Skills activation converged on the published dedicated-tool pattern in all eight runtimes, while session durability was exercised by none;
 - MCP object construction does not prove endpoint activation; a separate live probe activated one plugin over stdio and header-gated streamable HTTP in all eight runtimes, with two SDKs unable to honor `cwd` and non-portable tool naming;
-- one generic `delegates` field cannot name the mechanism a target actually uses;
+- one generic `delegates` field cannot name the mechanism a target actually uses; the narrow `subagents` relation is preserved by every product except AFM and by the agent-as-tool frameworks, and approximated by orchestration-first frameworks;
 - dependency isolation is part of a reproducible multi-framework experiment.
 
 The classifications are recorded reviewer judgments about each native mechanism, backed by construction tests and deterministic runtime smoke tests. They are not measurements derived from the traces. See `EVIDENCE.md`, individual reports under `generated/runtime/`, and the generated `generated/runtime/matrix.json`.

@@ -148,7 +148,7 @@ def build(
             description=agent.description,
             system_prompt=agent.instructions,
             tools=tools,
-            can_handoff_to=list(agent.delegate_names),
+            can_handoff_to=list(agent.subagent_names),
             llm=model,
             streaming=False,
         )
@@ -201,13 +201,13 @@ def build(
                 if agent.plugins
                 else ("preserved", "The source agent declares no plugins.")
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "approximated",
-                    "AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent.",
+                    "AgentWorkflow can_handoff_to transfers active control through shared workflow state; the caller does not keep control and no result returns to it.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         if mcp_losses[agent.name]:

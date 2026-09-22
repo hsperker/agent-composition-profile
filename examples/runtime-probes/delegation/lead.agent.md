@@ -1,7 +1,7 @@
 ---
 name: coordinator
 description: Coordinates one bounded specialist task and returns the final answer.
-delegates:
+subagents:
   - ./worker.agent.md
 ---
 

@@ -78,7 +78,7 @@ def main() -> None:
     runtime_reports = list((GENERATED / "runtime").glob("*/compatibility.json"))
     assert len(runtime_reports) == 8
     allowed = {"preserved", "resolved", "approximated", "unsupported", "omitted-preference", "unverified"}
-    modules = {"core", "description", "model", "skills", "plugins", "delegates"}
+    modules = {"core", "description", "model", "skills", "plugins", "subagents"}
     expected_strict = {
         "langgraph": "rejected",
         "crewai": "rejected",

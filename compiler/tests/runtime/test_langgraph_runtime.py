@@ -88,7 +88,7 @@ def test_builds_real_langgraph_agents_and_reports_semantics_independently() -> N
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "unsupported"
-    assert status(artifact, "lead-researcher", "delegates") == "resolved"
+    assert status(artifact, "lead-researcher", "subagents") == "resolved"
     assert status(artifact, "lead-researcher", "model.prefers.vision-input") == "omitted-preference"
 
 
@@ -103,14 +103,14 @@ def test_native_langgraph_runtime_returns_control_after_specialist_tool_call() -
     events = [(item.kind, item.agent, dict(item.data)) for item in result.observations]
     assert events == [
         (
-            "delegate-started",
+            "subagent-started",
             "lead-researcher",
-            {"delegate": "explorer", "mechanism": "agent-as-tool", "task": "Find primary evidence."},
+            {"subagent": "explorer", "mechanism": "agent-as-tool", "task": "Find primary evidence."},
         ),
         (
-            "delegate-returned",
+            "subagent-returned",
             "lead-researcher",
-            {"delegate": "explorer", "result": "Primary evidence with limits."},
+            {"subagent": "explorer", "result": "Primary evidence with limits."},
         ),
         (
             "runtime-output",

@@ -16,7 +16,7 @@ from .model import Agent, McpServer, Package, Plugin, ProfileError, Skill
 from .vendor_schemas import MCP_SCHEMA, MCP_SCHEMA_ID, PLUGIN_SCHEMA, PLUGIN_SCHEMA_ID
 
 
-_ALLOWED_FIELDS = {"name", "description", "model", "skills", "plugins", "delegates"}
+_ALLOWED_FIELDS = {"name", "description", "model", "skills", "plugins", "subagents", "delegates"}
 _ALLOWED_CAPABILITIES = {"reasoning", "tool-use", "vision-input"}
 _NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -315,8 +315,11 @@ def _parse_agent_document(path: Path, package_root: Path) -> Agent:
     plugin_paths = _resolve_reference_list(
         data.get("plugins"), source=path, package_root=package_root, expected="plugin"
     )
-    delegate_paths = _resolve_reference_list(
-        data.get("delegates"), source=path, package_root=package_root, expected="delegate"
+    if "subagents" in data and "delegates" in data:
+        raise ProfileError(f"{path}: declare either subagents or the draft 0.1 alias delegates, not both")
+    # `delegates` is the draft 0.1 spelling; draft 0.2 names the narrow relation `subagents`.
+    subagent_paths = _resolve_reference_list(
+        data.get("subagents", data.get("delegates")), source=path, package_root=package_root, expected="subagent"
     )
 
     direct_skills = tuple(_load_skill(skill_path) for skill_path in skill_paths)
@@ -341,7 +344,7 @@ def _parse_agent_document(path: Path, package_root: Path) -> Agent:
         prefers=prefers,
         direct_skills=direct_skills,
         plugins=plugins,
-        delegate_paths=delegate_paths,
+        subagent_paths=subagent_paths,
     )
 
 
@@ -363,7 +366,7 @@ def load_package(entry_path: Path | str, package_root: Path | str) -> Package:
         if path in visiting:
             cycle = visiting[visiting.index(path) :] + [path]
             rendered = " -> ".join(str(item.relative_to(root)) for item in cycle)
-            raise ProfileError(f"delegate cycle: {rendered}")
+            raise ProfileError(f"subagent cycle: {rendered}")
         if path in by_path:
             return by_path[path]
 
@@ -381,24 +384,24 @@ def load_package(entry_path: Path | str, package_root: Path | str) -> Package:
         # Inspect direct names before descending so ambiguous direct catalogs get a precise error.
         direct_name_sources: dict[str, Path] = {}
         parsed_children: list[Agent] = []
-        for delegate_path in agent.delegate_paths:
+        for delegate_path in agent.subagent_paths:
             child = by_path.get(delegate_path) or _parse_agent_document(delegate_path, root)
             previous = direct_name_sources.get(child.name)
             if previous is not None and previous != delegate_path:
                 raise ProfileError(
-                    f"{path}: duplicate direct delegate name {child.name!r}: "
+                    f"{path}: duplicate direct subagent name {child.name!r}: "
                     f"{previous.relative_to(root)} and {delegate_path.relative_to(root)}"
                 )
             direct_name_sources[child.name] = delegate_path
             parsed_children.append(child)
 
-        delegate_names: list[str] = []
-        for delegate_path in agent.delegate_paths:
+        subagent_names: list[str] = []
+        for delegate_path in agent.subagent_paths:
             child = visit(delegate_path)
-            delegate_names.append(child.name)
+            subagent_names.append(child.name)
 
         visiting.pop()
-        final_agent = replace(agent, delegate_names=tuple(delegate_names))
+        final_agent = replace(agent, subagent_names=tuple(subagent_names))
         by_path[path] = final_agent
         by_name[final_agent.name] = final_agent
         return final_agent

@@ -51,7 +51,7 @@ def test_amplifier_full_package_reports_skill_and_plugin_runtime_gaps() -> None:
         compile_package(package, "amplifier", BINDINGS["amplifier"], strict=True)
 
 
-def test_claude_code_lowers_full_package_with_scoped_mcp_and_main_agent_delegate_allowlist() -> None:
+def test_claude_code_lowers_full_package_with_scoped_mcp_and_main_agent_subagent_allowlist() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     result = compile_package(package, "claude-code", BINDINGS["claude-code"], strict=True)
 
@@ -64,13 +64,14 @@ def test_claude_code_lowers_full_package_with_scoped_mcp_and_main_agent_delegate
     assert lead_frontmatter["mcpServers"][0]["research"]["type"] == "http"
     assert ".claude/skills/source-evaluation/SKILL.md" in result.files
     assert ".claude/skills/query-planning/SKILL.md" in result.files
-    assert statuses(result, "delegates", "lead-researcher") == {"preserved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"preserved"}
     assert statuses(result, "plugins", "lead-researcher") == {"resolved"}
     assert not result.report.has_unsupported
 
 
-def test_claude_code_rejects_nested_delegate_allowlist_in_strict_mode(tmp_path: Path) -> None:
-    # Reuse the package but make explorer delegate to critic; Claude ignores Agent(type) in subagents.
+def test_claude_code_resolves_nested_subagents_without_enforcing_the_allowlist(tmp_path: Path) -> None:
+    # Reuse the package but let explorer call critic; Claude ignores Agent(type) inside subagents,
+    # so the listed agent is available (additive) but the allowlist is not enforced.
     package_dir = tmp_path / "package"
     package_dir.mkdir()
     for source in EXAMPLE.rglob("*"):
@@ -81,18 +82,17 @@ def test_claude_code_rejects_nested_delegate_allowlist_in_strict_mode(tmp_path: 
     explorer = package_dir / "agents" / "explorer.agent.md"
     text = explorer.read_text(encoding="utf-8").replace(
         "plugins:\n  - ../plugins/web-research\n",
-        "plugins:\n  - ../plugins/web-research\ndelegates:\n  - ./critic.agent.md\n",
+        "plugins:\n  - ../plugins/web-research\nsubagents:\n  - ./critic.agent.md\n",
     )
     explorer.write_text(text, encoding="utf-8")
     package = load_package(package_dir / "lead.agent.md", package_dir)
 
-    result = compile_package(package, "claude-code", BINDINGS["claude-code"], strict=False)
-    assert statuses(result, "delegates", "explorer") == {"unsupported"}
-    with pytest.raises(CompilationError):
-        compile_package(package, "claude-code", BINDINGS["claude-code"], strict=True)
+    result = compile_package(package, "claude-code", BINDINGS["claude-code"], strict=True)
+    assert statuses(result, "subagents", "explorer") == {"resolved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"preserved"}
 
 
-def test_codex_emits_parseable_agent_toml_and_resolves_delegate_catalog() -> None:
+def test_codex_emits_parseable_agent_toml_and_resolves_subagent_catalog() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     result = compile_package(package, "codex", BINDINGS["codex"], strict=True)
 
@@ -104,11 +104,11 @@ def test_codex_emits_parseable_agent_toml_and_resolves_delegate_catalog() -> Non
     assert lead["mcp_servers"]["research"]["url"] == "https://research.example.com/mcp"
     assert "explorer" in lead["developer_instructions"]
     assert "critic" in lead["developer_instructions"]
-    assert statuses(result, "delegates", "lead-researcher") == {"resolved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"resolved"}
     assert not result.report.has_unsupported
 
 
-def test_afm_compiles_leaf_with_skill_and_plugin_mcp_but_rejects_local_delegates() -> None:
+def test_afm_compiles_leaf_with_skill_and_plugin_mcp_but_rejects_local_subagents() -> None:
     leaf = load_package(EXAMPLE / "agents" / "explorer.agent.md", EXAMPLE)
     leaf_result = compile_package(leaf, "afm", BINDINGS["afm"], strict=True)
     afm_text = leaf_result.files["explorer.afm.md"]
@@ -123,7 +123,7 @@ def test_afm_compiles_leaf_with_skill_and_plugin_mcp_but_rejects_local_delegates
 
     full = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     diagnostic = compile_package(full, "afm", BINDINGS["afm"], strict=False)
-    assert statuses(diagnostic, "delegates", "lead-researcher") == {"unsupported"}
+    assert statuses(diagnostic, "subagents", "lead-researcher") == {"unsupported"}
     with pytest.raises(CompilationError):
         compile_package(full, "afm", BINDINGS["afm"], strict=True)
 
@@ -185,7 +185,7 @@ def test_claude_rejects_global_skill_name_collision_that_cannot_be_copied_once(t
     )
     write_agent(
         package_root / "root.agent.md",
-        "name: root-agent\ndescription: Coordinates two agents.\ndelegates: [./left.agent.md, ./right.agent.md]",
+        "name: root-agent\ndescription: Coordinates two agents.\nsubagents: [./left.agent.md, ./right.agent.md]",
     )
     write_agent(
         package_root / "left.agent.md",

@@ -23,7 +23,7 @@ def source_semantic_features(agent: Agent) -> tuple[str, ...]:
         *(("skills.durability", "skills.resources") if agent.all_skills else ()),
         "plugins",
         *(("plugins.activation",) if agent.plugins else ()),
-        "delegates",
+        "subagents",
     )
 
 

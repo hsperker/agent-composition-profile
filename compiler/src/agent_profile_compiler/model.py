@@ -22,7 +22,7 @@ BLOCKING_STATUSES = frozenset({"approximated", "unsupported"})
 
 # Conformance modules. Core is name plus instructions; every other module is an
 # optional capability module a host may or may not implement.
-MODULES = ("core", "description", "model", "skills", "plugins", "delegates")
+MODULES = ("core", "description", "model", "skills", "plugins", "subagents")
 
 
 def module_of(feature: str) -> str:
@@ -38,8 +38,8 @@ def module_of(feature: str) -> str:
         return "skills"
     if feature == "plugins" or feature.startswith("plugins."):
         return "plugins"
-    if feature == "delegates":
-        return "delegates"
+    if feature == "subagents":
+        return "subagents"
     raise ValueError(f"unknown source semantic feature {feature!r}")
 
 
@@ -83,8 +83,8 @@ class Agent:
     prefers: frozenset[str] = frozenset()
     direct_skills: tuple[Skill, ...] = ()
     plugins: tuple[Plugin, ...] = ()
-    delegate_paths: tuple[Path, ...] = ()
-    delegate_names: tuple[str, ...] = ()
+    subagent_paths: tuple[Path, ...] = ()
+    subagent_names: tuple[str, ...] = ()
 
     @property
     def all_skills(self) -> tuple[Skill, ...]:

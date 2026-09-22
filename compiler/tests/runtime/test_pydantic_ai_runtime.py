@@ -54,7 +54,7 @@ def test_builds_native_pydantic_agents_mcp_and_delegate_tools() -> None:
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "resolved"
+    assert status(artifact, "lead-researcher", "subagents") == "resolved"
 
 
 def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() -> None:
@@ -76,8 +76,8 @@ def test_pydantic_runner_executes_adapter_delegate_tool_and_returns_to_parent() 
 
     assert result.output == "coordinator used worker result"
     assert [event.kind for event in result.observations] == [
-        "delegate-started",
-        "delegate-returned",
+        "subagent-started",
+        "subagent-returned",
         "runtime-output",
     ]
     assert result.observations[1].data["result"] == "worker result"

@@ -39,15 +39,15 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             meta["model_role"] = role
         frontmatter: dict[str, Any] = {
             "meta": meta,
-            "agents": list(agent.delegate_names) if agent.delegate_names else "none",
+            "agents": list(agent.subagent_names) if agent.subagent_names else "none",
         }
         files[f"agents/{agent.name}.md"] = markdown_with_frontmatter(frontmatter, agent.instructions)
 
         report.add(
             agent.name,
-            "delegates",
+            "subagents",
             "preserved",
-            "Amplifier emits the direct delegate names through the agent allowlist.",
+            "Amplifier lists the subagents in the agent allowlist; each is invoked as a bounded task.",
         )
         if agent.all_skills:
             report.add(

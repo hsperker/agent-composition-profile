@@ -43,6 +43,9 @@
     },
     "plugins": {
       "$ref": "#/$defs/pathList"
+    },
+    "subagents": {
+      "$ref": "#/$defs/pathList"
     }
   },
   "$defs": {

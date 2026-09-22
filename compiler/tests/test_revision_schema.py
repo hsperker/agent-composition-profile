@@ -19,7 +19,7 @@ def test_evidence_revision_accepts_the_narrow_core() -> None:
 
 def test_evidence_revision_rejects_removed_delegates() -> None:
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate({"name": "technical-researcher", "delegates": []}, SCHEMA)
+        jsonschema.validate({"name": "technical-researcher", "subagents": []}, SCHEMA)
 
 
 def test_model_requirements_are_declared_in_the_profile() -> None:
@@ -41,3 +41,9 @@ def test_model_requirements_are_declared_in_the_profile() -> None:
 def test_model_preferences_and_empty_requirements_are_rejected(model: dict) -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate({"name": "technical-researcher", "model": model}, SCHEMA)
+
+
+def test_subagents_are_an_optional_list_of_agent_documents() -> None:
+    jsonschema.validate({"name": "coordinator", "subagents": ["./worker.agent.md"]}, SCHEMA)
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate({"name": "coordinator", "subagents": []}, SCHEMA)

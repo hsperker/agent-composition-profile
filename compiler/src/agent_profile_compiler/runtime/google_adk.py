@@ -130,7 +130,7 @@ def build(
         toolsets, losses = _mcp_toolsets(source, data_root)
         mcp_losses[name] = losses
         tools.extend(toolsets)
-        for delegate_name in source.delegate_names:
+        for delegate_name in source.subagent_names:
             tools.append(
                 AgentTool(
                     build_agent(delegate_name),
@@ -204,13 +204,13 @@ def build(
                     else ("preserved", "The source agent declares no plugins.")
                 )
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "approximated",
-                    "AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back.",
+                    "AgentTool is bounded and returns to the caller, but it copies parent state into the child and propagates child state deltas back, so the child is not isolated to its own instructions and task.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(
@@ -234,8 +234,8 @@ def build(
         metadata={
             "entry_name": package.entry_name,
             "source_to_native": source_to_native,
-            "delegate_native_names": {
-                name: [source_to_native[child] for child in agent.delegate_names]
+            "subagent_native_names": {
+                name: [source_to_native[child] for child in agent.subagent_names]
                 for name, agent in package.agents.items()
             },
         },
@@ -284,7 +284,7 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
             await runner.close()
 
     events = asyncio.run(execute())
-    delegates = set(artifact.metadata["delegate_native_names"].get(entry_name, []))
+    delegates = set(artifact.metadata["subagent_native_names"].get(entry_name, []))
     output = ""
     for event in events:
         content = getattr(event, "content", None)
@@ -293,10 +293,10 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
             if call and call.name in delegates:
                 observations.append(
                     RuntimeObservation(
-                        "delegate-started",
+                        "subagent-started",
                         entry_name,
                         {
-                            "delegate": call.name,
+                            "subagent": call.name,
                             "mechanism": "agent-tool-shared-state",
                             "task": (call.args or {}).get("request", ""),
                         },
@@ -314,9 +314,9 @@ def run(artifact: RuntimeArtifact, task: str, *, activate_plugins: bool = False)
             if response and response.name in delegates:
                 observations.append(
                     RuntimeObservation(
-                        "delegate-returned",
+                        "subagent-returned",
                         entry_name,
-                        {"delegate": response.name, "result": str(response.response)},
+                        {"subagent": response.name, "result": str(response.response)},
                     )
                 )
             elif response and response.name in tool_servers:

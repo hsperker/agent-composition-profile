@@ -123,7 +123,7 @@ def build(
     referenced = {
         delegate
         for agent in package.agents.values()
-        for delegate in agent.delegate_names
+        for delegate in agent.subagent_names
     }
 
     def build_agent(name: str):
@@ -149,7 +149,7 @@ def build(
                 )
             )
 
-        for delegate_name in source.delegate_names:
+        for delegate_name in source.subagent_names:
             delegate_graph = build_agent(delegate_name)
             delegate = package.agents[delegate_name]
 
@@ -163,10 +163,10 @@ def build(
                 """Run a specialist on a bounded task and return its text result."""
                 observations.append(
                     RuntimeObservation(
-                        "delegate-started",
+                        "subagent-started",
                         _parent,
                         {
-                            "delegate": _delegate.name,
+                            "subagent": _delegate.name,
                             "mechanism": "agent-as-tool",
                             "task": task,
                         },
@@ -176,9 +176,9 @@ def build(
                 output = _message_text(result["messages"][-1])
                 observations.append(
                     RuntimeObservation(
-                        "delegate-returned",
+                        "subagent-returned",
                         _parent,
-                        {"delegate": _delegate.name, "result": output},
+                        {"subagent": _delegate.name, "result": output},
                     )
                 )
                 return output
@@ -271,13 +271,13 @@ def build(
                 if agent.plugins
                 else ("preserved", "The source agent declares no plugins.")
             ),
-            "delegates": (
+            "subagents": (
                 (
                     "resolved",
-                    "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
+                    "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the subagents contract: own instructions, task in, result out, caller keeps control.",
                 )
-                if agent.delegate_names
-                else ("preserved", "The source agent declares no delegates.")
+                if agent.subagent_names
+                else ("preserved", "The source agent declares no subagents.")
             ),
         }
         assessments.update(_capability_assessments(agent, binding))

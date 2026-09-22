@@ -120,26 +120,26 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         else:
             report.add(agent.name, "plugins", "preserved", "The agent declares no plugins.")
 
-        if agent.delegate_names:
+        if agent.subagent_names:
             if agent.name == package.entry_name and entry_mode == "main":
-                tools.append(f"Agent({', '.join(agent.delegate_names)})")
+                tools.append(f"Agent({', '.join(agent.subagent_names)})")
                 report.add(
                     agent.name,
-                    "delegates",
+                    "subagents",
                     "preserved",
-                    "When launched as the main agent, Claude Code enforces the direct delegate allowlist with Agent(name, ...).",
+                    "When launched as the main agent, Claude Code enforces the subagent allowlist with Agent(name, ...); each call is a bounded task whose final report returns to the caller.",
                 )
             else:
                 tools.append("Agent")
                 report.add(
                     agent.name,
-                    "delegates",
-                    "unsupported",
-                    "Claude Code permits nested delegation, but ignores the type list in Agent(...) inside subagent definitions, so the direct catalog cannot be enforced natively.",
+                    "subagents",
+                    "resolved",
+                    "Claude Code permits nested subagent calls, so the listed agents are available as bounded tasks, but it ignores the Agent(type) list inside subagent definitions; availability holds, the allowlist is not enforced.",
                 )
         else:
-            # Explicitly omit Agent, preventing this generated subagent from spawning delegates.
-            report.add(agent.name, "delegates", "preserved", "No Agent tool is emitted for a leaf agent.")
+            # Explicitly omit Agent, preventing this generated subagent from spawning subagents.
+            report.add(agent.name, "subagents", "preserved", "No Agent tool is emitted for a leaf agent.")
 
         if tools:
             frontmatter["tools"] = tools

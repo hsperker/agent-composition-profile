@@ -80,7 +80,7 @@ def test_builds_native_crewai_agents_skills_mcp_and_crew_relationship() -> None:
     assert status(artifact, "lead-researcher", "skills.durability") == "unverified"
     assert status(artifact, "lead-researcher", "skills.resources") == "unverified"
     assert status(artifact, "lead-researcher", "plugins") == "resolved"
-    assert status(artifact, "lead-researcher", "delegates") == "approximated"
+    assert status(artifact, "lead-researcher", "subagents") == "approximated"
 
 
 def test_runs_a_real_crewai_leaf_agent_with_its_own_prompt() -> None:
@@ -103,7 +103,7 @@ def test_runs_a_real_crewai_leaf_agent_with_its_own_prompt() -> None:
 def test_strict_crewai_rejects_role_prompt_and_team_semantic_changes() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
-    with pytest.raises(RuntimeCompatibilityError, match="name.*description.*instructions.*delegates"):
+    with pytest.raises(RuntimeCompatibilityError, match="name.*description.*instructions.*subagents"):
         adapter.build(package, binding(), strict=True)
 
 
