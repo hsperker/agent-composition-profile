@@ -6,7 +6,7 @@
 
 ## Result
 
-The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static so far (files generated and verified, not executed); framework evidence is executed with deterministic models.
+The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static for five products (files generated and verified) and executed for Claude Code, which ran headless against a scripted model endpoint; framework evidence is executed with deterministic models.
 
 The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences did not survive. Generic delegation did not survive as one field, but one of the mechanisms it hid, an allowlisted subagent invoked as a bounded task that returns a result, did, and it survives more cleanly among products than among frameworks.
 
@@ -29,7 +29,7 @@ Products, static lowering by the reference compiler. A product qualifies when it
 
 | Product | Lowered to | Evidence |
 |---|---|---|
-| Claude Code | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | files generated, parsed, checked; not executed |
+| Claude Code 2.1.277 | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | generated files run headless against a scripted Anthropic endpoint; see the product probe below |
 | Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
 | GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
 | OpenCode | `.opencode/agents/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | files generated, parsed, checked; not executed |
@@ -49,7 +49,7 @@ Frameworks, executed. Each has its own hash locked environment. One shared envir
 | PydanticAI | 2.38.0 | `Agent`, `Tool`, `MCPToolset` | parent, async adapter tool, child, parent | accepted, skills unverified |
 | Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | parent, child `Agent.as_tool`, parent | accepted, skills unverified |
 
-Per target: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `plugin-activation.json`, `test-output.txt`. `generated/runtime/matrix.md` merges the eight framework reports with the four product reports and labels each row `runtime` or `product-static`. CrewAI, Agno, and LlamaIndex team and workflow objects were constructed but their transitions were not forced: the profile carries no task graph, process, or routing policy, and inventing one would be evidence for nothing.
+Per framework: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `plugin-activation.json`, `test-output.txt`. Per probed product: `generated/products/<product>/probe-<fixture>.json`. `generated/runtime/matrix.md` merges the eight framework reports with the four product reports and labels each row `runtime` or `product-static`. CrewAI, Agno, and LlamaIndex team and workflow objects were constructed but their transitions were not forced: the profile carries no task graph, process, or routing policy, and inventing one would be evidence for nothing.
 
 ## Grades
 
@@ -73,6 +73,25 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | AFM 0.4.0 (product, static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
 `requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; product targets were not executed, so neither applies.
+
+#### Product probe: Claude Code
+
+`scripts/verify-products.sh` compiles a fixture with the claude-code target into a temporary project, points `claude -p --agent <entry>` at a local server that speaks the Anthropic Messages API and answers from a script, and records every request the model would have seen. The user's own Claude configuration is untouched: the probe uses a fresh config directory in which only the temporary project is marked trusted. Two fixtures ran, the research team and the plugin activation probe.
+
+| Checked | Result |
+|---|---|
+| Entry instructions in the system prompt | yes, on every request |
+| Skills advertised before activation | names and descriptions in a system reminder message; the body absent |
+| Skill activation | `Skill` tool call, then the full `SKILL.md` body injected as a user text block |
+| Skill body persists | present in every later request of the session |
+| Subagent call | `Agent` tool with the listed type; the child ran with its own system prompt and without an `Agent` tool of its own |
+| Subagent result | returned to the caller as a later turn; Claude Code runs subagents asynchronously |
+| Plugin MCP over stdio and streamable HTTP | both servers connected and both tools ran, named `mcp__<server>__<tool>` |
+| Reserved environment variables | passed to the stdio server |
+| Working directory | not honored: Claude Code's MCP configuration has no `cwd` field and the server ran in the project directory |
+| Agent level `mcpServers` | loaded only after the project is trusted; untrusted projects silently drop them and a subagent with only MCP tools refuses to start |
+
+Consequences for the grades: Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
 
 Strict outcome per field group, all agents:
 
@@ -184,7 +203,7 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- The four product targets were lowered and verified, not executed. Product probes are the next pass.
+- Five product targets were lowered and verified, not executed. Claude Code was executed through the probe; Codex is installed but its Homebrew cask is broken on this machine, and OpenCode, Copilot, and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.

@@ -6,7 +6,7 @@ A portable agent profile must lower into the tools people actually run agents in
 
 ## Two dimensions
 
-**Products** are where customers run agents without writing code, so they are the destinations that make ownership real: whoever holds the file can leave whichever host produced it. A product qualifies as a target when it reads agent definitions from files the customer controls. Today: Claude Code, Codex, GitHub Copilot, OpenCode, and, from the earlier static work, Amplifier and AFM. Chat applications that keep agent configuration in a vendor UI do not qualify. Product evidence is currently static: the compiler produces the files and verifies them, but does not yet run the products.
+**Products** are where customers run agents without writing code, so they are the destinations that make ownership real: whoever holds the file can leave whichever host produced it. A product qualifies as a target when it reads agent definitions from files the customer controls. Today: Claude Code, Codex, GitHub Copilot, OpenCode, and, from the earlier static work, Amplifier and AFM. Chat applications that keep agent configuration in a vendor UI do not qualify. Product evidence is static for most products: the compiler produces the files and verifies them. Claude Code is also executed: the generated project runs headless against a scripted model endpoint and the probe records what reached the model.
 
 **Frameworks** are where developers embed agents in their own software. They are canaries: eight of them show which semantics are safe to promise and where a profile stops being a profile and becomes code generation. Framework evidence is executed: adapters build native objects and run them with deterministic models.
 
@@ -38,6 +38,7 @@ Grades are reviewer judgments backed by tests, not measurements. Anything not ex
 ```bash
 ./scripts/verify.sh          # parser, product targets, generated artifacts
 ./scripts/verify-runtime.sh  # eight locked framework environments, native tests, probes, matrix
+./scripts/verify-products.sh # installed product CLIs headless against a scripted endpoint
 ```
 
 Each framework has its own hash locked environment under `compiler/runtime-requirements/`, because CrewAI and OpenAI Agents need incompatible major versions of `openai`. Everything under `generated/` is produced by the scripts and never edited by hand.
@@ -47,12 +48,13 @@ Each framework has its own hash locked environment under `compiler/runtime-requi
 ```text
 compiler/src/agent_profile_compiler/targets/  product targets (static lowering)
 compiler/src/agent_profile_compiler/runtime/  framework adapters (executed)
+compiler/src/agent_profile_compiler/products/ product probes and the scripted Anthropic endpoint
 compiler/tests/                               parser, target, and runtime tests
 compiler/runtime-requirements/                per framework pins and hash locks
 examples/research-team/                       the unchanged fixture
 examples/runtime-probes/delegation/           offline control flow probe
 examples/runtime-probes/plugin-activation/    one plugin, local MCP echo server
-generated/                                    product outputs, framework reports, matrix
+generated/                                    product outputs, framework reports, product probes, matrix
 spec/                                         draft 0.2 and its schema
 docs/                                         provenance, discussion post draft
 ```
