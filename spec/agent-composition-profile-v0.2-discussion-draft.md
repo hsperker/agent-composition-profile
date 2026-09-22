@@ -129,7 +129,7 @@ Comments carry no semantics.
 
 The body after frontmatter is the agent's persistent instructions. It MUST contain non-whitespace text.
 
-Loaders MUST treat the body as literal Markdown. A target may translate it into a native instruction representation, but preservation requires that it remain persistent agent-level behavioral instructions applied on every invocation and kept distinct from ordinary task input. Ordinary task input, tool output, delegate output, and description text MUST NOT be silently merged into those instructions.
+Loaders MUST treat the body as literal Markdown. A target may translate it into a native instruction representation, but preservation requires that it remain persistent agent-level behavioral instructions applied on every invocation and kept distinct from ordinary task input. Ordinary task input, tool output, subagent output, and description text MUST NOT be silently merged into those instructions.
 
 The profile does not require a particular provider role such as `system` or `developer`.
 
@@ -141,7 +141,7 @@ The profile does not require a particular provider role such as `system` or `dev
 ^[a-z0-9]+(?:-[a-z0-9]+)*$
 ```
 
-The value is the logical package identity. It is required metadata for discovery, diagnostics, and packaging; it does not by itself define runtime behavior. Draft 0.2 has no intra-document references, so no field depends on it.
+The value is the logical package identity. It is required metadata for discovery, diagnostics, and packaging; it does not by itself define runtime behavior. `subagents` entries reference other documents by path, and hosts expose the child under its name, so the name must be stable within a package.
 
 A host MAY translate the name to a target-specific native identifier only if it retains a collision-free mapping back to the logical name and exposes the logical name in diagnostics. The profile does not define the translation.
 

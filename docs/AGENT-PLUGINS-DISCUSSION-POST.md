@@ -6,7 +6,7 @@
 
 Our premise: a portable Agent Profile must lower into the tools people run agents in, or it is a schema. We implemented a candidate profile in two dimensions. Products that read agent files the user controls (Claude Code, Codex, Amplifier, AFM), lowered by a reference compiler into each tool's native layout. And eight agent framework runtimes (LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, Microsoft Agent Framework), executed with deterministic models, as a check on the semantics. Grades are reviewer judgments against the published Agent Skills, Agent Plugins, and MCP contracts, backed by tests, and untested properties are marked `unverified`.
 
-The experiment did not support a general portable agent runtime abstraction. Model policy and generic multi-agent delegation did not converge. What survived was much smaller: logical identity, persistent agent instructions, and optional composition of Agent Skills and Agent Plugins.
+The experiment did not support a general portable agent runtime abstraction. Model policy and generic multi-agent delegation did not converge. What survived was much smaller: logical identity, persistent agent instructions, optional composition of Agent Skills and Agent Plugins, and one narrow subagent relation.
 
 What survived is small.
 
@@ -16,7 +16,9 @@ What survived is small.
 
 **Incubating:** `model.requires`. Declared by the author, resolved by the host. The concept held, but no capability vocabulary exists yet, so it stays out of the first proposal.
 
-**Out:** model selection and preferences, delegation, orchestration, workflows, deployment. One generic `delegates` field hid six different mechanisms.
+**Optional, narrowly typed:** `subagents`. Generic delegation hid six mechanisms behind one word and is gone. What the products agree on survives: a listed agent invoked as a bounded task with its own instructions, returning a result while the caller keeps control. Additive, like skills and plugins.
+
+**Out:** model selection and preferences, handoffs, workflows, teams, orchestration beyond bounded calls, deployment.
 
 Two findings from the plugin probe are not obvious from reading the formats:
 

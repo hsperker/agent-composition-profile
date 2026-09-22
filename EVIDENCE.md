@@ -2,13 +2,13 @@
 
 **Date:** 3 September 2026
 
-**Fixtures:** `examples/research-team/` (unchanged throughout), `examples/runtime-probes/delegation/` (delegation without the fixture's unreachable MCP endpoint), `examples/runtime-probes/plugin-activation/` (one Agent Plugin, a local MCP echo server over stdio and header gated streamable HTTP).
+**Fixtures:** `examples/research-team/` (unchanged throughout; it uses the draft 0.1 spelling `delegates`, which the loader accepts as an alias), `examples/runtime-probes/delegation/` (a subagent call without the fixture's unreachable MCP endpoint), `examples/runtime-probes/plugin-activation/` (one Agent Plugin, a local MCP echo server over stdio and header gated streamable HTTP).
 
 ## Result
 
 The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static so far (files generated and verified, not executed); framework evidence is executed with deterministic models.
 
-The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences and generic delegation did not survive.
+The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences did not survive. Generic delegation did not survive as one field, but one of the mechanisms it hid, an allowlisted subagent invoked as a bounded task that returns a result, did, and it survives more cleanly among products than among frameworks.
 
 | Field | Status | What survived |
 |---|---|---|
@@ -19,7 +19,7 @@ The candidate profile is not one portable runtime abstraction. Two fields surviv
 | `plugins` | **OPTIONAL** | A referenced plugin contributes all its standard components; a strict host makes them available to the declaring agent or rejects. Composition is guaranteed, a stable model visible tool name is not. |
 | `model.requires` | **INCUBATING** | Declared by the author, attested by the host binding. Sound as a concept; `tool-use` and `reasoning` have no standardized meaning. |
 | `model.prefers` | **REMOVED** | Deployment selection policy. Belongs in the host binding. |
-| `delegates` | **REMOVED** | One field for `agent-as-tool`, handoff, graph transition, shared state runs, and team collaboration. No agent inventory replaces it. |
+| `subagents` | **OPTIONAL** | Agents this agent may invoke as bounded tasks: own instructions, task in, result out, caller keeps control. Additive; nesting and child visibility are host policy. Replaces the generic `delegates`, which hid handoff, graph transition, shared state runs, and team collaboration behind one word. |
 
 How to read the grades. Each adapter states a grade and its reason for every field of every agent, tests assert those grades, and construction and runtime observations back them. The grades are judgments against the published Agent Skills, Agent Plugins, and MCP contracts, not measurements derived from traces. Deterministic models prove that instructions, tool calls, and results travel through the real framework code paths, not that a model behaves differently. A property that was not exercised is `unverified`, never `approximated`. Strict mode rejects `approximated` and `unsupported`, never discards a field, and lets `unverified` pass while listing it.
 
@@ -29,10 +29,10 @@ Products, static lowering by the reference compiler. A product qualifies when it
 
 | Product | Lowered to | Evidence |
 |---|---|---|
-| Claude Code | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` allowlist | files generated, parsed, checked; not executed |
+| Claude Code | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | files generated, parsed, checked; not executed |
 | Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
-| WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no delegate field, no stdio `cwd` |
+| WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no subagent relation, no stdio `cwd` |
 
 Frameworks, executed. Each has its own hash locked environment. One shared environment is impossible: CrewAI 1.15.18 needs `openai>=2.30,<3`, OpenAI Agents 0.22.0 needs `openai>=3,<4`. Python 3.13, because CrewAI's Chroma and Pydantic v1 path fails to import on 3.14.
 
@@ -53,7 +53,7 @@ Per target: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `pl
 
 Entry agent only. The JSON reports hold every agent and every reason.
 
-| Target | name | description | instructions | requires | prefers | skills | durability | resources | plugins | delegates |
+| Target | name | description | instructions | requires | prefers | skills | durability | resources | plugins | subagents |
 |---|---|---|---|---|---|---|---|---|---|---|
 | LangGraph | preserved | resolved | preserved | resolved | omitted | resolved | unverified | unverified | unsupported | resolved |
 | CrewAI | approximated | approximated | approximated | resolved | omitted | preserved | unverified | unverified | resolved | approximated |
@@ -79,7 +79,7 @@ Strict outcome per field group, all agents:
 | model | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | skills | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | plugins | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted |
-| delegates | accepted | rejected | rejected | rejected | accepted | rejected | accepted | accepted |
+| subagents | accepted | rejected | rejected | rejected | accepted | rejected | accepted | accepted |
 
 A rejected combined fixture says which field a target cannot preserve, not that the core is unportable. CrewAI is the one core rejection. Its role, goal, and backstory template fuses name, description, and instructions, and its template override drops role and goal only by collapsing the prompt into a single user message. That is a different agent abstraction, and the core should not be bent to pass it.
 
@@ -89,7 +89,7 @@ A rejected combined fixture says which field a target cannot preserve, not that 
 
 Six runtimes have a native name field. CrewAI has a role, which is prompt content, not identity. Google ADK requires Python identifiers, so `lead-researcher` becomes `lead_researcher` with an explicit map back. All four static targets have identity fields.
 
-The portable part is a stable logical identity for discovery, diagnostics, and packaging. Native spelling is not portable, and a native identifier may double as prompt content. With `delegates` gone the document has no internal references, so the name defines nothing at runtime. A host may translate it only with a collision free mapping back, graded `resolved` rather than `preserved`.
+The portable part is a stable logical identity for discovery, diagnostics, and packaging. Native spelling is not portable, and a native identifier may double as prompt content. Subagent references resolve to documents by path and to native tools by name, so the name must be stable, but it defines nothing else at runtime. A host may translate it only with a collision free mapping back, graded `resolved` rather than `preserved`.
 
 ### `description`
 
@@ -151,11 +151,18 @@ Not tested: two servers with the same tool name, SSE, OAuth, and failure reporti
 
 A referenced plugin contributes all its standard components; a strict host makes them available to the declaring agent, working directory default included, or rejects. This is a profile composition rule, not a change to Agent Plugins conformance, which allows clients with partial component support. Availability is not isolation; scoping stays with the host.
 
-### `delegates`
+### `subagents`
 
-The eight runtimes use six mechanisms. OpenAI Agents and Microsoft: native agent as tool, Microsoft in an isolated child session. LangGraph and PydanticAI: no relationship primitive, so an adapter tool implements the draft 0.1 contract of fresh child, task in, text out, control returns; graded `resolved`. Google ADK `AgentTool`: a child session that copies parent state and propagates deltas back. LlamaIndex `can_handoff_to`: transfer of control through shared workflow state. Agno `Team`: member collaboration. CrewAI: delegation bound to Crew tasks, context, and process. Codex exposes a project catalog; AFM has no local equivalent.
+The generic `delegates` field promised one semantic and the hosts supplied six. The eight frameworks alone use: native agent as tool (OpenAI Agents, Microsoft, the latter in an isolated child session), no relationship primitive at all (LangGraph, PydanticAI), a child session that copies parent state and propagates changes back (Google ADK `AgentTool`), transfer of control through shared workflow state (LlamaIndex `can_handoff_to`), team collaboration under a leader (Agno `Team`), and delegation bound to tasks and process (CrewAI). Codex exposes a project catalog; AFM has nothing local. Lowering one of these into another invents orchestration policy, so the generic field is gone, and no `agents:` inventory replaces it: a profile describes one agent, a package may hold several, orchestration relates them.
 
-The only shared meaning is that other agents exist. Who keeps control, whether state is shared, whether the child is a tool, and what the result contract is all differ, and lowering one mechanism into another invents orchestration policy. The field is removed because it is overloaded, not because adapter tools are illegitimate. No `agents:` inventory replaces it: a profile describes one agent, a package may hold several, orchestration relates them. A typed relationship such as `agent-as-tool` could become a future optional field.
+What the mechanisms share is narrower and worth keeping. The products largely agree on it: Claude Code's `Agent(...)` allowlist, Copilot's `agents` list, and OpenCode's task permission all invoke a listed agent as a bounded task with its own instructions and return its summary to the caller, who keeps control. Codex does the same through a project wide catalog without a per agent allowlist. Draft 0.2 names that relation `subagents` and, like `skills` and `plugins`, makes it additive: the listed agents must be available; whether others are too, how deep calls nest, and what the child sees beyond the task text are host policy.
+
+Graded against that contract, the picture splits by dimension:
+
+- Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. Codex `resolved`, same reason at project scope. Amplifier `preserved`. AFM `unsupported`.
+- Frameworks: OpenAI Agents and Microsoft `preserved`. LangGraph and PydanticAI `resolved`, because an adapter tool implements the four properties on a framework without a relationship primitive. Google ADK `approximated`, because state flows both ways. LlamaIndex, Agno, and CrewAI `approximated`, because control transfers or the call is bound to a team or task graph.
+
+The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every target that reached `preserved` or `resolved`. Copilot and OpenCode are documented, not yet lowered or probed; they enter in the next pass.
 
 ## What changes in the profile
 
@@ -164,7 +171,7 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 1. The core is `name` plus Markdown instructions. Nothing else is required.
 2. `description`, `skills`, and `plugins` are optional, with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Conformance is reported for the core and for each optional field.
 3. `model.requires` stays in the document as an incubating, host resolved declaration until a capability vocabulary is standardized. `model.prefers`, model selection, and attestation move to the host binding.
-4. `delegates` is removed as overloaded. No `agents:` inventory replaces it; packaging and orchestration are separate concerns.
+4. `delegates` is replaced by the narrow, additive `subagents` relation: bounded task, own instructions, result returns, caller keeps control. No `agents:` inventory; packaging and orchestration are separate concerns.
 5. The grading vocabulary gains `unverified` for properties that were not exercised. `omitted-preference` remains only for legacy reports.
 6. Reports distinguish construction, activation, and execution evidence. Hosts implement Agent Plugins §7.2.1 and §9 themselves: the working directory default, placeholder expansion, and the reserved variables.
 7. Host specific settings stay outside the document. No `x-<host>` sections, no extension map.
@@ -175,5 +182,5 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
 - The four product targets were lowered and verified, not executed. Product probes are the next pass.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
-- The combined fixture's strict outcome is a construction result. The probe fixture has no skills or delegates.
+- The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.

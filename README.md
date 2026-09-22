@@ -18,15 +18,15 @@ The candidate had eight fields: `name`, `description`, Markdown instructions, `m
 
 ```text
 Required     name, Markdown instructions
-Optional     description, skills, plugins
+Optional     description, skills, plugins, subagents
 Incubating   model.requires
-Removed      model.prefers, delegates
+Removed      model.prefers, generic delegates
 ```
 
 - Every product target and seven of eight frameworks preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions.
 - Optional fields follow one rule. If the field is present, a strict host preserves its defined semantics or rejects the profile. A skill or plugin reference means availability to the agent, not isolation.
 - Model requirements belong to the author and are resolved by the host, but no capability vocabulary is standardized yet.
-- `delegates` hid six mechanisms behind one word. The products, unlike the frameworks, largely agree on a narrow one: an allowlisted subagent invoked as a bounded task that returns a summary. A typed `subagents` field is the next thing to test.
+- `delegates` hid six mechanisms behind one word and is gone. One of them survives as `subagents`: a listed agent invoked as a bounded task with its own instructions, returning a result while the caller keeps control. Every product except AFM preserves or resolves it; orchestration first frameworks only approximate it.
 - One Agent Plugin with a local MCP server activated in all eight frameworks over stdio and header gated streamable HTTP. Two SDKs cannot set a working directory, so speaking MCP is not the same as supporting Agent Plugins. The tool names a model sees are not portable.
 
 Grades are reviewer judgments backed by tests, not measurements. Anything not exercised is marked `unverified`.
