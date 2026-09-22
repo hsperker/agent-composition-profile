@@ -1,10 +1,12 @@
-# Agent Composition Profile evidence
+# Agent Profile evidence
 
 **Date:** 3 September 2026
 
 **Fixtures:** `examples/research-team/` (unchanged throughout), `examples/runtime-probes/delegation/` (delegation without the fixture's unreachable MCP endpoint), `examples/runtime-probes/plugin-activation/` (one Agent Plugin, a local MCP echo server over stdio and header gated streamable HTTP).
 
 ## Result
+
+The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static so far (files generated and verified, not executed); framework evidence is executed with deterministic models.
 
 The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences and generic delegation did not survive.
 
@@ -23,7 +25,16 @@ How to read the grades. Each adapter states a grade and its reason for every fie
 
 ## What ran
 
-Each framework has its own hash locked environment. One shared environment is impossible: CrewAI 1.15.18 needs `openai>=2.30,<3`, OpenAI Agents 0.22.0 needs `openai>=3,<4`. Python 3.13, because CrewAI's Chroma and Pydantic v1 path fails to import on 3.14.
+Products, static lowering by the reference compiler. A product qualifies when it reads agent definitions from files the customer controls.
+
+| Product | Lowered to | Evidence |
+|---|---|---|
+| Claude Code | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` allowlist | files generated, parsed, checked; not executed |
+| Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
+| Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
+| WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no delegate field, no stdio `cwd` |
+
+Frameworks, executed. Each has its own hash locked environment. One shared environment is impossible: CrewAI 1.15.18 needs `openai>=2.30,<3`, OpenAI Agents 0.22.0 needs `openai>=3,<4`. Python 3.13, because CrewAI's Chroma and Pydantic v1 path fails to import on 3.14.
 
 | Runtime | Version | Native objects | Runtime path exercised | Full fixture, strict |
 |---|---:|---|---|---|
@@ -36,7 +47,7 @@ Each framework has its own hash locked environment. One shared environment is im
 | PydanticAI | 2.38.0 | `Agent`, `Tool`, `MCPToolset` | parent, async adapter tool, child, parent | accepted, skills unverified |
 | Microsoft Agent Framework | 1.17.0 | `Agent`, `SkillsProvider`, MCP tools, agent tools | parent, child `Agent.as_tool`, parent | accepted, skills unverified |
 
-Per target: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `plugin-activation.json`, `test-output.txt`. `generated/runtime/matrix.md` merges the eight runtime reports with the four static lowering reports and labels which is which. CrewAI, Agno, and LlamaIndex team and workflow objects were constructed but their transitions were not forced: the profile carries no task graph, process, or routing policy, and inventing one would be evidence for nothing.
+Per target: `generated/runtime/<target>/compatibility.json`, `runtime.json`, `plugin-activation.json`, `test-output.txt`. `generated/runtime/matrix.md` merges the eight framework reports with the four product reports and labels each row `runtime` or `product-static`. CrewAI, Agno, and LlamaIndex team and workflow objects were constructed but their transitions were not forced: the profile carries no task graph, process, or routing policy, and inventing one would be evidence for nothing.
 
 ## Grades
 
@@ -52,12 +63,12 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | Google ADK | resolved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | resolved | approximated |
 | PydanticAI | preserved | preserved | preserved | resolved | omitted | resolved | unverified | unverified | resolved | resolved |
 | Microsoft Agent Framework | preserved | preserved | preserved | resolved | omitted | preserved | unverified | unverified | resolved | preserved |
-| Amplifier (static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | n/a | unsupported | preserved |
-| Claude Code (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
-| Codex (static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
-| AFM 0.4.0 (static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
+| Amplifier (product, static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | n/a | unsupported | preserved |
+| Claude Code (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
+| Codex (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
+| AFM 0.4.0 (product, static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
-`requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; static targets never ran, so neither applies.
+`requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; product targets were not executed, so neither applies.
 
 Strict outcome per field group, all agents:
 
@@ -162,7 +173,7 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- The four static targets were never executed.
+- The four product targets were lowered and verified, not executed. Product probes are the next pass.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The probe fixture has no skills or delegates.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.

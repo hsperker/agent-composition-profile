@@ -4,13 +4,13 @@
 
 ## We tested where an Agent Profile stops being portable. The answer is: early.
 
-We investigated the Agent Profile idea by implementing a candidate profile across eight agent framework runtimes (LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, Microsoft Agent Framework) and four declarative targets (Amplifier, Claude Code, Codex, AFM). Every adapter builds native objects and runs them with deterministic models. Grades are reviewer judgments against the published Agent Skills, Agent Plugins, and MCP contracts, backed by tests, and untested properties are marked `unverified`.
+Our premise: a portable Agent Profile must lower into the tools people run agents in, or it is a schema. We implemented a candidate profile in two dimensions. Products that read agent files the user controls (Claude Code, Codex, Amplifier, AFM), lowered by a reference compiler into each tool's native layout. And eight agent framework runtimes (LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, Microsoft Agent Framework), executed with deterministic models, as a check on the semantics. Grades are reviewer judgments against the published Agent Skills, Agent Plugins, and MCP contracts, backed by tests, and untested properties are marked `unverified`.
 
 The experiment did not support a general portable agent runtime abstraction. Model policy and generic multi-agent delegation did not converge. What survived was much smaller: logical identity, persistent agent instructions, and optional composition of Agent Skills and Agent Plugins.
 
 What survived is small.
 
-**Required:** `name` and a Markdown instruction body, applied on every invocation and kept distinct from task input. Seven of eight runtimes preserve both. CrewAI does not: its role, goal, and backstory template changes both, and its custom templates fix that only by collapsing the prompt into one user message.
+**Required:** `name` and a Markdown instruction body, applied on every invocation and kept distinct from task input. Every product and seven of eight frameworks preserve both. CrewAI does not: its role, goal, and backstory template changes both, and its custom templates fix that only by collapsing the prompt into one user message.
 
 **Optional, with one rule:** `description`, `skills`, `plugins`. If the field is present, a strict host preserves its defined semantics or rejects the profile. A skill or plugin reference means availability to the declaring agent, not isolation. Scoping stays with the host, as in Agent Plugins.
 

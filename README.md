@@ -1,10 +1,20 @@
-# Agent Composition Profile interoperability experiment
+# Agent Profile interoperability experiment
 
-One question: which parts of a small agent declaration mean the same thing across independent agent frameworks?
+A portable agent profile must lower into the tools people actually run agents in. Otherwise it is a schema, not a profile. This repository tests how much of a candidate Agent Profile survives that lowering, and uses agent frameworks as a check on the semantics.
 
-We took a candidate profile with eight fields (`name`, `description`, Markdown instructions, `model.requires`, `model.prefers`, Agent Skills, Agent Plugins, `delegates`) and built the same fixture in eight framework runtimes and four declarative formats. Each adapter constructs native objects, runs them with deterministic models, and grades every field against the published Agent Skills, Agent Plugins, and MCP contracts. The runtimes are LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework. The formats are Amplifier, Claude Code, Codex, and AFM.
+**Success test.** One profile, compiled by the reference compiler into the directories of several products, runs in each without hand edits. Where it does not, the compatibility report says which field was lost and why.
+
+## Two dimensions
+
+**Products** are where customers run agents without writing code, so they are the destinations that make ownership real: whoever holds the file can leave whichever host produced it. A product qualifies as a target when it reads agent definitions from files the customer controls. Today: Claude Code, Codex, and, through the earlier static work, Amplifier and AFM. Copilot and OpenCode follow. Chat applications that keep agent configuration in a vendor UI do not qualify. Product evidence is currently static: the compiler produces the files and verifies them, but does not yet run the products.
+
+**Frameworks** are where developers embed agents in their own software. They are canaries: eight of them show which semantics are safe to promise and where a profile stops being a profile and becomes code generation. Framework evidence is executed: adapters build native objects and run them with deterministic models.
+
+The frameworks are LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework.
 
 ## What survived
+
+The candidate had eight fields: `name`, `description`, Markdown instructions, `model.requires`, `model.prefers`, Agent Skills, Agent Plugins, `delegates`.
 
 ```text
 Required     name, Markdown instructions
@@ -13,11 +23,11 @@ Incubating   model.requires
 Removed      model.prefers, delegates
 ```
 
-- Seven of eight runtimes preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions, and its template override only collapses everything into one user message.
-- Optional fields follow one rule. If the field is present, a strict host preserves its defined semantics or rejects the profile.
-- Model requirements belong to the author and are resolved by the host. No capability vocabulary is standardized yet, so the field stays incubating.
-- `delegates` hid six different mechanisms behind one word.
-- One Agent Plugin with a local MCP server activated in all eight runtimes over stdio and header gated streamable HTTP. Two SDKs cannot set a working directory, so speaking MCP is not the same as supporting Agent Plugins. The tool names a model sees are not portable.
+- Every product target and seven of eight frameworks preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions.
+- Optional fields follow one rule. If the field is present, a strict host preserves its defined semantics or rejects the profile. A skill or plugin reference means availability to the agent, not isolation.
+- Model requirements belong to the author and are resolved by the host, but no capability vocabulary is standardized yet.
+- `delegates` hid six mechanisms behind one word. The products, unlike the frameworks, largely agree on a narrow one: an allowlisted subagent invoked as a bounded task that returns a summary. A typed `subagents` field is the next thing to test.
+- One Agent Plugin with a local MCP server activated in all eight frameworks over stdio and header gated streamable HTTP. Two SDKs cannot set a working directory, so speaking MCP is not the same as supporting Agent Plugins. The tool names a model sees are not portable.
 
 Grades are reviewer judgments backed by tests, not measurements. Anything not exercised is marked `unverified`.
 
@@ -26,22 +36,23 @@ Grades are reviewer judgments backed by tests, not measurements. Anything not ex
 ## Reproduce
 
 ```bash
-./scripts/verify.sh          # parser, static targets, generated artifacts
-./scripts/verify-runtime.sh  # eight locked environments, native tests, probes, matrix
+./scripts/verify.sh          # parser, product targets, generated artifacts
+./scripts/verify-runtime.sh  # eight locked framework environments, native tests, probes, matrix
 ```
 
-Each runtime has its own hash locked environment under `compiler/runtime-requirements/`, because CrewAI and OpenAI Agents need incompatible major versions of `openai`. Everything under `generated/runtime/` is produced by the scripts and never edited by hand.
+Each framework has its own hash locked environment under `compiler/runtime-requirements/`, because CrewAI and OpenAI Agents need incompatible major versions of `openai`. Everything under `generated/` is produced by the scripts and never edited by hand.
 
 ## Map
 
 ```text
-compiler/src/agent_profile_compiler/runtime/  the eight runtime adapters
-compiler/tests/runtime/                       native construction and runtime tests
+compiler/src/agent_profile_compiler/targets/  product targets (static lowering)
+compiler/src/agent_profile_compiler/runtime/  framework adapters (executed)
+compiler/tests/                               parser, target, and runtime tests
 compiler/runtime-requirements/                per framework pins and hash locks
 examples/research-team/                       the unchanged fixture
 examples/runtime-probes/delegation/           offline control flow probe
 examples/runtime-probes/plugin-activation/    one plugin, local MCP echo server
-generated/runtime/                            reports, traces, matrix
+generated/                                    product outputs, framework reports, matrix
 spec/                                         draft 0.2 and its schema
-docs/                                         static lowering provenance, discussion post draft
+docs/                                         provenance, discussion post draft
 ```
