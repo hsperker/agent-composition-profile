@@ -14,6 +14,12 @@ BINDING = {"capabilities": {"reasoning": True, "tool-use": True}, "entry_mode": 
 pytestmark = pytest.mark.skipif(not claude_code.available(), reason="claude CLI is not installed")
 
 
+@pytest.fixture(autouse=True)
+def _needs_mcp_for_the_echo_server():
+    # The echo server runs under sys.executable and needs the mcp package (products.lock).
+    pytest.importorskip("mcp")
+
+
 def test_claude_code_runs_the_compiled_research_team_with_skill_activation_and_subagent_return() -> None:
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
 
