@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agent-profile-compiler"
 version = "0.1.0"
-description = "Reference compiler experiment for the Agent Composition Profile discussion draft"
+description = "Reference compiler experiment for the Agent Profile discussion draft"
 requires-python = ">=3.11"
 dependencies = ["PyYAML==6.0.3", "jsonschema==4.26.0"]
 

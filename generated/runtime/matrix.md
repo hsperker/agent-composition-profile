@@ -1,6 +1,6 @@
 # Generated compatibility matrix
 
-Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runtime, llamaindex=runtime, microsoft-agent-framework=runtime, openai-agents=runtime, pydantic-ai=runtime, amplifier=static-lowering, claude-code=static-lowering, codex=static-lowering, afm=static-lowering
+Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runtime, llamaindex=runtime, microsoft-agent-framework=runtime, openai-agents=runtime, pydantic-ai=runtime, amplifier=product-static, claude-code=product-static, codex=product-static, afm=product-static
 
 ## Entry-agent classification by source semantic
 

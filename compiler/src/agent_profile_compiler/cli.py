@@ -12,7 +12,7 @@ from .parser import load_package
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Compile an Agent Composition Profile package")
+    parser = argparse.ArgumentParser(description="Compile an Agent Profile package")
     parser.add_argument("entry", type=Path, help="Entry .agent.md declaration")
     parser.add_argument("--package-root", type=Path, required=True)
     parser.add_argument("--target", choices=["amplifier", "claude-code", "codex", "afm"], required=True)

@@ -1,10 +1,10 @@
 {
   "evidence_kind": {
-    "afm": "static-lowering",
+    "afm": "product-static",
     "agno": "runtime",
-    "amplifier": "static-lowering",
-    "claude-code": "static-lowering",
-    "codex": "static-lowering",
+    "amplifier": "product-static",
+    "claude-code": "product-static",
+    "codex": "product-static",
     "crewai": "runtime",
     "google-adk": "runtime",
     "langgraph": "runtime",

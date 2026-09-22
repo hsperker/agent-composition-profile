@@ -87,7 +87,7 @@ def main() -> None:
         },
         "evidence_kind": {
             report["target"]: (
-                "runtime" if "strict_mode" in report else "static-lowering"
+                "runtime" if "strict_mode" in report else "product-static"
             )
             for report in reports
         },

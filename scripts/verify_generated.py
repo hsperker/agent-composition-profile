@@ -114,7 +114,7 @@ def main() -> None:
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))
     assert len(matrix["targets"]) == 12
     assert sum(kind == "runtime" for kind in matrix["evidence_kind"].values()) == 8
-    assert sum(kind == "static-lowering" for kind in matrix["evidence_kind"].values()) == 4
+    assert sum(kind == "product-static" for kind in matrix["evidence_kind"].values()) == 4
     expected_hashes = {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in sorted((ROOT / "examples/research-team").rglob("*"))
