@@ -34,7 +34,7 @@
       "blocking": [],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "accepted",
       "blocking": [],
       "unverified": []
@@ -91,9 +91,9 @@
     },
     {
       "agent": "lead-researcher",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "resolved",
-      "detail": "All reachable agents are emitted as project custom agents; the direct catalog is added to developer instructions. Codex discovers roles globally rather than enforcing a per-parent allowlist."
+      "detail": "All reachable agents are emitted as project custom agents, so the listed subagents are available as bounded tasks that return a summary. Codex keeps a project-wide catalog and does not enforce a per-agent allowlist; the direct list is repeated in developer instructions."
     },
     {
       "agent": "explorer",
@@ -133,9 +133,9 @@
     },
     {
       "agent": "explorer",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "The agent declares no delegates."
+      "detail": "The agent declares no subagents."
     },
     {
       "agent": "critic",
@@ -175,9 +175,9 @@
     },
     {
       "agent": "critic",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "The agent declares no delegates."
+      "detail": "The agent declares no subagents."
     }
   ]
 }

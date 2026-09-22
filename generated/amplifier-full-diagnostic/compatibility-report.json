@@ -41,7 +41,7 @@
       ],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "accepted",
       "blocking": [],
       "unverified": []
@@ -86,9 +86,9 @@
     },
     {
       "agent": "lead-researcher",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+      "detail": "Amplifier lists the subagents in the agent allowlist; each is invoked as a bounded task."
     },
     {
       "agent": "lead-researcher",
@@ -128,9 +128,9 @@
     },
     {
       "agent": "explorer",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+      "detail": "Amplifier lists the subagents in the agent allowlist; each is invoked as a bounded task."
     },
     {
       "agent": "explorer",
@@ -170,9 +170,9 @@
     },
     {
       "agent": "critic",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+      "detail": "Amplifier lists the subagents in the agent allowlist; each is invoked as a bounded task."
     },
     {
       "agent": "critic",

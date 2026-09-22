@@ -100,8 +100,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent.",
-      "feature": "delegates",
+      "detail": "AgentWorkflow can_handoff_to transfers active control through shared workflow state; the caller does not keep control and no result returns to it.",
+      "feature": "subagents",
       "status": "approximated"
     },
     {
@@ -160,8 +160,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -202,8 +202,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -214,13 +214,6 @@
     "core": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
-    },
-    "delegates": {
-      "blocking": [
-        "lead-researcher:delegates"
-      ],
-      "outcome": "rejected",
       "unverified": []
     },
     "description": {
@@ -253,6 +246,13 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [
+        "lead-researcher:subagents"
+      ],
+      "outcome": "rejected",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/llamaindex.lock",
@@ -260,7 +260,7 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for llamaindex: unsupported lead-researcher:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable. | approximated lead-researcher:delegates: AgentWorkflow can_handoff_to transfers active control through shared workflow state instead of returning a bounded child result to the parent. | unsupported explorer:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable."
+    "reason": "strict runtime construction would lose required semantics for llamaindex: unsupported lead-researcher:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable. | approximated lead-researcher:subagents: AgentWorkflow can_handoff_to transfers active control through shared workflow state; the caller does not keep control and no result returns to it. | unsupported explorer:plugins: A native BasicMCPClient can preserve connection configuration, but tools cannot be attached to FunctionAgent until an activation handshake succeeds. The fixture endpoint is unavailable."
   },
   "summary": {
     "approximated": 1,

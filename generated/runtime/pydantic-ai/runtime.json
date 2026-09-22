@@ -7,19 +7,19 @@
     {
       "agent": "coordinator",
       "data": {
-        "delegate": "worker",
         "mechanism": "adapter-function-tool",
+        "subagent": "worker",
         "task": "a"
       },
-      "kind": "delegate-started"
+      "kind": "subagent-started"
     },
     {
       "agent": "coordinator",
       "data": {
-        "delegate": "worker",
-        "result": "worker result"
+        "result": "worker result",
+        "subagent": "worker"
       },
-      "kind": "delegate-returned"
+      "kind": "subagent-returned"
     },
     {
       "agent": "coordinator",

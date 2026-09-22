@@ -100,8 +100,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the draft 0.1 contract: fresh child run, task in, text out, control returns to the parent.",
-      "feature": "delegates",
+      "detail": "LangGraph has no agent relationship primitive. The adapter-authored StructuredTool implements the subagents contract: own instructions, task in, result out, caller keeps control.",
+      "feature": "subagents",
       "status": "resolved"
     },
     {
@@ -160,8 +160,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -202,8 +202,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -212,11 +212,6 @@
   "has_unverified": true,
   "modules": {
     "core": {
-      "blocking": [],
-      "outcome": "accepted",
-      "unverified": []
-    },
-    "delegates": {
       "blocking": [],
       "outcome": "accepted",
       "unverified": []
@@ -251,6 +246,11 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/langgraph.lock",

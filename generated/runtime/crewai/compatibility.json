@@ -109,8 +109,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation.",
-      "feature": "delegates",
+      "detail": "CrewAI delegation is bound to Crew tasks, context, and process, not a bounded call from this agent that returns a result to it.",
+      "feature": "subagents",
       "status": "approximated"
     },
     {
@@ -169,8 +169,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -211,8 +211,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -228,13 +228,6 @@
         "explorer:instructions",
         "critic:name",
         "critic:instructions"
-      ],
-      "outcome": "rejected",
-      "unverified": []
-    },
-    "delegates": {
-      "blocking": [
-        "lead-researcher:delegates"
       ],
       "outcome": "rejected",
       "unverified": []
@@ -270,6 +263,13 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [
+        "lead-researcher:subagents"
+      ],
+      "outcome": "rejected",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/crewai.lock",
@@ -277,7 +277,7 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for crewai: approximated lead-researcher:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated lead-researcher:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated lead-researcher:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated lead-researcher:delegates: CrewAI delegation is team-member collaboration with task/context fields inside a Crew, not the profile's fresh text-in/text-out child invocation. | approximated explorer:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated explorer:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated explorer:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated critic:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated critic:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated critic:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field."
+    "reason": "strict runtime construction would lose required semantics for crewai: approximated lead-researcher:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated lead-researcher:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated lead-researcher:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated lead-researcher:subagents: CrewAI delegation is bound to Crew tasks, context, and process, not a bounded call from this agent that returns a result to it. | approximated explorer:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated explorer:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated explorer:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field. | approximated critic:name: CrewAI has a role string rather than a stable machine-readable agent name; the source name is placed in role. | approximated critic:description: CrewAI goal is model-visible prompt content, not passive discovery/routing metadata. | approximated critic:instructions: The Markdown body is placed in backstory and embedded in CrewAI's generated prompt template rather than a literal persistent instruction field."
   },
   "summary": {
     "approximated": 10,

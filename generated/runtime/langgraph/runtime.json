@@ -8,19 +8,19 @@
     {
       "agent": "lead-researcher",
       "data": {
-        "delegate": "explorer",
         "mechanism": "agent-as-tool",
+        "subagent": "explorer",
         "task": "Find primary evidence."
       },
-      "kind": "delegate-started"
+      "kind": "subagent-started"
     },
     {
       "agent": "lead-researcher",
       "data": {
-        "delegate": "explorer",
-        "result": "Primary evidence with limits."
+        "result": "Primary evidence with limits.",
+        "subagent": "explorer"
       },
-      "kind": "delegate-returned"
+      "kind": "subagent-returned"
     },
     {
       "agent": "lead-researcher",

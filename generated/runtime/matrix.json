@@ -14,20 +14,6 @@
     "pydantic-ai": "runtime"
   },
   "features": {
-    "delegates": {
-      "afm": "unsupported",
-      "agno": "approximated",
-      "amplifier": "preserved",
-      "claude-code": "preserved",
-      "codex": "resolved",
-      "crewai": "approximated",
-      "google-adk": "approximated",
-      "langgraph": "resolved",
-      "llamaindex": "approximated",
-      "microsoft-agent-framework": "preserved",
-      "openai-agents": "preserved",
-      "pydantic-ai": "resolved"
-    },
     "description": {
       "afm": "preserved",
       "agno": "approximated",
@@ -181,104 +167,118 @@
       "microsoft-agent-framework": "unverified",
       "openai-agents": "unverified",
       "pydantic-ai": "unverified"
+    },
+    "subagents": {
+      "afm": "unsupported",
+      "agno": "approximated",
+      "amplifier": "preserved",
+      "claude-code": "preserved",
+      "codex": "resolved",
+      "crewai": "approximated",
+      "google-adk": "approximated",
+      "langgraph": "resolved",
+      "llamaindex": "approximated",
+      "microsoft-agent-framework": "preserved",
+      "openai-agents": "preserved",
+      "pydantic-ai": "resolved"
     }
   },
   "modules": {
     "afm": {
       "core": "accepted",
-      "delegates": "rejected",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "rejected"
     },
     "agno": {
       "core": "accepted",
-      "delegates": "rejected",
       "description": "rejected",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "rejected"
     },
     "amplifier": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "rejected",
-      "skills": "rejected"
+      "skills": "rejected",
+      "subagents": "accepted"
     },
     "claude-code": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     },
     "codex": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     },
     "crewai": {
       "core": "rejected",
-      "delegates": "rejected",
       "description": "rejected",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "rejected"
     },
     "google-adk": {
       "core": "accepted",
-      "delegates": "rejected",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "rejected"
     },
     "langgraph": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "rejected",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     },
     "llamaindex": {
       "core": "accepted",
-      "delegates": "rejected",
       "description": "accepted",
       "model": "accepted",
       "plugins": "rejected",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "rejected"
     },
     "microsoft-agent-framework": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     },
     "openai-agents": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     },
     "pydantic-ai": {
       "core": "accepted",
-      "delegates": "accepted",
       "description": "accepted",
       "model": "accepted",
       "plugins": "accepted",
-      "skills": "accepted"
+      "skills": "accepted",
+      "subagents": "accepted"
     }
   },
   "plugin_activation": {

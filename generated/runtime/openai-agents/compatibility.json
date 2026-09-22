@@ -103,8 +103,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agent.as_tool starts the specialist as a nested run with its own instructions/model and returns text without transferring the conversation.",
-      "feature": "delegates",
+      "detail": "Agent.as_tool runs the listed agent as a bounded task with its own instructions and model, returns text, and leaves control with the caller.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -163,8 +163,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -205,8 +205,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -215,11 +215,6 @@
   "has_unverified": true,
   "modules": {
     "core": {
-      "blocking": [],
-      "outcome": "accepted",
-      "unverified": []
-    },
-    "delegates": {
       "blocking": [],
       "outcome": "accepted",
       "unverified": []
@@ -251,6 +246,11 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [],
+      "outcome": "accepted",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/openai-agents.lock",

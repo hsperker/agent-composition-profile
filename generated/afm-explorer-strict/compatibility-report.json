@@ -34,7 +34,7 @@
       "blocking": [],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "accepted",
       "blocking": [],
       "unverified": []
@@ -79,9 +79,9 @@
     },
     {
       "agent": "explorer",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "The agent declares no delegates."
+      "detail": "The agent declares no subagents."
     }
   ]
 }

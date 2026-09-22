@@ -34,7 +34,7 @@
       "blocking": [],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "accepted",
       "blocking": [],
       "unverified": []
@@ -91,9 +91,9 @@
     },
     {
       "agent": "lead-researcher",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "When launched as the main agent, Claude Code enforces the direct delegate allowlist with Agent(name, ...)."
+      "detail": "When launched as the main agent, Claude Code enforces the subagent allowlist with Agent(name, ...); each call is a bounded task whose final report returns to the caller."
     },
     {
       "agent": "explorer",
@@ -133,7 +133,7 @@
     },
     {
       "agent": "explorer",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
       "detail": "No Agent tool is emitted for a leaf agent."
     },
@@ -175,7 +175,7 @@
     },
     {
       "agent": "critic",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
       "detail": "No Agent tool is emitted for a leaf agent."
     }

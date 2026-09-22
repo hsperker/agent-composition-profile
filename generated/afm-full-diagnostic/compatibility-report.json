@@ -35,10 +35,10 @@
       "blocking": [],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "rejected",
       "blocking": [
-        "lead-researcher:delegates"
+        "lead-researcher:subagents"
       ],
       "unverified": []
     }
@@ -94,9 +94,9 @@
     },
     {
       "agent": "lead-researcher",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "unsupported",
-      "detail": "AFM 0.4.0 does not define local delegate composition; its future-work section points to remote multi-agent interaction through A2A."
+      "detail": "AFM 0.4.0 defines no local subagent relation; its future-work section points to remote multi-agent interaction through A2A."
     },
     {
       "agent": "explorer",
@@ -136,9 +136,9 @@
     },
     {
       "agent": "explorer",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "The agent declares no delegates."
+      "detail": "The agent declares no subagents."
     },
     {
       "agent": "critic",
@@ -178,9 +178,9 @@
     },
     {
       "agent": "critic",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "The agent declares no delegates."
+      "detail": "The agent declares no subagents."
     }
   ]
 }

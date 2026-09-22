@@ -97,8 +97,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back.",
-      "feature": "delegates",
+      "detail": "AgentTool is bounded and returns to the caller, but it copies parent state into the child and propagates child state deltas back, so the child is not isolated to its own instructions and task.",
+      "feature": "subagents",
       "status": "approximated"
     },
     {
@@ -157,8 +157,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -199,8 +199,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -211,13 +211,6 @@
     "core": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
-    },
-    "delegates": {
-      "blocking": [
-        "lead-researcher:delegates"
-      ],
-      "outcome": "rejected",
       "unverified": []
     },
     "description": {
@@ -247,6 +240,13 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [
+        "lead-researcher:subagents"
+      ],
+      "outcome": "rejected",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/google-adk.lock",
@@ -254,7 +254,7 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for google-adk: approximated lead-researcher:delegates: AgentTool is a bounded nested run, but it copies parent state into a fresh session and propagates child state deltas back."
+    "reason": "strict runtime construction would lose required semantics for google-adk: approximated lead-researcher:subagents: AgentTool is bounded and returns to the caller, but it copies parent state into the child and propagates child state deltas back, so the child is not isolated to its own instructions and task."
   },
   "summary": {
     "approximated": 1,

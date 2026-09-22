@@ -114,8 +114,8 @@
     },
     {
       "agent": "lead-researcher",
-      "detail": "Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent.",
-      "feature": "delegates",
+      "detail": "Agno Team is member collaboration under a team leader, not a bounded call from this agent that returns a result to it.",
+      "feature": "subagents",
       "status": "approximated"
     },
     {
@@ -174,8 +174,8 @@
     },
     {
       "agent": "explorer",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     },
     {
@@ -216,8 +216,8 @@
     },
     {
       "agent": "critic",
-      "detail": "The source agent declares no delegates.",
-      "feature": "delegates",
+      "detail": "The source agent declares no subagents.",
+      "feature": "subagents",
       "status": "preserved"
     }
   ],
@@ -228,13 +228,6 @@
     "core": {
       "blocking": [],
       "outcome": "accepted",
-      "unverified": []
-    },
-    "delegates": {
-      "blocking": [
-        "lead-researcher:delegates"
-      ],
-      "outcome": "rejected",
       "unverified": []
     },
     "description": {
@@ -268,6 +261,13 @@
         "explorer:skills.durability",
         "explorer:skills.resources"
       ]
+    },
+    "subagents": {
+      "blocking": [
+        "lead-researcher:subagents"
+      ],
+      "outcome": "rejected",
+      "unverified": []
     }
   },
   "requirements_lock": "compiler/runtime-requirements/agno.lock",
@@ -275,7 +275,7 @@
   "source_entry": "lead-researcher",
   "strict_mode": {
     "outcome": "rejected",
-    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:delegates: Agno Team provides member collaboration and shared team execution, not a fresh bounded child call returning control to an Agent parent. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
+    "reason": "strict runtime construction would lose required semantics for agno: approximated lead-researcher:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated lead-researcher:subagents: Agno Team is member collaboration under a team leader, not a bounded call from this agent that returns a result to it. | approximated explorer:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content. | approximated critic:description: Agno stores description but also injects it into generated model context, changing passive discovery metadata into prompt content."
   },
   "summary": {
     "approximated": 4,

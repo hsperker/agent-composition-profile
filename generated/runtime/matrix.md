@@ -6,7 +6,6 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 
 | semantic | agno | crewai | google-adk | langgraph | llamaindex | microsoft-agent-framework | openai-agents | pydantic-ai | amplifier | claude-code | codex | afm |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| delegates | approximated | approximated | approximated | resolved | approximated | preserved | preserved | resolved | preserved | preserved | resolved | unsupported |
 | description | approximated | approximated | preserved | resolved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved |
 | instructions | preserved | approximated | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved | preserved |
 | model.prefers.vision-input | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | omitted-preference | resolved | resolved | resolved | resolved |
@@ -18,6 +17,7 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 | skills | preserved | preserved | resolved | resolved | resolved | preserved | resolved | resolved | unsupported | resolved | resolved | preserved |
 | skills.durability | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared |
 | skills.resources | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared |
+| subagents | approximated | approximated | approximated | resolved | approximated | preserved | preserved | resolved | preserved | preserved | resolved | unsupported |
 
 ## Strict conformance by module (all agents)
 
@@ -26,11 +26,11 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 | module | agno | crewai | google-adk | langgraph | llamaindex | microsoft-agent-framework | openai-agents | pydantic-ai | amplifier | claude-code | codex | afm |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | core | accepted | rejected | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
-| delegates | rejected | rejected | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted | accepted | rejected |
 | description | rejected | rejected | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | model | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted |
 | plugins | accepted | accepted | accepted | rejected | rejected | accepted | accepted | accepted | rejected | accepted | accepted | accepted |
 | skills | accepted | accepted | accepted | accepted | accepted | accepted | accepted | accepted | rejected | accepted | accepted | accepted |
+| subagents | rejected | rejected | rejected | accepted | rejected | accepted | accepted | accepted | accepted | accepted | accepted | rejected |
 
 ## Agent Plugin activation probe (runtime targets)
 

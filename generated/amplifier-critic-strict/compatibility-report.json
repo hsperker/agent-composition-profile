@@ -34,7 +34,7 @@
       "blocking": [],
       "unverified": []
     },
-    "delegates": {
+    "subagents": {
       "outcome": "accepted",
       "blocking": [],
       "unverified": []
@@ -67,9 +67,9 @@
     },
     {
       "agent": "critic",
-      "feature": "delegates",
+      "feature": "subagents",
       "status": "preserved",
-      "detail": "Amplifier emits the direct delegate names through the agent allowlist."
+      "detail": "Amplifier lists the subagents in the agent allowlist; each is invoked as a bounded task."
     },
     {
       "agent": "critic",
