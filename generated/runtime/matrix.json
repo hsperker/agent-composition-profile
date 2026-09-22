@@ -5,12 +5,14 @@
     "amplifier": "product-static",
     "claude-code": "product-static",
     "codex": "product-static",
+    "copilot": "product-static",
     "crewai": "runtime",
     "google-adk": "runtime",
     "langgraph": "runtime",
     "llamaindex": "runtime",
     "microsoft-agent-framework": "runtime",
     "openai-agents": "runtime",
+    "opencode": "product-static",
     "pydantic-ai": "runtime"
   },
   "features": {
@@ -20,12 +22,14 @@
       "amplifier": "preserved",
       "claude-code": "preserved",
       "codex": "preserved",
+      "copilot": "preserved",
       "crewai": "approximated",
       "google-adk": "preserved",
       "langgraph": "resolved",
       "llamaindex": "preserved",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
+      "opencode": "preserved",
       "pydantic-ai": "preserved"
     },
     "instructions": {
@@ -34,12 +38,14 @@
       "amplifier": "preserved",
       "claude-code": "preserved",
       "codex": "preserved",
+      "copilot": "preserved",
       "crewai": "approximated",
       "google-adk": "preserved",
       "langgraph": "preserved",
       "llamaindex": "preserved",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
+      "opencode": "preserved",
       "pydantic-ai": "preserved"
     },
     "model.prefers.vision-input": {
@@ -48,12 +54,14 @@
       "amplifier": "resolved",
       "claude-code": "resolved",
       "codex": "resolved",
+      "copilot": "resolved",
       "crewai": "omitted-preference",
       "google-adk": "omitted-preference",
       "langgraph": "omitted-preference",
       "llamaindex": "omitted-preference",
       "microsoft-agent-framework": "omitted-preference",
       "openai-agents": "omitted-preference",
+      "opencode": "resolved",
       "pydantic-ai": "omitted-preference"
     },
     "model.requires.reasoning": {
@@ -62,12 +70,14 @@
       "amplifier": "resolved",
       "claude-code": "resolved",
       "codex": "resolved",
+      "copilot": "resolved",
       "crewai": "resolved",
       "google-adk": "resolved",
       "langgraph": "resolved",
       "llamaindex": "resolved",
       "microsoft-agent-framework": "resolved",
       "openai-agents": "resolved",
+      "opencode": "resolved",
       "pydantic-ai": "resolved"
     },
     "model.requires.tool-use": {
@@ -76,12 +86,14 @@
       "amplifier": "resolved",
       "claude-code": "resolved",
       "codex": "resolved",
+      "copilot": "resolved",
       "crewai": "resolved",
       "google-adk": "resolved",
       "langgraph": "resolved",
       "llamaindex": "resolved",
       "microsoft-agent-framework": "resolved",
       "openai-agents": "resolved",
+      "opencode": "resolved",
       "pydantic-ai": "resolved"
     },
     "name": {
@@ -90,12 +102,14 @@
       "amplifier": "preserved",
       "claude-code": "preserved",
       "codex": "preserved",
+      "copilot": "preserved",
       "crewai": "approximated",
       "google-adk": "resolved",
       "langgraph": "preserved",
       "llamaindex": "preserved",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
+      "opencode": "resolved",
       "pydantic-ai": "preserved"
     },
     "plugins": {
@@ -104,12 +118,14 @@
       "amplifier": "unsupported",
       "claude-code": "resolved",
       "codex": "resolved",
+      "copilot": "resolved",
       "crewai": "resolved",
       "google-adk": "resolved",
       "langgraph": "unsupported",
       "llamaindex": "unsupported",
       "microsoft-agent-framework": "resolved",
       "openai-agents": "resolved",
+      "opencode": "resolved",
       "pydantic-ai": "resolved"
     },
     "plugins.activation": {
@@ -118,12 +134,14 @@
       "amplifier": "not-declared",
       "claude-code": "not-declared",
       "codex": "not-declared",
+      "copilot": "not-declared",
       "crewai": "unverified",
       "google-adk": "unverified",
       "langgraph": "unverified",
       "llamaindex": "unverified",
       "microsoft-agent-framework": "unverified",
       "openai-agents": "unverified",
+      "opencode": "not-declared",
       "pydantic-ai": "unverified"
     },
     "skills": {
@@ -132,12 +150,14 @@
       "amplifier": "unsupported",
       "claude-code": "resolved",
       "codex": "resolved",
+      "copilot": "resolved",
       "crewai": "preserved",
       "google-adk": "resolved",
       "langgraph": "resolved",
       "llamaindex": "resolved",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "resolved",
+      "opencode": "resolved",
       "pydantic-ai": "resolved"
     },
     "skills.durability": {
@@ -146,12 +166,14 @@
       "amplifier": "not-declared",
       "claude-code": "not-declared",
       "codex": "not-declared",
+      "copilot": "not-declared",
       "crewai": "unverified",
       "google-adk": "unverified",
       "langgraph": "unverified",
       "llamaindex": "unverified",
       "microsoft-agent-framework": "unverified",
       "openai-agents": "unverified",
+      "opencode": "not-declared",
       "pydantic-ai": "unverified"
     },
     "skills.resources": {
@@ -160,12 +182,14 @@
       "amplifier": "not-declared",
       "claude-code": "not-declared",
       "codex": "not-declared",
+      "copilot": "not-declared",
       "crewai": "unverified",
       "google-adk": "unverified",
       "langgraph": "unverified",
       "llamaindex": "unverified",
       "microsoft-agent-framework": "unverified",
       "openai-agents": "unverified",
+      "opencode": "not-declared",
       "pydantic-ai": "unverified"
     },
     "subagents": {
@@ -174,12 +198,14 @@
       "amplifier": "preserved",
       "claude-code": "preserved",
       "codex": "resolved",
+      "copilot": "preserved",
       "crewai": "approximated",
       "google-adk": "approximated",
       "langgraph": "resolved",
       "llamaindex": "approximated",
       "microsoft-agent-framework": "preserved",
       "openai-agents": "preserved",
+      "opencode": "preserved",
       "pydantic-ai": "resolved"
     }
   },
@@ -217,6 +243,14 @@
       "subagents": "accepted"
     },
     "codex": {
+      "core": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted",
+      "subagents": "accepted"
+    },
+    "copilot": {
       "core": "accepted",
       "description": "accepted",
       "model": "accepted",
@@ -265,6 +299,14 @@
       "subagents": "accepted"
     },
     "openai-agents": {
+      "core": "accepted",
+      "description": "accepted",
+      "model": "accepted",
+      "plugins": "accepted",
+      "skills": "accepted",
+      "subagents": "accepted"
+    },
+    "opencode": {
       "core": "accepted",
       "description": "accepted",
       "model": "accepted",
@@ -421,12 +463,14 @@
     "amplifier": "rejected",
     "claude-code": "accepted",
     "codex": "accepted",
+    "copilot": "accepted",
     "crewai": "rejected",
     "google-adk": "rejected",
     "langgraph": "rejected",
     "llamaindex": "rejected",
     "microsoft-agent-framework": "accepted",
     "openai-agents": "accepted",
+    "opencode": "accepted",
     "pydantic-ai": "accepted"
   },
   "targets": [
@@ -441,6 +485,8 @@
     "amplifier",
     "claude-code",
     "codex",
+    "copilot",
+    "opencode",
     "afm"
   ]
 }

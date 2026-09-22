@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "research": {
+      "type": "http",
+      "url": "https://research.example.com/mcp"
+    }
+  }
+}

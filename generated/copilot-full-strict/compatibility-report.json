@@ -1,0 +1,183 @@
+{
+  "target": "copilot",
+  "source_entry": "lead-researcher",
+  "has_unsupported": false,
+  "has_blocking_loss": false,
+  "has_unverified": false,
+  "summary": {
+    "preserved": 14,
+    "resolved": 9
+  },
+  "modules": {
+    "core": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "description": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "model": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "skills": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "plugins": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "subagents": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    }
+  },
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "feature": "name",
+      "status": "preserved",
+      "detail": "The name is emitted as the native identity field."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native discovery metadata."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the Copilot model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the Copilot model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.prefers.vision-input",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the Copilot model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "skills",
+      "status": "resolved",
+      "detail": "Agent Skills are copied to .github/skills, where Copilot discovers them project-wide and activates them on demand; the catalog is not private to this agent."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "plugins",
+      "status": "resolved",
+      "detail": "Plugin skills are copied to .github/skills. MCP servers are emitted twice: in the agent file for the cloud coding agent, where they are per agent, and in .vscode/mcp.json for VS Code, where they are workspace wide."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "The agents list is Copilot's per-agent subagent allowlist; each listed agent runs as a bounded task through the agent tool and returns its result to the caller."
+    },
+    {
+      "agent": "explorer",
+      "feature": "name",
+      "status": "preserved",
+      "detail": "The name is emitted as the native identity field."
+    },
+    {
+      "agent": "explorer",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native discovery metadata."
+    },
+    {
+      "agent": "explorer",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "explorer",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the Copilot model."
+    },
+    {
+      "agent": "explorer",
+      "feature": "skills",
+      "status": "resolved",
+      "detail": "Agent Skills are copied to .github/skills, where Copilot discovers them project-wide and activates them on demand; the catalog is not private to this agent."
+    },
+    {
+      "agent": "explorer",
+      "feature": "plugins",
+      "status": "resolved",
+      "detail": "Plugin skills are copied to .github/skills. MCP servers are emitted twice: in the agent file for the cloud coding agent, where they are per agent, and in .vscode/mcp.json for VS Code, where they are workspace wide."
+    },
+    {
+      "agent": "explorer",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "An empty agents list is emitted for a leaf agent."
+    },
+    {
+      "agent": "critic",
+      "feature": "name",
+      "status": "preserved",
+      "detail": "The name is emitted as the native identity field."
+    },
+    {
+      "agent": "critic",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native discovery metadata."
+    },
+    {
+      "agent": "critic",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "Markdown instructions are emitted as the native persistent prompt."
+    },
+    {
+      "agent": "critic",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the Copilot model."
+    },
+    {
+      "agent": "critic",
+      "feature": "skills",
+      "status": "preserved",
+      "detail": "The agent declares no skills."
+    },
+    {
+      "agent": "critic",
+      "feature": "plugins",
+      "status": "preserved",
+      "detail": "The agent declares no plugins."
+    },
+    {
+      "agent": "critic",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "An empty agents list is emitted for a leaf agent."
+    }
+  ]
+}

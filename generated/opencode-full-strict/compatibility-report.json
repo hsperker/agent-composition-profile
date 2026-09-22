@@ -1,0 +1,183 @@
+{
+  "target": "opencode",
+  "source_entry": "lead-researcher",
+  "has_unsupported": false,
+  "has_blocking_loss": false,
+  "has_unverified": false,
+  "summary": {
+    "preserved": 11,
+    "resolved": 12
+  },
+  "modules": {
+    "core": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "description": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "model": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "skills": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "plugins": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    },
+    "subagents": {
+      "outcome": "accepted",
+      "blocking": [],
+      "unverified": []
+    }
+  },
+  "findings": [
+    {
+      "agent": "lead-researcher",
+      "feature": "name",
+      "status": "resolved",
+      "detail": "OpenCode derives the agent identifier from the filename; the file is named after the logical name and there is no name field."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native frontmatter used for selection."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "The Markdown body is the agent's system prompt."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the OpenCode provider/model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the OpenCode provider/model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "model.prefers.vision-input",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the OpenCode provider/model."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "skills",
+      "status": "resolved",
+      "detail": "Agent Skills are copied to .opencode/skills, where OpenCode discovers them project-wide and the skill tool loads them on demand; the catalog is not private to this agent."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "plugins",
+      "status": "resolved",
+      "detail": "Plugin skills are copied to .opencode/skills. MCP servers are configured in opencode.json, where they are available to every agent in the project, not only the declaring one."
+    },
+    {
+      "agent": "lead-researcher",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "permission.task is OpenCode's per-agent subagent allowlist; each listed agent runs as a bounded task through the Task tool and returns its result to the caller."
+    },
+    {
+      "agent": "explorer",
+      "feature": "name",
+      "status": "resolved",
+      "detail": "OpenCode derives the agent identifier from the filename; the file is named after the logical name and there is no name field."
+    },
+    {
+      "agent": "explorer",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native frontmatter used for selection."
+    },
+    {
+      "agent": "explorer",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "The Markdown body is the agent's system prompt."
+    },
+    {
+      "agent": "explorer",
+      "feature": "model.requires.tool-use",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the OpenCode provider/model."
+    },
+    {
+      "agent": "explorer",
+      "feature": "skills",
+      "status": "resolved",
+      "detail": "Agent Skills are copied to .opencode/skills, where OpenCode discovers them project-wide and the skill tool loads them on demand; the catalog is not private to this agent."
+    },
+    {
+      "agent": "explorer",
+      "feature": "plugins",
+      "status": "resolved",
+      "detail": "Plugin skills are copied to .opencode/skills. MCP servers are configured in opencode.json, where they are available to every agent in the project, not only the declaring one."
+    },
+    {
+      "agent": "explorer",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "Task permission is denied for a leaf agent."
+    },
+    {
+      "agent": "critic",
+      "feature": "name",
+      "status": "resolved",
+      "detail": "OpenCode derives the agent identifier from the filename; the file is named after the logical name and there is no name field."
+    },
+    {
+      "agent": "critic",
+      "feature": "description",
+      "status": "preserved",
+      "detail": "The description is emitted as native frontmatter used for selection."
+    },
+    {
+      "agent": "critic",
+      "feature": "instructions",
+      "status": "preserved",
+      "detail": "The Markdown body is the agent's system prompt."
+    },
+    {
+      "agent": "critic",
+      "feature": "model.requires.reasoning",
+      "status": "resolved",
+      "detail": "External binding attests the capability and may select the OpenCode provider/model."
+    },
+    {
+      "agent": "critic",
+      "feature": "skills",
+      "status": "preserved",
+      "detail": "The agent declares no skills."
+    },
+    {
+      "agent": "critic",
+      "feature": "plugins",
+      "status": "preserved",
+      "detail": "The agent declares no plugins."
+    },
+    {
+      "agent": "critic",
+      "feature": "subagents",
+      "status": "preserved",
+      "detail": "Task permission is denied for a leaf agent."
+    }
+  ]
+}

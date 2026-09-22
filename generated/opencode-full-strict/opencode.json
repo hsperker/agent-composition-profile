@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "research": {
+      "type": "remote",
+      "url": "https://research.example.com/mcp",
+      "enabled": true
+    }
+  }
+}
