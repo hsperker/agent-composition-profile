@@ -30,7 +30,8 @@ def echo_tool_names(names: Iterable[str]) -> list[str]:
     return sorted(name for name in names if "echo" in name)
 
 
-_ECHO_PAYLOAD = re.compile(r'\{[^{}]*"cwd"[^{}]*\}')
+# The innermost object carrying "cwd"; ${NAME} placeholders from path redaction are allowed inside.
+_ECHO_PAYLOAD = re.compile(r'\{(?:[^{}]|\$\{[A-Z_]+\})*"cwd"(?:[^{}]|\$\{[A-Z_]+\})*\}')
 
 
 def parse_echo_result(text: Any) -> dict[str, Any]:

@@ -5,6 +5,7 @@ import pytest
 from agent_profile_compiler.model import McpServer
 from agent_profile_compiler.parser import load_package
 from agent_profile_compiler.runtime.common import plugin_activation_assessment, source_semantic_features
+from agent_profile_compiler.runtime.mcp_probe import parse_echo_result
 from agent_profile_compiler.runtime.plugins import effective_server_config
 
 
@@ -72,3 +73,11 @@ def test_agents_with_plugins_carry_an_activation_finding() -> None:
 
     assert "plugins.activation" in source_semantic_features(package.entry)
     assert plugin_activation_assessment(package.entry)["plugins.activation"][0] == "unverified"
+
+
+def test_echo_payload_parses_through_wrappers_and_redaction_placeholders() -> None:
+    wrapped = '{"result": "{\\"cwd\\": \\"${PROJECT_DIR}\\", \\"label\\": \\"stdio\\", \\"plugin_data_env\\": true, \\"plugin_root_env\\": true, \\"text\\": \\"probe\\"}"}'
+    parsed = parse_echo_result(wrapped)
+
+    assert parsed["label"] == "stdio" and parsed["cwd"] == "${PROJECT_DIR}"
+    assert parse_echo_result("no payload here") == {"raw": "no payload here"}
