@@ -32,7 +32,7 @@ This revision follows the runtime evidence in `EVIDENCE.md`. It reduces the requ
 
 This draft asks for the smallest agent declaration that lowers unchanged into the tools people run agents in. A portable profile that cannot be lowered into those tools is a schema, not a profile. The draft composes Agent Skills and Agent Plugins rather than redefining them.
 
-The accompanying experiment has two dimensions. Products, where customers run agents from files they control, are the primary one: Claude Code, Codex, Amplifier, and WSO2 AFM, lowered statically by a reference compiler. Frameworks are the check on the semantics: LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework, each executed with deterministic models.
+The accompanying experiment has two dimensions. Products, where customers run agents from files they control, are the primary one: Claude Code, Codex, GitHub Copilot, OpenCode, Amplifier, and WSO2 AFM, lowered statically by a reference compiler. Frameworks are the check on the semantics: LangGraph, CrewAI, LlamaIndex, Agno, OpenAI Agents SDK, Google ADK, PydanticAI, and Microsoft Agent Framework, each executed with deterministic models.
 
 The observed semantic intersection is narrower than draft 0.1:
 
@@ -278,7 +278,7 @@ Target-specific settings remain in external bindings. Draft 0.2 defines no `x-<h
 
 ## 14. Evidence status
 
-The shared research fixture produced machine-readable reports for twelve targets: four products lowered statically and verified, eight frameworks executed with real SDK objects and native runners. Every product target preserves the core. Seven of eight runtime targets accepted the required core; CrewAI's role, goal, and backstory prompt template approximates both name and instructions, and its custom template override removes role and goal only by collapsing the prompt into a single user message. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability and resource access unverified; the other four each failed one or two optional fields, most often description or delegates.
+The shared research fixture produced machine-readable reports for fourteen targets: six products lowered statically and verified, eight frameworks executed with real SDK objects and native runners. Every product target preserves the core. Seven of eight runtime targets accepted the required core; CrewAI's role, goal, and backstory prompt template approximates both name and instructions, and its custom template override removes role and goal only by collapsing the prompt into a single user message. OpenAI Agents SDK, PydanticAI, and Microsoft Agent Framework accepted the combined draft 0.1 fixture with skill durability and resource access unverified; the other four each failed one or two optional fields, most often description or delegates.
 
 The decisive findings were:
 

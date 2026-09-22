@@ -6,7 +6,7 @@ A portable agent profile must lower into the tools people actually run agents in
 
 ## Two dimensions
 
-**Products** are where customers run agents without writing code, so they are the destinations that make ownership real: whoever holds the file can leave whichever host produced it. A product qualifies as a target when it reads agent definitions from files the customer controls. Today: Claude Code, Codex, and, through the earlier static work, Amplifier and AFM. Copilot and OpenCode follow. Chat applications that keep agent configuration in a vendor UI do not qualify. Product evidence is currently static: the compiler produces the files and verifies them, but does not yet run the products.
+**Products** are where customers run agents without writing code, so they are the destinations that make ownership real: whoever holds the file can leave whichever host produced it. A product qualifies as a target when it reads agent definitions from files the customer controls. Today: Claude Code, Codex, GitHub Copilot, OpenCode, and, from the earlier static work, Amplifier and AFM. Chat applications that keep agent configuration in a vendor UI do not qualify. Product evidence is currently static: the compiler produces the files and verifies them, but does not yet run the products.
 
 **Frameworks** are where developers embed agents in their own software. They are canaries: eight of them show which semantics are safe to promise and where a profile stops being a profile and becomes code generation. Framework evidence is executed: adapters build native objects and run them with deterministic models.
 
@@ -23,10 +23,10 @@ Incubating   model.requires
 Removed      model.prefers, generic delegates
 ```
 
-- Every product target and seven of eight frameworks preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions.
+- All six product targets and seven of eight frameworks preserve the core. CrewAI does not: its role, goal, and backstory template fuses identity, description, and instructions.
 - Optional fields follow one rule. If the field is present, a strict host preserves its defined semantics or rejects the profile. A skill or plugin reference means availability to the agent, not isolation.
 - Model requirements belong to the author and are resolved by the host, but no capability vocabulary is standardized yet.
-- `delegates` hid six mechanisms behind one word and is gone. One of them survives as `subagents`: a listed agent invoked as a bounded task with its own instructions, returning a result while the caller keeps control. Every product except AFM preserves or resolves it; orchestration first frameworks only approximate it.
+- `delegates` hid six mechanisms behind one word and is gone. One of them survives as `subagents`: a listed agent invoked as a bounded task with its own instructions, returning a result while the caller keeps control. Claude Code, Copilot, OpenCode, and Amplifier preserve it, Codex resolves it through its project catalog, AFM has no equivalent; orchestration first frameworks only approximate it.
 - One Agent Plugin with a local MCP server activated in all eight frameworks over stdio and header gated streamable HTTP. Two SDKs cannot set a working directory, so speaking MCP is not the same as supporting Agent Plugins. The tool names a model sees are not portable.
 
 Grades are reviewer judgments backed by tests, not measurements. Anything not exercised is marked `unverified`.

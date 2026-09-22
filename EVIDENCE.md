@@ -31,6 +31,8 @@ Products, static lowering by the reference compiler. A product qualifies when it
 |---|---|---|
 | Claude Code | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | files generated, parsed, checked; not executed |
 | Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
+| GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
+| OpenCode | `.opencode/agents/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | files generated, parsed, checked; not executed |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
 | WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no subagent relation, no stdio `cwd` |
 
@@ -66,6 +68,8 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | Amplifier (product, static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | n/a | unsupported | preserved |
 | Claude Code (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
 | Codex (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
+| Copilot (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
+| OpenCode (product, static) | resolved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
 | AFM 0.4.0 (product, static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
 `requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; product targets were not executed, so neither applies.
@@ -87,13 +91,13 @@ A rejected combined fixture says which field a target cannot preserve, not that 
 
 ### `name`
 
-Six runtimes have a native name field. CrewAI has a role, which is prompt content, not identity. Google ADK requires Python identifiers, so `lead-researcher` becomes `lead_researcher` with an explicit map back. All four static targets have identity fields.
+Six runtimes have a native name field. CrewAI has a role, which is prompt content, not identity. Google ADK requires Python identifiers, so `lead-researcher` becomes `lead_researcher` with an explicit map back. Five products have an identity field; OpenCode takes the identifier from the filename, which the compiler names after the logical name, so `resolved`.
 
 The portable part is a stable logical identity for discovery, diagnostics, and packaging. Native spelling is not portable, and a native identifier may double as prompt content. Subagent references resolve to documents by path and to native tools by name, so the name must be stable, but it defines nothing else at runtime. A host may translate it only with a collision free mapping back, graded `resolved` rather than `preserved`.
 
 ### `description`
 
-Google ADK, LlamaIndex, OpenAI Agents, PydanticAI, and Microsoft have native description or handoff metadata. LangGraph's compiled agent has none, so the adapter keeps descriptions in a catalog in the artifact metadata, never in the prompt, and children wrapped as tools carry theirs as the tool description. Agno injects the description into model context. CrewAI's nearest field is `goal`, which is behavioral.
+Google ADK, LlamaIndex, OpenAI Agents, PydanticAI, Microsoft, and all six products have native description or handoff metadata. LangGraph's compiled agent has none, so the adapter keeps descriptions in a catalog in the artifact metadata, never in the prompt, and children wrapped as tools carry theirs as the tool description. Agno injects the description into model context. CrewAI's nearest field is `goal`, which is behavioral.
 
 Discovery metadata, routing metadata, tool description, and behavioral goal are not interchangeable; promotion into instructions can change output. A same named native field is not preservation, and the lack of one is not `unsupported`: a host that keeps the description in a catalog, registry, UI, or diagnostics and says where reports `resolved`. Injection into prompt content is `approximated` and strict mode rejects it. CrewAI and Agno could reach `resolved` by keeping the description out of the prompt; this experiment did not try.
 
@@ -117,13 +121,13 @@ Every runtime bound a model without the preferred `vision-input`, reported `omit
 
 ### `skills`
 
-CrewAI, Agno, and Microsoft implement Agent Skills natively. Tests confirmed metadata only discovery, then invoked the native loader (`LoadSkillTool`, `get_skill_instructions`, `SkillsProvider.load_skill`). Each returns the full body on demand as a tool result, the dedicated tool activation the Agent Skills integration guide describes, so `preserved`. Microsoft gates loading behind approval by default; the adapter disables it and records that as host policy. LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no skills concept; the adapter supplies the activation tool with the catalog in its description, so `resolved`. Claude Code, Codex, and AFM have static mappings with documented scope differences. Amplifier has none without a runtime module.
+Claude Code, Codex, Copilot, and OpenCode discover Agent Skills from a project directory the compiler fills (`.claude/skills`, `.agents/skills`, `.github/skills`, `.opencode/skills`) and load them on demand; the catalog is project wide rather than per agent, so `resolved`. Among frameworks, CrewAI, Agno, and Microsoft implement Agent Skills natively. Tests confirmed metadata only discovery, then invoked the native loader (`LoadSkillTool`, `get_skill_instructions`, `SkillsProvider.load_skill`). Each returns the full body on demand as a tool result, the dedicated tool activation the Agent Skills integration guide describes, so `preserved`. Microsoft gates loading behind approval by default; the adapter disables it and records that as host policy. LangGraph, LlamaIndex, OpenAI Agents, Google ADK, and PydanticAI have no skills concept; the adapter supplies the activation tool with the catalog in its description, so `resolved`. Claude Code, Codex, and AFM have static mappings with documented scope differences. Amplifier has none without a runtime module.
 
 Not exercised, and therefore `unverified` everywhere: whether activated content survives context compaction, and whether bundled references, scripts, and assets are reachable on demand, since the fixture skills bundle none. Agent Skills does not define skill isolation, so `skills` is additive: the listed skills must be available to the agent, and ambient skills are host policy.
 
 ### `plugins`
 
-Six runtimes construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
+Among products, Claude Code takes MCP servers per agent in the agent file, Codex per agent in its TOML, OpenCode once in `opencode.json` for every agent, and Copilot twice: per agent in the agent file for the cloud coding agent, and workspace wide in `.vscode/mcp.json` for VS Code. Copilot's cloud configuration has no working directory, so any stdio server is `unsupported` there; OpenCode's local server has `cwd`. Among frameworks, six construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
 
 The probe plugin declares a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. One echo server script runs under MCP SDK 1.x and 2.x, because the environments pin three `mcp` releases. A deterministic model calls every echo tool once. The echo result reports working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` arrived, and which server answered.
 
@@ -159,10 +163,10 @@ What the mechanisms share is narrower and worth keeping. The products largely ag
 
 Graded against that contract, the picture splits by dimension:
 
-- Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. Codex `resolved`, same reason at project scope. Amplifier `preserved`. AFM `unsupported`.
+- Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. Copilot `preserved` through its `agents` list. OpenCode `preserved` through `permission.task`. Codex `resolved`, because its project catalog makes the agents available without a per agent allowlist. Amplifier `preserved`. AFM `unsupported`.
 - Frameworks: OpenAI Agents and Microsoft `preserved`. LangGraph and PydanticAI `resolved`, because an adapter tool implements the four properties on a framework without a relationship primitive. Google ADK `approximated`, because state flows both ways. LlamaIndex, Agno, and CrewAI `approximated`, because control transfers or the call is bound to a team or task graph.
 
-The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every target that reached `preserved` or `resolved`. Copilot and OpenCode are documented, not yet lowered or probed; they enter in the next pass.
+The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every framework that reached `preserved` or `resolved`. The product grades rest on generated files and the products' documentation; product probes are the next pass.
 
 ## What changes in the profile
 
