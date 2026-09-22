@@ -266,3 +266,99 @@ def test_afm_stdio_servers_always_lose_the_required_working_directory() -> None:
 
     assert mapped == {"name": "local", "transport": {"type": "stdio", "command": "python"}}
     assert len(losses) == 1 and "plugin-root default" in losses[0]
+
+
+def test_copilot_lowers_full_package_to_agent_md_with_subagent_allowlist_and_mcp() -> None:
+    package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
+    result = compile_package(package, "copilot", BINDINGS["copilot"], strict=True)
+
+    lead = yaml.safe_load(result.files[".github/agents/lead-researcher.agent.md"].split("---", 2)[1])
+    assert lead["name"] == "lead-researcher"
+    assert lead["description"] == package.entry.description
+    assert lead["agents"] == ["explorer", "critic"]
+    assert lead["mcp-servers"]["research"] == {
+        "type": "http",
+        "url": "https://research.example.com/mcp",
+        "tools": ["*"],
+    }
+    critic = yaml.safe_load(result.files[".github/agents/critic.agent.md"].split("---", 2)[1])
+    assert critic["agents"] == []
+    assert "mcp-servers" not in critic
+    workspace = json.loads(result.files[".vscode/mcp.json"])
+    assert workspace["servers"]["research"] == {"type": "http", "url": "https://research.example.com/mcp"}
+    assert ".github/skills/source-evaluation/SKILL.md" in result.files
+    assert ".github/skills/query-planning/SKILL.md" in result.files
+    assert result.files[".github/agents/lead-researcher.agent.md"].rstrip().endswith(package.entry.instructions.rstrip())
+    assert statuses(result, "name", "lead-researcher") == {"preserved"}
+    assert statuses(result, "instructions", "lead-researcher") == {"preserved"}
+    assert statuses(result, "skills", "lead-researcher") == {"resolved"}
+    assert statuses(result, "plugins", "lead-researcher") == {"resolved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"preserved"}
+    assert statuses(result, "subagents", "critic") == {"preserved"}
+    assert not result.report.has_unsupported
+
+
+def test_copilot_rejects_stdio_plugin_servers_because_the_cloud_config_has_no_cwd(tmp_path: Path) -> None:
+    from agent_profile_compiler.model import McpServer
+    from agent_profile_compiler.targets.copilot import map_mcp_for_cloud_agent
+
+    mapped, losses = map_mcp_for_cloud_agent(
+        McpServer(name="local", config={"type": "stdio", "command": "python", "args": ["x.py"]}, plugin_root=tmp_path)
+    )
+
+    assert mapped == {"type": "local", "command": "python", "args": ["x.py"], "tools": ["*"]}
+    assert len(losses) == 1 and "cwd" in losses[0]
+
+
+def test_opencode_lowers_full_package_with_task_permission_allowlist_and_global_mcp() -> None:
+    package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
+    result = compile_package(package, "opencode", BINDINGS["opencode"], strict=True)
+
+    lead_text = result.files[".opencode/agents/lead-researcher.md"]
+    lead = yaml.safe_load(lead_text.split("---", 2)[1])
+    assert "name" not in lead  # OpenCode takes the identifier from the filename
+    assert lead["description"] == package.entry.description
+    assert lead["mode"] == "primary"
+    assert lead["permission"]["task"] == {"*": "deny", "explorer": "allow", "critic": "allow"}
+    assert lead_text.rstrip().endswith(package.entry.instructions.rstrip())
+    explorer = yaml.safe_load(result.files[".opencode/agents/explorer.md"].split("---", 2)[1])
+    assert explorer["mode"] == "subagent"
+    assert explorer["permission"]["task"] == {"*": "deny"}
+    config = json.loads(result.files["opencode.json"])
+    assert config["mcp"]["research"] == {
+        "type": "remote",
+        "url": "https://research.example.com/mcp",
+        "enabled": True,
+    }
+    assert ".opencode/skills/source-evaluation/SKILL.md" in result.files
+    assert statuses(result, "name", "lead-researcher") == {"resolved"}
+    assert statuses(result, "skills", "lead-researcher") == {"resolved"}
+    assert statuses(result, "plugins", "lead-researcher") == {"resolved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"preserved"}
+    assert not result.report.has_unsupported
+
+
+def test_opencode_maps_stdio_servers_with_cwd_and_rejects_sse(tmp_path: Path) -> None:
+    from agent_profile_compiler.model import McpServer
+    from agent_profile_compiler.targets.opencode import map_mcp_for_opencode
+
+    mapped, losses = map_mcp_for_opencode(
+        McpServer(
+            name="local",
+            config={"type": "stdio", "command": "python", "args": ["x.py"], "env": {"A": "1"}, "cwd": "${PLUGIN_ROOT}"},
+            plugin_root=tmp_path,
+        )
+    )
+    assert mapped == {
+        "type": "local",
+        "command": ["python", "x.py"],
+        "environment": {"A": "1"},
+        "cwd": "${PLUGIN_ROOT}",
+        "enabled": True,
+    }
+    assert losses == ()
+
+    mapped, losses = map_mcp_for_opencode(
+        McpServer(name="legacy", config={"type": "sse", "url": "https://x/sse"}, plugin_root=tmp_path)
+    )
+    assert mapped is None and len(losses) == 1

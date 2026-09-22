@@ -26,5 +26,7 @@ compile amplifier-critic-strict "$PACKAGE/agents/critic.agent.md" amplifier
 compile amplifier-full-diagnostic "$PACKAGE/lead.agent.md" amplifier --diagnostic
 compile claude-code-full-strict "$PACKAGE/lead.agent.md" claude-code
 compile codex-full-strict "$PACKAGE/lead.agent.md" codex
+compile copilot-full-strict "$PACKAGE/lead.agent.md" copilot
+compile opencode-full-strict "$PACKAGE/lead.agent.md" opencode
 compile afm-explorer-strict "$PACKAGE/agents/explorer.agent.md" afm
 compile afm-full-diagnostic "$PACKAGE/lead.agent.md" afm --diagnostic

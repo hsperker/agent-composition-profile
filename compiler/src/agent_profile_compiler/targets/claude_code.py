@@ -4,20 +4,7 @@ from typing import Any, Mapping
 
 from ..model import CompilationResult, CompatibilityReport, Package
 from ..report import add_identity_and_instructions, report_json, resolve_model_requirements
-from .common import copy_tree_to_files, map_agent_plugin_mcp_to_claude, markdown_with_frontmatter
-
-
-def _global_skills(package: Package):
-    by_name = {}
-    conflicts: set[str] = set()
-    for agent in package.agents.values():
-        for skill in agent.all_skills:
-            prior = by_name.get(skill.name)
-            if prior is not None and prior.root != skill.root:
-                conflicts.add(skill.name)
-                continue
-            by_name[skill.name] = skill
-    return {name: skill for name, skill in by_name.items() if name not in conflicts}, conflicts
+from .common import copy_tree_to_files, global_skill_catalog, map_agent_plugin_mcp_to_claude, markdown_with_frontmatter
 
 
 def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationResult:
@@ -26,7 +13,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
     model = binding.get("model")
     entry_mode = binding.get("entry_mode", "subagent")
 
-    global_skills, conflicting_skill_names = _global_skills(package)
+    global_skills, conflicting_skill_names = global_skill_catalog(package)
     for skill in global_skills.values():
         copy_tree_to_files(skill.root, f".claude/skills/{skill.name}", files)
 

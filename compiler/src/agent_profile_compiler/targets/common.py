@@ -7,7 +7,7 @@ from typing import Any, Iterable, Mapping
 
 import yaml
 
-from ..model import McpServer, Skill
+from ..model import McpServer, Package, Skill
 
 
 def markdown_with_frontmatter(frontmatter: Mapping[str, Any], body: str) -> str:
@@ -92,3 +92,22 @@ def strip_top_level_instructions_heading(body: str) -> str:
                     lines.pop(0)
             break
     return "\n".join(lines).strip()
+
+
+def global_skill_catalog(package: Package) -> tuple[dict[str, Skill], set[str]]:
+    """Skills by name for hosts with one project-wide skill catalog.
+
+    Returns the usable catalog and the names that collide, meaning two agents
+    reference different skill directories under the same name.
+    """
+
+    by_name: dict[str, Skill] = {}
+    conflicts: set[str] = set()
+    for agent in package.agents.values():
+        for skill in agent.all_skills:
+            prior = by_name.get(skill.name)
+            if prior is not None and prior.root != skill.root:
+                conflicts.add(skill.name)
+                continue
+            by_name[skill.name] = skill
+    return {name: skill for name, skill in by_name.items() if name not in conflicts}, conflicts

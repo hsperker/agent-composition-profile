@@ -14,6 +14,8 @@ LEGACY_REPORTS = [
     ROOT / "generated" / "amplifier-full-diagnostic" / "compatibility-report.json",
     ROOT / "generated" / "claude-code-full-strict" / "compatibility-report.json",
     ROOT / "generated" / "codex-full-strict" / "compatibility-report.json",
+    ROOT / "generated" / "copilot-full-strict" / "compatibility-report.json",
+    ROOT / "generated" / "opencode-full-strict" / "compatibility-report.json",
     ROOT / "generated" / "afm-full-diagnostic" / "compatibility-report.json",
 ]
 

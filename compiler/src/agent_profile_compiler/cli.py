@@ -15,7 +15,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compile an Agent Profile package")
     parser.add_argument("entry", type=Path, help="Entry .agent.md declaration")
     parser.add_argument("--package-root", type=Path, required=True)
-    parser.add_argument("--target", choices=["amplifier", "claude-code", "codex", "afm"], required=True)
+    parser.add_argument("--target", choices=["amplifier", "claude-code", "codex", "copilot", "opencode", "afm"], required=True)
     parser.add_argument("--binding", type=Path, help="Target-specific, non-portable binding YAML")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--diagnostic", action="store_true", help="Write output even when required semantics are unsupported")

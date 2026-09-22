@@ -44,6 +44,8 @@ def main() -> None:
         "amplifier-full-diagnostic": True,
         "claude-code-full-strict": False,
         "codex-full-strict": False,
+        "copilot-full-strict": False,
+        "opencode-full-strict": False,
         "afm-explorer-strict": False,
         "afm-full-diagnostic": True,
     }
@@ -66,6 +68,14 @@ def main() -> None:
     assert "skills" not in codex
     assert "research" in codex["mcp_servers"]
     assert (GENERATED / "codex-full-strict/.agents/skills/source-evaluation/SKILL.md").is_file()
+
+    copilot = frontmatter(GENERATED / "copilot-full-strict/.github/agents/lead-researcher.agent.md")
+    assert copilot["agents"] == ["explorer", "critic"]
+    assert "research" in copilot["mcp-servers"]
+    json.loads((GENERATED / "copilot-full-strict/.vscode/mcp.json").read_text(encoding="utf-8"))
+    opencode = frontmatter(GENERATED / "opencode-full-strict/.opencode/agents/lead-researcher.md")
+    assert opencode["permission"]["task"]["explorer"] == "allow"
+    assert "research" in json.loads((GENERATED / "opencode-full-strict/opencode.json").read_text(encoding="utf-8"))["mcp"]
 
     amplifier = frontmatter(GENERATED / "amplifier-critic-strict/agents/critic.md")
     assert amplifier["meta"]["model_role"] == "reasoning"
@@ -112,9 +122,9 @@ def main() -> None:
         assert payload["servers"]["echohttp"]["header_honored"] is True, payload["target"]
 
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))
-    assert len(matrix["targets"]) == 12
+    assert len(matrix["targets"]) == 14
     assert sum(kind == "runtime" for kind in matrix["evidence_kind"].values()) == 8
-    assert sum(kind == "product-static" for kind in matrix["evidence_kind"].values()) == 4
+    assert sum(kind == "product-static" for kind in matrix["evidence_kind"].values()) == 6
     expected_hashes = {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in sorted((ROOT / "examples/research-team").rglob("*"))

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from .model import CompilationResult, Package
-from .targets import afm, amplifier, claude_code, codex
+from .targets import afm, amplifier, claude_code, codex, copilot, opencode
 
 
 class CompilationError(RuntimeError):
@@ -14,6 +14,8 @@ _TARGETS = {
     "amplifier": amplifier.compile_target,
     "claude-code": claude_code.compile_target,
     "codex": codex.compile_target,
+    "copilot": copilot.compile_target,
+    "opencode": opencode.compile_target,
     "afm": afm.compile_target,
 }
 
