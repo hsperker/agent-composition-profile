@@ -87,7 +87,7 @@
       "agent": "lead-researcher",
       "feature": "plugins",
       "status": "resolved",
-      "detail": "Agent Plugin skills are copied as project skills and MCP servers are lowered to agent-scoped mcpServers."
+      "detail": "Agent Plugin skills are copied as project skills and MCP servers are lowered to the agent's mcpServers; Claude Code loads them once the project is trusted."
     },
     {
       "agent": "lead-researcher",
@@ -129,7 +129,7 @@
       "agent": "explorer",
       "feature": "plugins",
       "status": "resolved",
-      "detail": "Agent Plugin skills are copied as project skills and MCP servers are lowered to agent-scoped mcpServers."
+      "detail": "Agent Plugin skills are copied as project skills and MCP servers are lowered to the agent's mcpServers; Claude Code loads them once the project is trusted."
     },
     {
       "agent": "explorer",
