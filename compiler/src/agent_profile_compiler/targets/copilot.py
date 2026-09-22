@@ -13,7 +13,7 @@ from typing import Any, Mapping
 
 from ..model import CompilationResult, CompatibilityReport, McpServer, Package
 from ..report import add_identity_and_instructions, report_json, resolve_model_requirements
-from .common import copy_tree_to_files, global_skill_catalog, markdown_with_frontmatter
+from .common import copy_tree_to_files, global_skill_catalog, lowered_server, markdown_with_frontmatter
 
 
 def map_mcp_for_cloud_agent(server: McpServer) -> tuple[dict[str, Any], tuple[str, ...]]:
@@ -90,7 +90,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             plugin_conflicts = sorted({skill.name for plugin in agent.plugins for skill in plugin.skills} & conflicts)
             losses: list[str] = list(f"plugin skill name collides in the project-wide catalog: {name}" for name in plugin_conflicts)
             cloud: dict[str, Any] = {}
-            for server in agent.mcp_servers:
+            for server in map(lambda item: lowered_server(item, binding), agent.mcp_servers):
                 mapped, server_losses = map_mcp_for_cloud_agent(server)
                 cloud[server.name] = mapped
                 losses.extend(server_losses)

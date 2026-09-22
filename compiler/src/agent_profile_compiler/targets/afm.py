@@ -5,6 +5,7 @@ from typing import Any, Mapping
 from ..model import CompilationResult, CompatibilityReport, Package
 from ..report import add_identity_and_instructions, report_json, resolve_model_requirements
 from .common import (
+    lowered_server,
     copy_tree_to_files,
     map_agent_plugin_mcp_to_afm,
     markdown_with_frontmatter,
@@ -52,7 +53,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         if agent.mcp_servers:
             mapped_servers = []
             mcp_losses: list[str] = []
-            for server in agent.mcp_servers:
+            for server in (lowered_server(item, binding) for item in agent.mcp_servers):
                 mapped, losses = map_agent_plugin_mcp_to_afm(server)
                 if mapped is not None:
                     mapped_servers.append(mapped)

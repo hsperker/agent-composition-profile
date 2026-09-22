@@ -8,6 +8,7 @@ from typing import Any, Iterable, Mapping
 import yaml
 
 from ..model import McpServer, Package, Skill
+from ..runtime.plugins import effective_server_config, plugin_data_root
 
 
 def markdown_with_frontmatter(frontmatter: Mapping[str, Any], body: str) -> str:
@@ -111,3 +112,20 @@ def global_skill_catalog(package: Package) -> tuple[dict[str, Skill], set[str]]:
                 continue
             by_name[skill.name] = skill
     return {name: skill for name, skill in by_name.items() if name not in conflicts}, conflicts
+
+
+def lowered_server(server: McpServer, binding: Mapping[str, Any]) -> McpServer:
+    """The server as a product host must see it: Agent Plugins §7.2.1 and §9 applied.
+
+    Product hosts do not expand `${PLUGIN_ROOT}`, provide `PLUGIN_ROOT` and
+    `PLUGIN_DATA`, or default `cwd` to the plugin root, so the compiler does it
+    for stdio servers. HTTP servers pass through unchanged.
+    """
+
+    if server.config.get("type") != "stdio":
+        return server
+    return McpServer(
+        name=server.name,
+        config=effective_server_config(server, data_root=plugin_data_root(binding)),
+        plugin_root=server.plugin_root,
+    )

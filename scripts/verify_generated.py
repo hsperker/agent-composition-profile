@@ -121,6 +121,20 @@ def main() -> None:
         assert payload["servers"]["echostdio"]["env_honored"] is True, payload["target"]
         assert payload["servers"]["echohttp"]["header_honored"] is True, payload["target"]
 
+    product_probes = sorted((GENERATED / "products").glob("*/probe-*.json")) if (GENERATED / "products").exists() else []
+    for path in product_probes:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        assert payload["exit_code"] == 0, (path, payload["notes"])
+        assert payload["entry_instructions_in_system_prompt"] is True, path
+        if path.stem.endswith("research-team"):
+            assert payload["skill_activated"] and payload["skill_body_absent_before_activation"], path
+            assert payload["skill_body_in_context_after_activation"] and payload["skill_body_persisted_in_later_turns"], path
+            assert payload["subagent_called"] and payload["subagent_ran_with_own_instructions"], path
+            assert payload["subagent_result_returned_to_caller"], path
+        if path.stem.endswith("plugin-activation"):
+            assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
+        assert "hans-christian" not in path.read_text(encoding="utf-8"), path
+
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))
     assert len(matrix["targets"]) == 14
     assert sum(kind == "runtime" for kind in matrix["evidence_kind"].values()) == 8

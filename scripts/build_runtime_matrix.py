@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "generated" / "runtime"
+PRODUCTS = ROOT / "generated" / "products"
 LEGACY_REPORTS = [
     ROOT / "generated" / "amplifier-full-diagnostic" / "compatibility-report.json",
     ROOT / "generated" / "claude-code-full-strict" / "compatibility-report.json",
@@ -45,6 +46,10 @@ def main() -> None:
     }
     if len(activation_reports) != 8:
         raise SystemExit(f"expected 8 plugin activation reports, found {len(activation_reports)}")
+    product_probes = {
+        f"{path.parent.name}/{path.stem.removeprefix('probe-')}": json.loads(path.read_text(encoding="utf-8"))
+        for path in sorted(PRODUCTS.glob("*/probe-*.json"))
+    } if PRODUCTS.exists() else {}
     legacy_reports = [json.loads(path.read_text(encoding="utf-8")) for path in LEGACY_REPORTS]
     reports = [*runtime_reports, *legacy_reports]
     findings_by_target = {
@@ -68,6 +73,19 @@ def main() -> None:
             for feature in features
         },
         "modules": {report["target"]: module_outcomes(report) for report in reports},
+        "product_probes": {
+            key: {
+                field: probe.get(field)
+                for field in (
+                    "version", "exit_code", "entry_instructions_in_system_prompt",
+                    "skill_catalog_advertised_before_activation", "skill_body_absent_before_activation",
+                    "skill_activated", "skill_body_in_context_after_activation", "skill_body_persisted_in_later_turns",
+                    "subagent_called", "subagent_ran_with_own_instructions", "subagent_result_returned_to_caller",
+                    "mcp_tools_offered",
+                )
+            }
+            for key, probe in product_probes.items()
+        },
         "plugin_activation": {
             target: {
                 name: {
@@ -153,6 +171,24 @@ def main() -> None:
             )
             + " |"
             for target, servers in sorted(matrix["plugin_activation"].items())
+        ),
+        "",
+        "## Product probes (executed headless against a scripted model endpoint)",
+        "",
+        "| product / fixture | version | instructions in system prompt | skills: catalog first, body on activation, persists | subagent: called, own instructions, result returned | MCP tools offered |",
+        "| --- | --- | --- | --- | --- | --- |",
+        *(
+            "| " + " | ".join([
+                key,
+                str(probe.get("version")),
+                str(probe.get("entry_instructions_in_system_prompt")).lower(),
+                (f"{bool(probe.get('skill_catalog_advertised_before_activation'))}, {probe.get('skill_body_in_context_after_activation')}, {probe.get('skill_body_persisted_in_later_turns')}".lower()
+                 if probe.get("skill_activated") else "no skills in fixture"),
+                (f"{probe.get('subagent_called')}, {probe.get('subagent_ran_with_own_instructions')}, {probe.get('subagent_result_returned_to_caller')}".lower()
+                 if probe.get("subagent_called") else "no subagents in fixture"),
+                ", ".join(probe.get("mcp_tools_offered") or []) or "none",
+            ]) + " |"
+            for key, probe in sorted(matrix["product_probes"].items())
         ),
         "",
         "Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.",

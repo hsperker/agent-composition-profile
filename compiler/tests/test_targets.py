@@ -362,3 +362,24 @@ def test_opencode_maps_stdio_servers_with_cwd_and_rejects_sse(tmp_path: Path) ->
         McpServer(name="legacy", config={"type": "sse", "url": "https://x/sse"}, plugin_root=tmp_path)
     )
     assert mapped is None and len(losses) == 1
+
+
+def test_product_targets_apply_agent_plugins_placeholder_expansion_for_stdio_servers(tmp_path: Path) -> None:
+    probe = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+    package = load_package(probe / "agent.agent.md", probe)
+    binding = {"capabilities": {}, "plugin_data_root": str(tmp_path / "data")}
+    plugin_root = str((probe / "plugins" / "local-echo").resolve())
+
+    # Claude Code cannot honor cwd for stdio servers, so strict mode rejects this fixture.
+    with pytest.raises(CompilationError, match="cwd"):
+        compile_package(package, "claude-code", binding, strict=True)
+    result = compile_package(package, "claude-code", binding, strict=False)
+    assert statuses(result, "plugins", "plugin-user") == {"unsupported"}
+
+    agent = yaml.safe_load(result.files[".claude/agents/plugin-user.md"].split("---", 2)[1])
+    stdio = next(server["echostdio"] for server in agent["mcpServers"] if "echostdio" in server)
+    assert stdio["args"][0] == f"{plugin_root}/servers/echo_server.py"
+    assert stdio["cwd"] == plugin_root
+    assert stdio["env"]["PLUGIN_ROOT"] == plugin_root
+    assert stdio["env"]["PLUGIN_DATA"] == str(tmp_path / "data")
+    assert stdio["env"]["PROBE_LABEL"] == "stdio"

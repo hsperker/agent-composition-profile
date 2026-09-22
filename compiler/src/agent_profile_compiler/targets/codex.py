@@ -4,7 +4,7 @@ from typing import Any, Mapping
 
 from ..model import CompilationResult, CompatibilityReport, Package
 from ..report import add_identity_and_instructions, report_json, resolve_model_requirements
-from .common import copy_tree_to_files, toml_string
+from .common import copy_tree_to_files, lowered_server, toml_string
 
 
 def _render_agent_toml(
@@ -67,10 +67,10 @@ def _inline_table(mapping: Mapping[str, Any]) -> str:
 
 
 
-def _codex_mcp_servers(agent):
+def _codex_mcp_servers(agent, binding: Mapping[str, Any]):
     supported = []
     losses: list[str] = []
-    for server in agent.mcp_servers:
+    for server in (lowered_server(item, binding) for item in agent.mcp_servers):
         transport = server.config.get("type")
         if transport in {"stdio", "streamable-http"}:
             supported.append(server)
@@ -110,7 +110,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             binding,
             resolution_detail="External binding attests the capability and emits a Codex model/config selection.",
         )
-        codex_mcp_servers, mcp_losses = _codex_mcp_servers(agent)
+        codex_mcp_servers, mcp_losses = _codex_mcp_servers(agent, binding)
         files[f".codex/agents/{agent.name}.toml"] = _render_agent_toml(
             package, agent, binding, codex_mcp_servers
         )

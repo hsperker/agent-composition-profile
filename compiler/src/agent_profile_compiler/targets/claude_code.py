@@ -4,7 +4,13 @@ from typing import Any, Mapping
 
 from ..model import CompilationResult, CompatibilityReport, Package
 from ..report import add_identity_and_instructions, report_json, resolve_model_requirements
-from .common import copy_tree_to_files, global_skill_catalog, map_agent_plugin_mcp_to_claude, markdown_with_frontmatter
+from .common import (
+    copy_tree_to_files,
+    global_skill_catalog,
+    lowered_server,
+    map_agent_plugin_mcp_to_claude,
+    markdown_with_frontmatter,
+)
 
 
 def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationResult:
@@ -62,14 +68,26 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
 
         if agent.mcp_servers:
             frontmatter["mcpServers"] = [
-                map_agent_plugin_mcp_to_claude(server) for server in agent.mcp_servers
+                map_agent_plugin_mcp_to_claude(lowered_server(server, binding)) for server in agent.mcp_servers
             ]
             tools.extend(f"mcp__{server.name}__*" for server in agent.mcp_servers)
             plugin_conflicts = sorted(
                 {skill.name for plugin in agent.plugins for skill in plugin.skills}
                 & conflicting_skill_names
             )
-            if plugin_conflicts:
+            # Claude Code's MCP configuration has no cwd field; the probe confirmed a stdio
+            # server runs in the project directory. Agent Plugins §7.2.1 requires the
+            # declared cwd or the plugin root, so any stdio server is a loss.
+            stdio_servers = [server.name for server in agent.mcp_servers if server.config.get("type") == "stdio"]
+            if stdio_servers:
+                report.add(
+                    agent.name,
+                    "plugins",
+                    "unsupported",
+                    "Claude Code MCP configuration has no cwd field, so the Agent Plugins working directory cannot be "
+                    "honored for stdio servers: " + ", ".join(stdio_servers),
+                )
+            elif plugin_conflicts:
                 report.add(
                     agent.name,
                     "plugins",
@@ -82,7 +100,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
                     agent.name,
                     "plugins",
                     "resolved",
-                    "Agent Plugin skills are copied as project skills and MCP servers are lowered to agent-scoped mcpServers.",
+                    "Agent Plugin skills are copied as project skills and MCP servers are lowered to the agent's mcpServers; Claude Code loads them once the project is trusted.",
                 )
         elif agent.plugins:
             plugin_conflicts = sorted(
