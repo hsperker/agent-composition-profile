@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 from agent_profile_compiler.parser import load_package
-from agent_profile_compiler.products import claude_code, opencode
+from agent_profile_compiler.products import claude_code, codex, opencode
 from agent_profile_compiler.runtime.mcp_probe import echo_http_server
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,7 +16,7 @@ FIXTURES = {
     "research-team": ROOT / "examples" / "research-team" / "lead.agent.md",
     "plugin-activation": ROOT / "examples" / "runtime-probes" / "plugin-activation" / "agent.agent.md",
 }
-PRODUCTS = {"claude-code": claude_code, "opencode": opencode}
+PRODUCTS = {"claude-code": claude_code, "codex": codex, "opencode": opencode}
 
 
 def main() -> None:
@@ -33,7 +33,9 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name, entry in FIXTURES.items():
         package = load_package(entry, entry.parent)
-        binding = {"capabilities": {"reasoning": True, "tool-use": True}, "entry_mode": "main" if args.product == "claude-code" else "primary"}
+        binding = {"capabilities": {"reasoning": True, "tool-use": True}, "entry_mode": "primary" if args.product == "opencode" else "main"}
+        if args.product == "codex":
+            binding.update({"model": "probe-model", "model_reasoning_effort": "low"})
         if name == "plugin-activation":
             plugin_root = (entry.parent / "plugins" / "local-echo").resolve()
             with echo_http_server(plugin_root):
@@ -45,7 +47,7 @@ def main() -> None:
         payload = json.loads(json.dumps(payload).replace(str(ROOT), "${REPO_ROOT}"))
         (output_dir / f"probe-{name}.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(
-            f"{args.product} {name}: exit={result.exit_code} instructions={result.entry_instructions_in_system_prompt} "
+            f"{args.product} {name}: exit={result.exit_code} instructions={getattr(result, 'entry_instructions_in_system_prompt', getattr(result, 'entry_instructions_in_instructions', None))} "
             f"skill={result.skill_activated} subagent={result.subagent_called} returned={result.subagent_result_returned_to_caller} "
             f"mcp={result.mcp_tools_offered} mcp_results={len(result.mcp_results)} notes={result.notes}"
         )
