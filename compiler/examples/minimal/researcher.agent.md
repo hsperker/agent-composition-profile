@@ -1,6 +1,5 @@
 ---
 name: researcher
-description: Investigates technical questions using primary evidence.
 ---
 
 # Instructions

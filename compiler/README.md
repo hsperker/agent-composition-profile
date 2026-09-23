@@ -72,7 +72,7 @@ The `modules` section rolls findings up to the core (name and instructions) and 
 
 Three packages under `examples/`, all in draft 0.2 form. A test compiles each one strictly for the four executed products.
 
-- `minimal/`: name, description, instructions. Compiles to a single agent file everywhere.
+- `minimal/`: name and instructions, the required core and nothing else. Compiles to a single agent file everywhere.
 - `skills-and-plugin/`: one Agent Skills directory and one Agent Plugin with a streamable HTTP MCP server. Stdio servers are deliberately absent: Claude Code and Copilot cannot set a working directory for them, so they compile as `unsupported` there.
 - `subagents/`: a lead with two leaf agents. Claude Code and OpenCode enforce the list; Codex and Copilot CLI expose the whole project catalog.
 
