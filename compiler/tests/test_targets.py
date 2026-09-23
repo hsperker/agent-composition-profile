@@ -383,3 +383,37 @@ def test_product_targets_apply_agent_plugins_placeholder_expansion_for_stdio_ser
     assert stdio["env"]["PLUGIN_ROOT"] == plugin_root
     assert stdio["env"]["PLUGIN_DATA"] == str(tmp_path / "data")
     assert stdio["env"]["PROBE_LABEL"] == "stdio"
+
+
+def test_codex_emits_entry_agent_mcp_servers_into_project_config(tmp_path: Path) -> None:
+    """Codex's main thread reads MCP servers from config.toml, not from a custom agent file."""
+
+    probe = ROOT / "examples" / "runtime-probes" / "plugin-activation"
+    package = load_package(probe / "agent.agent.md", probe)
+    binding = {"capabilities": {}, "plugin_data_root": str(tmp_path / "data")}
+    plugin_root = str((probe / "plugins" / "local-echo").resolve())
+
+    result = compile_package(package, "codex", binding, strict=True)
+
+    config = tomllib.loads(result.files[".codex/config.toml"])
+    stdio = config["mcp_servers"]["echostdio"]
+    assert stdio["command"] == "python"
+    assert stdio["args"][0] == f"{plugin_root}/servers/echo_server.py"
+    assert stdio["cwd"] == plugin_root
+    assert stdio["env"]["PLUGIN_DATA"] == str(tmp_path / "data")
+    assert config["mcp_servers"]["echohttp"]["url"].startswith("http://127.0.0.1:")
+    agent = tomllib.loads(result.files[".codex/agents/plugin-user.toml"])
+    assert agent["mcp_servers"].keys() == config["mcp_servers"].keys()
+
+
+def test_codex_main_mode_writes_the_entry_instructions_to_agents_md() -> None:
+    """Codex's main thread is not a custom agent; in main mode its instructions travel as AGENTS.md."""
+
+    package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
+
+    main = compile_package(package, "codex", {**BINDINGS["codex"], "entry_mode": "main"}, strict=True)
+    assert main.files["AGENTS.md"] == package.entry.instructions.rstrip() + "\n"
+    assert ".codex/agents/lead-researcher.toml" in main.files  # the custom agent file stays for spawning
+
+    subagent_only = compile_package(package, "codex", {**BINDINGS["codex"], "entry_mode": "subagent"}, strict=True)
+    assert "AGENTS.md" not in subagent_only.files

@@ -6,4 +6,3 @@ developer_instructions = "# Instructions\n\nForm a tentative conclusion from evi
 
 [mcp_servers."research"]
 url = "https://research.example.com/mcp"
-required = true

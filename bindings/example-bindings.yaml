@@ -24,6 +24,7 @@ targets:
       vision-input: true
     model: gpt-5.6-terra
     model_reasoning_effort: high
+    entry_mode: main
   copilot:
     capabilities:
       reasoning: true

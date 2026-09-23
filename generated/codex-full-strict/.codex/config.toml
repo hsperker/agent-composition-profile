@@ -1,2 +1,5 @@
 [agents]
 max_concurrent_threads_per_session = 4
+
+[mcp_servers."research"]
+url = "https://research.example.com/mcp"

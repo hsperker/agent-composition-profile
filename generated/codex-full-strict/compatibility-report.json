@@ -87,7 +87,7 @@
       "agent": "lead-researcher",
       "feature": "plugins",
       "status": "resolved",
-      "detail": "Agent Plugin skills are copied to .agents/skills and supported MCP servers become per-agent mcp_servers entries."
+      "detail": "Agent Plugin skills are copied to .agents/skills and supported MCP servers become per-agent mcp_servers entries; the entry agent's servers also go into .codex/config.toml because Codex's main thread reads MCP servers only from config."
     },
     {
       "agent": "lead-researcher",
@@ -129,7 +129,7 @@
       "agent": "explorer",
       "feature": "plugins",
       "status": "resolved",
-      "detail": "Agent Plugin skills are copied to .agents/skills and supported MCP servers become per-agent mcp_servers entries."
+      "detail": "Agent Plugin skills are copied to .agents/skills and supported MCP servers become per-agent mcp_servers entries; the entry agent's servers also go into .codex/config.toml because Codex's main thread reads MCP servers only from config."
     },
     {
       "agent": "explorer",

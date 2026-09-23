@@ -6,4 +6,3 @@ developer_instructions = "# Instructions\n\nSearch broadly, then prefer primary 
 
 [mcp_servers."research"]
 url = "https://research.example.com/mcp"
-required = true
