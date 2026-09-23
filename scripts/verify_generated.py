@@ -67,6 +67,8 @@ def main() -> None:
     )
     assert "skills" not in codex
     assert "research" in codex["mcp_servers"]
+    codex_config = tomllib.loads((GENERATED / "codex-full-strict/.codex/config.toml").read_text(encoding="utf-8"))
+    assert "research" in codex_config["mcp_servers"], "entry agent MCP servers must reach Codex's main thread"
     assert (GENERATED / "codex-full-strict/.agents/skills/source-evaluation/SKILL.md").is_file()
 
     copilot = frontmatter(GENERATED / "copilot-full-strict/.github/agents/lead-researcher.agent.md")
@@ -125,7 +127,8 @@ def main() -> None:
     for path in product_probes:
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["exit_code"] == 0, (path, payload["notes"])
-        assert payload["entry_instructions_in_system_prompt"] is True, path
+        reached = payload.get("entry_instructions_in_system_prompt", payload.get("entry_instructions_in_instructions"))
+        assert reached is True, path
         if path.stem.endswith("research-team"):
             assert payload["skill_activated"] and payload["skill_body_absent_before_activation"], path
             assert payload["skill_body_in_context_after_activation"] and payload["skill_body_persisted_in_later_turns"], path
@@ -134,13 +137,17 @@ def main() -> None:
         if path.stem.endswith("plugin-activation"):
             if payload["product"] == "claude-code":
                 assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
+            if payload["product"] == "codex":
+                assert payload["mcp_tools_offered"] == ["mcp__echohttp.echo_http", "mcp__echostdio.echo_stdio"], path
+                assert len(payload["mcp_results"]) == 2, path
             if payload["product"] == "opencode":
                 assert payload["mcp_servers_connected"] == {"echostdio": "connected", "echohttp": "connected"}, path
                 if path.parent.name.endswith("-v2"):
                     assert payload["mcp_tools_offered"] == [], path
                 else:
                     assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
-        assert "hans-christian" not in path.read_text(encoding="utf-8"), path
+        text = path.read_text(encoding="utf-8")
+        assert "hans-christian" not in text and "/home/" not in text and "/Users/" not in text, path
 
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))
     assert len(matrix["targets"]) == 14

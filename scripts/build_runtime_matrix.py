@@ -33,6 +33,14 @@ def module_outcomes(report: dict) -> dict[str, str]:
     return {module: value["outcome"] for module, value in report["modules"].items()}
 
 
+def instructions_cell(probe: dict) -> str:
+    """Whether the entry instructions reached the model, and through which channel."""
+
+    reached = probe.get("entry_instructions_in_system_prompt", probe.get("entry_instructions_in_instructions"))
+    channel = probe.get("entry_instructions_delivered_as") or "system prompt"
+    return f"{str(reached).lower()} ({channel})"
+
+
 def main() -> None:
     runtime_reports = [
         json.loads(path.read_text(encoding="utf-8"))
@@ -77,7 +85,8 @@ def main() -> None:
             key: {
                 field: probe.get(field)
                 for field in (
-                    "version", "exit_code", "entry_instructions_in_system_prompt",
+                    "version", "exit_code", "entry_instructions_in_system_prompt", "entry_instructions_in_instructions",
+                    "entry_instructions_delivered_as",
                     "skill_catalog_advertised_before_activation", "skill_body_absent_before_activation",
                     "skill_activated", "skill_body_in_context_after_activation", "skill_body_persisted_in_later_turns",
                     "subagent_called", "subagent_ran_with_own_instructions", "subagent_result_returned_to_caller",
@@ -175,13 +184,13 @@ def main() -> None:
         "",
         "## Product probes (executed headless against a scripted model endpoint)",
         "",
-        "| product / fixture | version | instructions in system prompt | skills: catalog first, body on activation, persists | subagent: called, own instructions, result returned | MCP tools offered |",
+        "| product / fixture | version | instructions reached the model (how) | skills: catalog first, body on activation, persists | subagent: called, own instructions, result returned | MCP tools offered |",
         "| --- | --- | --- | --- | --- | --- |",
         *(
             "| " + " | ".join([
                 key,
                 str(probe.get("version")),
-                str(probe.get("entry_instructions_in_system_prompt")).lower(),
+                instructions_cell(probe),
                 (f"{bool(probe.get('skill_catalog_advertised_before_activation'))}, {probe.get('skill_body_in_context_after_activation')}, {probe.get('skill_body_persisted_in_later_turns')}".lower()
                  if probe.get("skill_activated") else "no skills in fixture"),
                 (f"{probe.get('subagent_called')}, {probe.get('subagent_ran_with_own_instructions')}, {probe.get('subagent_result_returned_to_caller')}".lower()
