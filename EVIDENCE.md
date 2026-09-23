@@ -32,7 +32,7 @@ Products, static lowering by the reference compiler. A product qualifies when it
 | Claude Code 2.1.277 | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | generated files run headless against a scripted Anthropic endpoint; see the product probe below |
 | Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
 | GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
-| OpenCode 2.0.14 | `.opencode/agent/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | generated files run headless against a scripted OpenAI compatible endpoint; see the product probe below |
+| OpenCode 1.18.32 and 2.0.14 | `.opencode/agent/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | generated files run headless against a scripted OpenAI compatible endpoint on both major versions; see the product probe below |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
 | WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no subagent relation, no stdio `cwd` |
 
@@ -91,22 +91,25 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | Working directory | not honored: Claude Code's MCP configuration has no `cwd` field and the server ran in the project directory |
 | Agent level `mcpServers` | loaded only after the project is trusted; untrusted projects silently drop them and a subagent with only MCP tools refuses to start |
 
-#### Product probe: OpenCode
+#### Product probe: OpenCode, two major versions
 
-The same script runs OpenCode 2.0.14 with `opencode run --standalone --agent <entry>` against a local server that speaks the OpenAI chat completions protocol, configured as a custom provider. HOME and the XDG directories point into the temporary directory, so the user's configuration, skills, and data are untouched.
+The same script runs OpenCode headless (`opencode run --agent <entry>`, with `--standalone` on v2 and `--dir` on v1) against a local server that speaks the OpenAI chat completions protocol, configured as a custom provider. HOME and the XDG directories point into the temporary directory, so the user's configuration, skills, and data are untouched. v2.0.14 was probed first; v1.18.32 was then installed as a control because the v2 MCP result needed one.
 
-| Checked | Result |
-|---|---|
-| Entry instructions in the system prompt | yes; OpenCode appends model and environment notes after the body |
-| Skills advertised before activation | an `<available_skills>` block in the system prompt with id, name, and description; body absent |
-| Skill activation | `skill` tool call with the id, then the body arrives as the tool result and stays in later requests |
-| Subagents | the tool is named `subagent`, not Task; its description lists exactly the allowlisted agents from `permission.task`; the child ran with its own system prompt and its result came back as the tool result |
-| Plugin MCP servers | both connected within 300 ms of startup, one tool each, over stdio and header gated streamable HTTP |
-| MCP tools offered to the model | none. Not as function tools, and not through OpenCode 2's Code Mode: an `execute` call to `search({query: "echo"})` returned no items and the `tools` namespace held only `browser` and `opencode`. Cause not determined from outside |
+| Checked | v1.18.32 | v2.0.14 |
+|---|---|---|
+| Entry instructions in the system prompt | yes | yes, with model and environment notes appended |
+| Skills advertised before activation | `<available_skills>` block, body absent | same |
+| Skill activation | `skill` tool takes `name`; body returned as the tool result and kept in later requests | `skill` tool takes `id`; same delivery |
+| Subagents | tool named `task`, lists exactly the `permission.task` allowlist, child ran with own prompt, result returned | tool renamed `subagent`, same behavior |
+| Plugin MCP servers | both connected | both connected within 300 ms |
+| MCP tools offered to the model | `echostdio_echo_stdio` and `echohttp_echo_http` as function tools, plus generic MCP resource tools; both invoked | none, not as function tools and not through Code Mode: `execute` with `search({query: "echo"})` returned no items |
+| Stdio working directory and reserved variables | `cwd` honored, `PLUGIN_ROOT` and `PLUGIN_DATA` present | not observable, no tool call reached the server |
 
-Three things the probe had to learn the hard way. OpenCode 2.0.14 reads agents from `.opencode/agent/`, singular; a project with only the documented `agents/` directory reports the agent as not found. It resolves its project from the `PWD` environment variable, not from the process working directory, so a subprocess launched with a different `cwd` runs against the wrong project. And with the user's real home directory, the skill catalog also lists every skill under `~/.claude/skills`, a live example of skills being additive rather than isolated.
+So the v2 gap is a version change, not our configuration: the same files, the same servers, and the same scripted model work on v1. Between the two versions the agent directory stayed `.opencode/agent/` (singular; the documentation shows `agents/`, which neither version reads), the subagent tool was renamed from `task` to `subagent`, the `skill` tool's argument changed from `name` to `id`, and MCP tool exposure moved to Code Mode, where these servers did not appear. That is one product changing four things a compiler depends on across one major version, which is the case for probing per release.
 
-Consequences for the grades: OpenCode's `plugins.activation` is recorded as connected without tool exposure; its compile time grade stays `resolved` because the configuration is representable and the servers do connect, and the note says what the model could not do. Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
+Two more things the probe had to learn. OpenCode resolves its project from the `PWD` environment variable, not from the process working directory, so a subprocess launched with a different `cwd` runs against the wrong project. And with the user's real home directory, the skill catalog also lists every skill under `~/.claude/skills`, a live example of skills being additive rather than isolated.
+
+Consequences for the grades: OpenCode's compile time `plugins` grade stays `resolved`, because the configuration is representable and v1 activates it fully. The v2 exposure gap is recorded in the probe evidence as a version specific observation whose cause was not determined from outside. Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
 
 Strict outcome per field group, all agents:
 
@@ -218,8 +221,8 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- Four product targets were lowered and verified, not executed. Claude Code and OpenCode were executed through probes; Codex is installed but its Homebrew cask is broken on this machine, and Copilot and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
-- The OpenCode MCP finding is observational: the servers connected and the model was offered no MCP tool through either path OpenCode 2 provides, but the reason was not determined.
+- Four product targets were lowered and verified, not executed. Claude Code and OpenCode (two major versions) were executed through probes; Codex is installed but its Homebrew cask is broken on this machine, and Copilot and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- The OpenCode v2 MCP finding is observational: the servers connected and the model was offered no MCP tool through either path v2 provides, while v1 exposes and runs them; the v2 cause was not determined.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.
