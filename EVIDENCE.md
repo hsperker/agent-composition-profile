@@ -31,7 +31,7 @@ Products, static lowering by the reference compiler. A product qualifies when it
 |---|---|---|
 | Claude Code 2.1.277 | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | generated files run headless against a scripted Anthropic endpoint; see the product probe below |
 | Codex 0.154.0 | `.codex/agents/*.toml`, `.codex/config.toml` with the entry agent's `mcp_servers`, `AGENTS.md`, `.agents/skills/` | generated files run headless against a scripted Responses API endpoint on a Raspberry Pi; see the product probe below |
-| GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
+| GitHub Copilot CLI 1.0.88 | `.github/agents/*.agent.md` with `agents` list and `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | generated files run headless in bring your own key mode against a scripted OpenAI compatible endpoint; see the product probe below |
 | OpenCode 1.18.32 and 2.0.14 | `.opencode/agent/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | generated files run headless against a scripted OpenAI compatible endpoint on both major versions; see the product probe below |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
 | WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no subagent relation, no stdio `cwd` |
@@ -68,7 +68,7 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | Amplifier (product, static) | preserved | preserved | preserved | resolved | resolved | unsupported | n/a | n/a | unsupported | preserved |
 | Claude Code (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
 | Codex (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
-| Copilot (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
+| Copilot (product, static) | preserved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | resolved |
 | OpenCode (product, static) | resolved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
 | AFM 0.4.0 (product, static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
@@ -110,6 +110,23 @@ So the v2 gap is a version change, not our configuration: the same files, the sa
 Two more things the probe had to learn. OpenCode resolves its project from the `PWD` environment variable, not from the process working directory, so a subprocess launched with a different `cwd` runs against the wrong project. And with the user's real home directory, the skill catalog also lists every skill under `~/.claude/skills`, a live example of skills being additive rather than isolated.
 
 Consequences for the grades: OpenCode's compile time `plugins` grade stays `resolved`, because the configuration is representable and v1 activates it fully. The v2 exposure gap is recorded in the probe evidence as a version specific observation whose cause was not determined from outside. Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
+
+#### Product probe: GitHub Copilot CLI
+
+Copilot CLI 1.0.88 has a bring your own key mode: `COPILOT_PROVIDER_BASE_URL` routes every model call to the scripted chat completions server, and `COPILOT_OFFLINE` disables GitHub authentication, telemetry, and the built in GitHub MCP server. `COPILOT_HOME` moves state into the temporary directory and `COPILOT_ALLOW_ALL=true` trusts the project, which is what loads its agents, skills, and MCP servers. The probe runs `copilot -p --agent <entry>` with JSON output. Both fixtures ran.
+
+| Observation | Copilot CLI 1.0.88 |
+|---|---|
+| Entry instructions | in the system prompt inside an `<agent_instructions>` block, declared subordinate to Copilot's own instructions |
+| Skills advertised before activation | `<available_skills>` block with name, description, and location; the body is absent. Copilot's builtin skills are listed beside the project's |
+| Skill activation | `skill` tool takes `skill`; body returned as the tool result and kept in later requests |
+| Subagents | `task` tool with `agent_type`; its description lists Copilot's builtin agent types and then every custom agent in the project, the entry itself included. The child ran with its own instructions and its result came back as the tool result. A call to an agent the entry's `agents` list omits ran as well |
+| Plugin MCP servers | read from the agent file's `mcp-servers` block; both connected and were offered as `<server>-<tool>` function tools; both invoked |
+| Stdio working directory and reserved variables | `env` honored, `PLUGIN_ROOT` and `PLUGIN_DATA` present; `cwd` not honored, the server ran in the project directory |
+
+Two things the probe settled. The CLI reads the agent file's MCP block, so the compiler's per agent `mcp-servers` reaches the CLI as well as the cloud coding agent; `.vscode/mcp.json` stays for VS Code. And the `agents` list is not an allowlist in the CLI: it is emitted, but the `task` tool exposes the whole project catalog and runs an unlisted agent. Whether the cloud coding agent enforces the list was not exercised.
+
+Consequences for the grades: Copilot's `subagents` moves from `preserved` to `resolved`, the same grade as Codex and for the same reason. `plugins` stays `unsupported` for stdio servers and `resolved` for HTTP, now confirmed by execution. `skills` stays `resolved`, the core `preserved`.
 
 #### Product probe: Codex
 
@@ -182,7 +199,7 @@ Not exercised, and therefore `unverified` everywhere: whether activated content 
 
 ### `plugins`
 
-Among products, Claude Code takes MCP servers per agent in the agent file, Codex per custom agent in its TOML and, for the entry agent, in `.codex/config.toml` because the main thread reads servers only from config, OpenCode once in `opencode.json` for every agent, and Copilot twice: per agent in the agent file for the cloud coding agent, and workspace wide in `.vscode/mcp.json` for VS Code. Copilot's cloud configuration has no working directory, so any stdio server is `unsupported` there; OpenCode's local server has `cwd`. Among frameworks, six construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
+Among products, Claude Code takes MCP servers per agent in the agent file, Codex per custom agent in its TOML and, for the entry agent, in `.codex/config.toml` because the main thread reads servers only from config, OpenCode once in `opencode.json` for every agent, and Copilot twice: per agent in the agent file for the cloud coding agent, and workspace wide in `.vscode/mcp.json` for VS Code. Copilot's agent file configuration has no working directory, so any stdio server is `unsupported` there, and the CLI probe confirmed the server runs in the project directory; OpenCode's local server has `cwd`. Among frameworks, six construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
 
 The probe plugin declares a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. One echo server script runs under MCP SDK 1.x and 2.x, because the environments pin three `mcp` releases. A deterministic model calls every echo tool once. The echo result reports working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` arrived, and which server answered.
 
@@ -214,14 +231,14 @@ A referenced plugin contributes all its standard components; a strict host makes
 
 The generic `delegates` field promised one semantic and the hosts supplied six. The eight frameworks alone use: native agent as tool (OpenAI Agents, Microsoft, the latter in an isolated child session), no relationship primitive at all (LangGraph, PydanticAI), a child session that copies parent state and propagates changes back (Google ADK `AgentTool`), transfer of control through shared workflow state (LlamaIndex `can_handoff_to`), team collaboration under a leader (Agno `Team`), and delegation bound to tasks and process (CrewAI). Codex exposes a project catalog; AFM has nothing local. Lowering one of these into another invents orchestration policy, so the generic field is gone, and no `agents:` inventory replaces it: a profile describes one agent, a package may hold several, orchestration relates them.
 
-What the mechanisms share is narrower and worth keeping. The products largely agree on it: Claude Code's `Agent(...)` allowlist, Copilot's `agents` list, and OpenCode's task permission all invoke a listed agent as a bounded task with its own instructions and return its summary to the caller, who keeps control. Codex does the same through a project wide catalog without a per agent allowlist. Draft 0.2 names that relation `subagents` and, like `skills` and `plugins`, makes it additive: the listed agents must be available; whether others are too, how deep calls nest, and what the child sees beyond the task text are host policy.
+What the mechanisms share is narrower and worth keeping. The products largely agree on it: Claude Code's `Agent(...)` allowlist, Copilot's `task` tool, and OpenCode's task permission all invoke a listed agent as a bounded task with its own instructions and return its summary to the caller, who keeps control. Codex and Copilot CLI do it through a project wide catalog: the `agents` list in a Copilot agent file is emitted, but the CLI advertised and ran an agent the list omits. Draft 0.2 names that relation `subagents` and, like `skills` and `plugins`, makes it additive: the listed agents must be available; whether others are too, how deep calls nest, and what the child sees beyond the task text are host policy.
 
 Graded against that contract, the picture splits by dimension:
 
-- Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. Copilot `preserved` through its `agents` list. OpenCode `preserved` through `permission.task`. Codex `resolved`, because its project catalog makes the agents available without a per agent allowlist. Amplifier `preserved`. AFM `unsupported`.
+- Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. OpenCode `preserved` through `permission.task`. Codex and Copilot `resolved`, because their project catalogs make the agents available without an enforced per agent allowlist; Copilot was `preserved` on paper until the CLI probe ran the unlisted agent. Amplifier `preserved`. AFM `unsupported`.
 - Frameworks: OpenAI Agents and Microsoft `preserved`. LangGraph and PydanticAI `resolved`, because an adapter tool implements the four properties on a framework without a relationship primitive. Google ADK `approximated`, because state flows both ways. LlamaIndex, Agno, and CrewAI `approximated`, because control transfers or the call is bound to a team or task graph.
 
-The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every framework that reached `preserved` or `resolved`. For Claude Code, Codex, and OpenCode the product probes show the same round trip against the generated files: the child ran with its own instructions and its result came back to the caller. Copilot, Amplifier, and AFM rest on generated files and documentation.
+The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every framework that reached `preserved` or `resolved`. For Claude Code, Codex, Copilot CLI, and OpenCode the product probes show the same round trip against the generated files: the child ran with its own instructions and its result came back to the caller. Amplifier and AFM rest on generated files and documentation.
 
 ## What changes in the profile
 
@@ -239,7 +256,7 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- Three product targets were lowered and verified, not executed: Copilot, Amplifier, and AFM. Claude Code, Codex, and OpenCode (two major versions) were executed through probes. Codex ran on a Raspberry Pi because the endpoint protection on the development machine removed the Codex binary; the probe did not work around that. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- Two product targets were lowered and verified, not executed: Amplifier and AFM. Claude Code, Codex, Copilot CLI, and OpenCode (two major versions) were executed through probes. Copilot's VS Code and cloud coding agent surfaces were not executed; the CLI stands in for them. Codex ran on a Raspberry Pi because the endpoint protection on the development machine removed the Codex binary; the probe did not work around that.
 - The Codex probe pauses ten seconds before the first answer so a slow stdio server can finish starting. Without the pause the first step ran without that server, which is Codex behavior, not a lowering loss, but it means MCP evidence on Codex depends on timing.
 - The OpenCode v2 MCP finding is observational: the servers connected and the model was offered no MCP tool through either path v2 provides, while v1 exposes and runs them; the v2 cause was not determined.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
