@@ -136,7 +136,10 @@ def main() -> None:
                 assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
             if payload["product"] == "opencode":
                 assert payload["mcp_servers_connected"] == {"echostdio": "connected", "echohttp": "connected"}, path
-                assert payload["mcp_tools_offered"] == [], path
+                if path.parent.name.endswith("-v2"):
+                    assert payload["mcp_tools_offered"] == [], path
+                else:
+                    assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
         assert "hans-christian" not in path.read_text(encoding="utf-8"), path
 
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))

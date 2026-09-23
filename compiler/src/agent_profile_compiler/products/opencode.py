@@ -41,6 +41,14 @@ def version() -> str:
         return "unknown"
 
 
+def major_version() -> int:
+    digits = "".join(ch if ch.isdigit() or ch == "." else " " for ch in version()).split()
+    try:
+        return int(digits[0].split(".")[0]) if digits else 0
+    except ValueError:
+        return 0
+
+
 @dataclass
 class ProbeResult:
     product: str
@@ -85,7 +93,15 @@ def _is_mcp_tool(name: str, builtin: set[str]) -> bool:
 
 
 BUILTIN_TOOLS = {"edit", "glob", "grep", "question", "read", "shell", "skill", "subagent", "task", "webfetch",
-                 "websearch", "write", "execute", "bash", "list", "patch", "todowrite", "todoread", "lsp", "batch"}
+                 "websearch", "write", "execute", "bash", "list", "patch", "todowrite", "todoread", "lsp", "batch",
+                 # v1 generic MCP resource tools, not plugin tools
+                 "list_mcp_resources", "list_mcp_resource_templates", "read_mcp_resource"}
+
+
+def evidence_dir() -> str:
+    """Evidence is kept per major version because v1 and v2 behave differently."""
+
+    return f"{PRODUCT}-v{major_version()}"
 
 
 def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate the claim.", timeout: int = 240) -> ProbeResult:
@@ -119,7 +135,8 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
                 # this long to answer, and the pause lets the stdio server finish its handshake.
                 time.sleep(3)
             if skill_names and "skill" in names and "skill" not in done:
-                return reply_tool_call("skill", {"id": skill_names[0]})
+                # v2 takes `id`, v1 takes `name`; sending both satisfies either schema.
+                return reply_tool_call("skill", {"id": skill_names[0], "name": skill_names[0]})
             mcp = [name for name in names if _is_mcp_tool(name, BUILTIN_TOOLS) and name not in done]
             if mcp:
                 return reply_tool_call(mcp[0], {"text": "probe"})
@@ -127,8 +144,10 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
             # ask the Code Mode catalog once so the probe records what the model could have found.
             if entry.plugins and "execute" in names and "execute" not in done:
                 return reply_tool_call("execute", {"code": 'const r = await search({query: "echo"}); return JSON.stringify(r);'})
-            if child_names and "subagent" in names and "subagent" not in done:
-                return reply_tool_call("subagent", {"agent": child_names[0], "description": "bounded task", "prompt": "Analyze this."})
+            # v2 names the tool `subagent`, v1 `task`; the arguments are the same.
+            subagent_tool = "subagent" if "subagent" in names else ("task" if "task" in names else None)
+            if child_names and subagent_tool and subagent_tool not in done:
+                return reply_tool_call(subagent_tool, {"subagent_type": child_names[0], "agent": child_names[0], "description": "bounded task", "prompt": "Analyze this."})
             return reply_text("final answer from the entry agent")
 
         with FakeOpenAI(director, log) as fake:
@@ -154,8 +173,12 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
                 "OPENCODE_DISABLE_AUTOUPDATE": "1",
                 "OPENCODE_DISABLE_MODELS_FETCH": "1",
             })
-            command = ["opencode", "run", "--standalone", "--auto", "--agent", entry.name, "--format", "json",
-                       "--print-logs", "--log-level", "info", task]
+            if major_version() >= 2:
+                command = ["opencode", "run", "--standalone", "--auto", "--agent", entry.name, "--format", "json",
+                           "--print-logs", "--log-level", "info", task]
+            else:
+                command = ["opencode", "run", "--auto", "--agent", entry.name, "--format", "json",
+                           "--print-logs", "--log-level", "INFO", "--dir", str(project), task]
             proc = subprocess.run(command, cwd=project, env=env, capture_output=True, text=True,
                                   timeout=timeout, stdin=subprocess.DEVNULL)
             requests = [item["request"] for item in fake.requests()]
@@ -183,11 +206,11 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
         after_activation = [json.dumps(r) for r in entry_requests[1:]]
         body_after = bool(skill_body) and any(skill_body in blob for blob in after_activation[:1])
         body_persisted = bool(skill_body) and len(after_activation) > 1 and all(skill_body in blob for blob in after_activation)
-        called_child = next((child_names[0] for item in all_results if item["tool"] == "subagent"), None) if child_names else None
+        called_child = next((child_names[0] for item in all_results if item["tool"] in ("subagent", "task")), None) if child_names else None
         child_reqs = child_requests.get(called_child or "", [])
         child_tools = tool_names(child_reqs[0]) if child_reqs else []
         child_returned = called_child is not None and any(f"{called_child} result" in json.dumps(r) for r in entry_requests)
-        subagent_tool = next((t.get("function", {}) for t in first.get("tools", []) if t.get("function", {}).get("name") == "subagent"), {})
+        subagent_tool = next((t.get("function", {}) for t in first.get("tools", []) if t.get("function", {}).get("name") in ("subagent", "task")), {})
         advertised = [name for name in package.agents if name != entry.name and f"- {name}:" in (subagent_tool.get("description") or "")]
         mcp_offered = sorted(name for name in offered if _is_mcp_tool(name, BUILTIN_TOOLS))
         mcp_results: list[dict[str, Any]] = []
@@ -198,14 +221,19 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
                     mcp_results.append(entry_result)
         notes = [f"opencode error: {error}" for error in errors]
         connected: dict[str, str] = {}
-        for line in proc.stderr.splitlines():
+        for line in proc.stderr.splitlines():  # v2 logs connections; v1 does not
             if 'message="mcp connected"' in line and "server=" in line:
                 connected[line.split("server=")[1].split()[0]] = "connected"
             if 'message="mcp connect failed"' in line and "server=" in line:
                 connected[line.split("server=")[1].split()[0]] = "failed"
+        for server in entry.mcp_servers:  # a server whose tools were offered is connected
+            if any(name.startswith(f"{server.name}_") for name in mcp_offered):
+                connected[server.name] = "connected"
         code_mode = next((str(item["content"])[:300] for item in all_results if item["tool"] == "execute"), None)
-        if entry.plugins and not mcp_offered:
+        if entry.plugins and connected and not mcp_offered:
             notes.append("MCP servers connected but no MCP tool was offered to the model, directly or through the Code Mode catalog")
+        if entry.plugins and mcp_offered:
+            notes.append("MCP tools offered directly as <server>_<tool> function tools")
         return ProbeResult(
             product=PRODUCT, version=version(), fixture=str(package.root),
             exit_code=proc.returncode, final_output=final_text,

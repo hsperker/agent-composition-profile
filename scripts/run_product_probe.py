@@ -28,7 +28,8 @@ def main() -> None:
     if not module.available():
         raise SystemExit(f"{args.product} is not installed; skipping the product probe")
 
-    output_dir = args.output_root / args.product
+    evidence_dir = module.evidence_dir() if hasattr(module, "evidence_dir") else args.product
+    output_dir = args.output_root / evidence_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     for name, entry in FIXTURES.items():
         package = load_package(entry, entry.parent)

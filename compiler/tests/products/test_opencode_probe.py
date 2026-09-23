@@ -26,7 +26,8 @@ def test_opencode_runs_the_compiled_research_team_with_skill_activation_and_suba
 
     assert result.exit_code == 0, result.notes
     assert result.entry_instructions_in_system_prompt
-    assert {"skill", "subagent"} <= set(result.tools_offered_to_entry)
+    assert "skill" in result.tools_offered_to_entry
+    assert {"subagent", "task"} & set(result.tools_offered_to_entry)
     assert result.skill_catalog_advertised_before_activation == ["source-evaluation", "query-planning"]
     assert result.skill_body_absent_before_activation
     assert result.skill_activated == "source-evaluation"
@@ -38,9 +39,9 @@ def test_opencode_runs_the_compiled_research_team_with_skill_activation_and_suba
     assert result.subagent_result_returned_to_caller
 
 
-def test_opencode_connects_plugin_mcp_servers_but_offers_no_mcp_tool_to_the_model() -> None:
-    """Recorded finding for OpenCode 2.0.14: both plugin servers connect, yet the model is offered
-    no MCP tool, neither as a function tool nor through the Code Mode catalog."""
+def test_opencode_plugin_mcp_servers_connect_and_tool_exposure_depends_on_the_major_version() -> None:
+    """v1 exposes plugin MCP servers as <server>_<tool> function tools and honors cwd.
+    v2.0.14 connects both servers but offers the model no MCP tool, directly or through Code Mode."""
     package = load_package(PROBE / "agent.agent.md", PROBE)
 
     with echo_http_server((PROBE / "plugins" / "local-echo").resolve()):
@@ -49,6 +50,14 @@ def test_opencode_connects_plugin_mcp_servers_but_offers_no_mcp_tool_to_the_mode
     assert result.exit_code == 0, result.notes
     assert result.entry_instructions_in_system_prompt
     assert result.mcp_servers_connected == {"echostdio": "connected", "echohttp": "connected"}, result.notes
-    assert result.mcp_tools_offered == [], result.tools_offered_to_entry
-    assert result.mcp_results == []
-    assert result.code_mode_search_result is not None and '"items":[]' in result.code_mode_search_result
+    if opencode.major_version() >= 2:
+        assert result.mcp_tools_offered == [], result.tools_offered_to_entry
+        assert result.mcp_results == []
+        assert result.code_mode_search_result is not None and '"items":[]' in result.code_mode_search_result
+    else:
+        assert result.mcp_tools_offered == ["echohttp_echo_http", "echostdio_echo_stdio"], result.tools_offered_to_entry
+        by_label = {parse_echo_result(item["result"]).get("label"): parse_echo_result(item["result"]) for item in result.mcp_results}
+        assert set(by_label) == {"stdio", "http"}, result.mcp_results
+        assert by_label["stdio"]["plugin_root_env"] is True and by_label["stdio"]["plugin_data_env"] is True
+        assert by_label["stdio"]["cwd"] == str((PROBE / "plugins" / "local-echo").resolve())
+        assert by_label["http"]["plugin_root_env"] is False
