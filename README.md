@@ -41,11 +41,15 @@ Grades are reviewer judgments backed by tests, not measurements. Anything not ex
 ./scripts/verify-products.sh # installed product CLIs headless against a scripted endpoint
 ```
 
+To compile your own package, see [compiler/README.md](compiler/README.md).
+
 Each framework has its own hash locked environment under `compiler/runtime-requirements/`, because CrewAI and OpenAI Agents need incompatible major versions of `openai`. Everything under `generated/` is produced by the scripts and never edited by hand.
 
 ## Map
 
 ```text
+compiler/README.md                            how to run the compiler and read its report
+compiler/examples/                            three small draft 0.2 packages to copy from
 compiler/src/agent_profile_compiler/targets/  product targets (static lowering)
 compiler/src/agent_profile_compiler/runtime/  framework adapters (executed)
 compiler/src/agent_profile_compiler/products/ product probes and the scripted Anthropic endpoint
