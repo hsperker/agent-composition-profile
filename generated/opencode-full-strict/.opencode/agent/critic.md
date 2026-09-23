@@ -1,6 +1,6 @@
 ---
-description: Challenges a tentative conclusion for unsupported assumptions and missed alternatives. Use after evidence has been gathered and a provisional answer exists.
 mode: subagent
+description: Challenges a tentative conclusion for unsupported assumptions and missed alternatives. Use after evidence has been gathered and a provisional answer exists.
 permission:
   task:
     '*': deny

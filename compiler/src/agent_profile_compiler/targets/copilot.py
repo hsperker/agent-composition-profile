@@ -70,7 +70,9 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             report, agent, binding,
             resolution_detail="External binding attests the capability and may select the Copilot model.",
         )
-        frontmatter: dict[str, Any] = {"name": agent.name, "description": agent.description}
+        frontmatter: dict[str, Any] = {"name": agent.name}
+        if agent.description is not None:
+            frontmatter["description"] = agent.description
         if isinstance(model, str) and model:
             frontmatter["model"] = model
 

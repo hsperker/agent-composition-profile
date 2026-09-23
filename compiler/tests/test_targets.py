@@ -417,3 +417,20 @@ def test_codex_main_mode_writes_the_entry_instructions_to_agents_md() -> None:
 
     subagent_only = compile_package(package, "codex", {**BINDINGS["codex"], "entry_mode": "subagent"}, strict=True)
     assert "AGENTS.md" not in subagent_only.files
+
+
+def test_targets_omit_an_absent_description_and_report_nothing_lost(tmp_path: Path) -> None:
+    (tmp_path / "a.agent.md").write_text(
+        "---\nname: quiet\n---\n\n# Instructions\n\nWork from the instructions alone.\n", encoding="utf-8"
+    )
+    package = load_package(tmp_path / "a.agent.md", tmp_path)
+
+    for target in ("claude-code", "codex", "copilot", "opencode", "afm", "amplifier"):
+        binding = dict(BINDINGS[target])
+        result = compile_package(package, target, binding, strict=True)
+        emitted = "\n".join(content for path, content in result.files.items() if path != "compatibility-report.json")
+        # No target may emit a placeholder for the missing field (Amplifier's bundle metadata has its own text).
+        for placeholder in ("description: ''", 'description: ""', "description: null", "description: None", 'description = ""', "# Role"):
+            assert placeholder not in emitted, (target, placeholder)
+        assert statuses(result, "description", "quiet") == {"preserved"}, target
+        assert not result.report.has_blocking_loss, target

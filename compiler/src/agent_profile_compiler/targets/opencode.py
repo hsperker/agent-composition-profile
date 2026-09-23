@@ -61,10 +61,9 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             report, agent, binding,
             resolution_detail="External binding attests the capability and may select the OpenCode provider/model.",
         )
-        frontmatter: dict[str, Any] = {
-            "description": agent.description,
-            "mode": entry_mode if agent.name == package.entry_name else "subagent",
-        }
+        frontmatter: dict[str, Any] = {"mode": entry_mode if agent.name == package.entry_name else "subagent"}
+        if agent.description is not None:
+            frontmatter["description"] = agent.description
         if isinstance(model, str) and model:
             frontmatter["model"] = model
 

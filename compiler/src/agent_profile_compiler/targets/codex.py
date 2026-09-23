@@ -13,10 +13,9 @@ def _render_agent_toml(
     binding: Mapping[str, Any],
     mcp_servers,
 ) -> str:
-    lines = [
-        f"name = {toml_string(agent.name)}",
-        f"description = {toml_string(agent.description)}",
-    ]
+    lines = [f"name = {toml_string(agent.name)}"]
+    if agent.description is not None:
+        lines.append(f"description = {toml_string(agent.description)}")
     model = binding.get("model")
     if isinstance(model, str) and model:
         lines.append(f"model = {toml_string(model)}")
@@ -27,7 +26,8 @@ def _render_agent_toml(
     instructions = agent.instructions.rstrip()
     if agent.subagent_names:
         catalog = "\n".join(
-            f"- {name}: {package.agents[name].description.strip()}" for name in agent.subagent_names
+            f"- {name}: {package.agents[name].description.strip()}" if package.agents[name].description else f"- {name}"
+            for name in agent.subagent_names
         )
         instructions += (
             "\n\n## Portable subagent catalog\n\n"

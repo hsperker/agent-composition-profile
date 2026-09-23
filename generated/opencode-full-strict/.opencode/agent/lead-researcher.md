@@ -1,6 +1,6 @@
 ---
-description: Investigates technical questions and produces evidence-backed conclusions. Use when a question needs research, independent criticism, and synthesis.
 mode: primary
+description: Investigates technical questions and produces evidence-backed conclusions. Use when a question needs research, independent criticism, and synthesis.
 permission:
   task:
     '*': deny

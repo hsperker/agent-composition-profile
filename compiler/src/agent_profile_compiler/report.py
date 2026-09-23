@@ -11,7 +11,10 @@ VALID_STATUSES = set(VALID_COMPATIBILITY_STATUSES)
 
 def add_identity_and_instructions(report: CompatibilityReport, agent: Agent) -> None:
     report.add(agent.name, "name", "preserved", "The name is emitted as the native identity field.")
-    report.add(agent.name, "description", "preserved", "The description is emitted as native discovery metadata.")
+    if agent.description is None:
+        report.add(agent.name, "description", "preserved", "The agent declares no description.")
+    else:
+        report.add(agent.name, "description", "preserved", "The description is emitted as native discovery metadata.")
     report.add(agent.name, "instructions", "preserved", "Markdown instructions are emitted as the native persistent prompt.")
 
 

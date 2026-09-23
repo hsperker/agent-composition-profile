@@ -240,3 +240,14 @@ def test_delegates_is_accepted_as_the_draft_0_1_alias_but_not_alongside_subagent
     )
     with pytest.raises(ProfileError, match="either subagents or the draft 0.1 alias delegates"):
         load_package(tmp_path / "both.agent.md", tmp_path)
+
+
+def test_description_is_optional_as_the_draft_and_schema_say(tmp_path: Path) -> None:
+    (tmp_path / "a.agent.md").write_text(
+        "---\nname: nameless-metadata\n---\n\n# Instructions\n\nWork from the instructions alone.\n",
+        encoding="utf-8",
+    )
+
+    package = load_package(tmp_path / "a.agent.md", tmp_path)
+
+    assert package.entry.description is None

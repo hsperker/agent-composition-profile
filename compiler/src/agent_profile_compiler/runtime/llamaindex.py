@@ -145,7 +145,7 @@ def build(
             named_clients[agent.name] = clients
         native = FunctionAgent(
             name=agent.name,
-            description=agent.description,
+            description=(agent.description or ""),
             system_prompt=agent.instructions,
             tools=tools,
             can_handoff_to=list(agent.subagent_names),

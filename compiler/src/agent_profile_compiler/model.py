@@ -77,7 +77,7 @@ class Agent:
     source_path: Path
     relative_path: Path
     name: str
-    description: str
+    description: str | None
     instructions: str
     requires: frozenset[str] = frozenset()
     prefers: frozenset[str] = frozenset()

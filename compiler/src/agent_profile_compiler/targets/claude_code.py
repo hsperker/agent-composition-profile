@@ -31,10 +31,9 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             binding,
             resolution_detail="External binding attests the capability and selects the Claude Code model alias.",
         )
-        frontmatter: dict[str, Any] = {
-            "name": agent.name,
-            "description": agent.description,
-        }
+        frontmatter: dict[str, Any] = {"name": agent.name}
+        if agent.description is not None:
+            frontmatter["description"] = agent.description
         if isinstance(model, str) and model:
             frontmatter["model"] = model
 

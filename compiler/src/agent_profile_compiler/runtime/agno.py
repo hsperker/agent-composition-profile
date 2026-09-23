@@ -97,7 +97,7 @@ def build(
         losses[agent.name] = mcp_losses
         native = Agent(
             name=agent.name,
-            description=agent.description,
+            description=(agent.description or ""),
             instructions=agent.instructions,
             model=model,
             skills=skills,
@@ -124,7 +124,7 @@ def build(
         team = Team(
             members=[native_agents[name] for name in agent.subagent_names],
             name=agent.name,
-            description=agent.description,
+            description=(agent.description or ""),
             instructions=agent.instructions,
             model=native_agents[agent.name].model,
             skills=native_skills[agent.name],

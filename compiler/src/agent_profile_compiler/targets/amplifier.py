@@ -31,10 +31,9 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
                 role = model_roles[capability]
                 break
 
-        meta: dict[str, Any] = {
-            "name": agent.name,
-            "description": agent.description,
-        }
+        meta: dict[str, Any] = {"name": agent.name}
+        if agent.description is not None:
+            meta["description"] = agent.description
         if role:
             meta["model_role"] = role
         frontmatter: dict[str, Any] = {

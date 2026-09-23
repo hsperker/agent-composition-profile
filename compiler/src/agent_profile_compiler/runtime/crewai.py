@@ -85,7 +85,7 @@ def build(
         mcp_losses[agent.name] = losses
         native = CrewAgent(
             role=agent.name,
-            goal=agent.description,
+            goal=(agent.description or ""),
             backstory=agent.instructions,
             llm=model,
             allow_delegation=bool(agent.subagent_names),

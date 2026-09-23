@@ -110,7 +110,7 @@ def build(
         mcp_losses[name] = losses
         delegate_tools = [
             build_agent(delegate_name).as_tool(
-                description=package.agents[delegate_name].description,
+                description=(package.agents[delegate_name].description or ""),
                 propagate_session=False,
             )
             for delegate_name in source.subagent_names
@@ -118,7 +118,7 @@ def build(
         native = Agent(
             client,
             name=source.name,
-            description=source.description,
+            description=(source.description or ""),
             instructions=source.instructions,
             tools=[*delegate_tools, *mcp_tools],
             context_providers=[provider] if provider else None,

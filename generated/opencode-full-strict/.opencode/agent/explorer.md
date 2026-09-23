@@ -1,6 +1,6 @@
 ---
-description: Finds and assesses primary sources for a focused research question. Use when claims need external evidence before synthesis.
 mode: subagent
+description: Finds and assesses primary sources for a focused research question. Use when claims need external evidence before synthesis.
 permission:
   task:
     '*': deny

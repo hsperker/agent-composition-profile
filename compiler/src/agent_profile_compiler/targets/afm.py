@@ -26,11 +26,9 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
             binding,
             resolution_detail="External deployment binding attests capabilities and supplies AFM's concrete model service fields.",
         )
-        frontmatter: dict[str, Any] = {
-            "spec_version": "0.4.0",
-            "name": agent.name,
-            "description": agent.description,
-        }
+        frontmatter: dict[str, Any] = {"spec_version": "0.4.0", "name": agent.name}
+        if agent.description is not None:
+            frontmatter["description"] = agent.description
         if isinstance(bound_model, Mapping) and bound_model:
             frontmatter["model"] = dict(bound_model)
 
@@ -90,10 +88,8 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         else:
             report.add(agent.name, "subagents", "preserved", "The agent declares no subagents.")
 
-        body = (
-            f"# Role\n\n{agent.description.strip()}\n\n"
-            f"# Instructions\n\n{strip_top_level_instructions_heading(agent.instructions)}"
-        )
+        role = f"# Role\n\n{agent.description.strip()}\n\n" if agent.description else ""
+        body = role + f"# Instructions\n\n{strip_top_level_instructions_heading(agent.instructions)}"
         files[f"{agent.name}.afm.md"] = markdown_with_frontmatter(frontmatter, body)
 
     files["compatibility-report.json"] = report_json(report)

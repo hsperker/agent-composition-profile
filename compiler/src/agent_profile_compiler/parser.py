@@ -302,12 +302,12 @@ def _parse_agent_document(path: Path, package_root: Path) -> Agent:
     unknown = set(data) - _ALLOWED_FIELDS
     if unknown:
         raise ProfileError(f"{path}: unknown top-level field(s): {', '.join(sorted(unknown))}")
-    missing = {"name", "description"} - set(data)
-    if missing:
-        raise ProfileError(f"{path}: missing required field(s): {', '.join(sorted(missing))}")
+    if "name" not in data:
+        raise ProfileError(f"{path}: missing required field(s): name")
 
     name = _validate_name(data["name"], path)
-    description = _validate_description(data["description"], path)
+    # Draft 0.2: only name and the body are required; a description, when present, is validated.
+    description = _validate_description(data["description"], path) if "description" in data else None
     requires, prefers = _parse_capabilities(data.get("model"), path)
     skill_paths = _resolve_reference_list(
         data.get("skills"), source=path, package_root=package_root, expected="skill"

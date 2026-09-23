@@ -140,7 +140,7 @@ def build(
             )
         native = LlmAgent(
             name=source_to_native[name],
-            description=source.description,
+            description=(source.description or ""),
             instruction=_literal_instruction(source.instructions),
             model=model,
             tools=tools,

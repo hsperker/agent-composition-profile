@@ -118,14 +118,14 @@ def build(
             tools.append(
                 child.as_tool(
                     tool_name=delegate_name,
-                    tool_description=package.agents[delegate_name].description,
+                    tool_description=(package.agents[delegate_name].description or ""),
                 )
             )
         servers, losses = _mcp_servers(source, data_root)
         mcp_losses[name] = losses
         native = Agent(
             name=source.name,
-            handoff_description=source.description,
+            handoff_description=(source.description or ""),
             instructions=source.instructions,
             model=model,
             tools=tools,

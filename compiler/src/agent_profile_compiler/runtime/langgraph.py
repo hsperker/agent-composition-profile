@@ -187,7 +187,7 @@ def build(
                 StructuredTool.from_function(
                     invoke_delegate,
                     name=delegate.name,
-                    description=delegate.description,
+                    description=(delegate.description or ""),
                 )
             )
 
@@ -296,7 +296,7 @@ def build(
             "entry_name": package.entry_name,
             "skill_catalogs": skill_catalogs,
             "agent_catalog": {
-                agent.name: {"name": agent.name, "description": agent.description}
+                agent.name: {"name": agent.name, "description": (agent.description or "")}
                 for agent in package.agents.values()
             },
             "mcp_tool_servers": tool_servers,

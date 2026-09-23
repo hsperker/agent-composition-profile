@@ -131,7 +131,7 @@ def build(
                 Tool(
                     make_delegate(delegate_name, child),
                     name=delegate_name,
-                    description=package.agents[delegate_name].description,
+                    description=(package.agents[delegate_name].description or ""),
                 )
             )
         toolsets, losses = _mcp_toolsets(source, data_root)
@@ -139,7 +139,7 @@ def build(
         native = Agent(
             model,
             name=source.name,
-            description=source.description,
+            description=(source.description or ""),
             instructions=source.instructions,
             tools=tools,
             toolsets=toolsets,
