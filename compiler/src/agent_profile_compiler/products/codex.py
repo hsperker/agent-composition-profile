@@ -106,7 +106,9 @@ def probe(package: Package, binding: dict[str, Any], *, task: str = "Investigate
     # Codex refuses to create helper binaries under /tmp, so the probe works under ~/.cache.
     cache_root = Path.home() / ".cache" / "acp-probe"
     cache_root.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="codex-", dir=cache_root) as tmp:
+    # Codex keeps writing plugin caches under CODEX_HOME for a moment after exit; a directory that
+    # is not yet empty must not fail the probe.
+    with tempfile.TemporaryDirectory(prefix="codex-", dir=cache_root, ignore_cleanup_errors=True) as tmp:
         project = (Path(tmp) / "project").resolve()
         codex_home = (Path(tmp) / "codex-home").resolve()
         project.mkdir()
