@@ -6,7 +6,7 @@
 
 ## Result
 
-The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static for five products (files generated and verified) and executed for Claude Code, which ran headless against a scripted model endpoint; framework evidence is executed with deterministic models.
+The question is how much of a candidate Agent Profile lowers unchanged into the tools people run agents in. Products are the primary dimension because they are where ownership is tested; frameworks are the check on the semantics. Product evidence is static for four products (files generated and verified) and executed for Claude Code and OpenCode, which ran headless against scripted model endpoints; framework evidence is executed with deterministic models.
 
 The candidate profile is not one portable runtime abstraction. Two fields survived as the core: a logical name and persistent agent level instructions. Description, Agent Skills, and Agent Plugins survived as optional fields with one rule: if present, a strict host preserves the field's defined semantics or rejects the profile. Model requirements survived as a concept without a vocabulary. Model preferences did not survive. Generic delegation did not survive as one field, but one of the mechanisms it hid, an allowlisted subagent invoked as a bounded task that returns a result, did, and it survives more cleanly among products than among frameworks.
 
@@ -32,7 +32,7 @@ Products, static lowering by the reference compiler. A product qualifies when it
 | Claude Code 2.1.277 | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | generated files run headless against a scripted Anthropic endpoint; see the product probe below |
 | Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
 | GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
-| OpenCode | `.opencode/agents/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | files generated, parsed, checked; not executed |
+| OpenCode 2.0.14 | `.opencode/agent/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | generated files run headless against a scripted OpenAI compatible endpoint; see the product probe below |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
 | WSO2 AFM 0.4.0 | `*.afm.md`, local skills, `tools.mcp` | files generated; no subagent relation, no stdio `cwd` |
 
@@ -91,7 +91,22 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | Working directory | not honored: Claude Code's MCP configuration has no `cwd` field and the server ran in the project directory |
 | Agent level `mcpServers` | loaded only after the project is trusted; untrusted projects silently drop them and a subagent with only MCP tools refuses to start |
 
-Consequences for the grades: Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
+#### Product probe: OpenCode
+
+The same script runs OpenCode 2.0.14 with `opencode run --standalone --agent <entry>` against a local server that speaks the OpenAI chat completions protocol, configured as a custom provider. HOME and the XDG directories point into the temporary directory, so the user's configuration, skills, and data are untouched.
+
+| Checked | Result |
+|---|---|
+| Entry instructions in the system prompt | yes; OpenCode appends model and environment notes after the body |
+| Skills advertised before activation | an `<available_skills>` block in the system prompt with id, name, and description; body absent |
+| Skill activation | `skill` tool call with the id, then the body arrives as the tool result and stays in later requests |
+| Subagents | the tool is named `subagent`, not Task; its description lists exactly the allowlisted agents from `permission.task`; the child ran with its own system prompt and its result came back as the tool result |
+| Plugin MCP servers | both connected within 300 ms of startup, one tool each, over stdio and header gated streamable HTTP |
+| MCP tools offered to the model | none. Not as function tools, and not through OpenCode 2's Code Mode: an `execute` call to `search({query: "echo"})` returned no items and the `tools` namespace held only `browser` and `opencode`. Cause not determined from outside |
+
+Three things the probe had to learn the hard way. OpenCode 2.0.14 reads agents from `.opencode/agent/`, singular; a project with only the documented `agents/` directory reports the agent as not found. It resolves its project from the `PWD` environment variable, not from the process working directory, so a subprocess launched with a different `cwd` runs against the wrong project. And with the user's real home directory, the skill catalog also lists every skill under `~/.claude/skills`, a live example of skills being additive rather than isolated.
+
+Consequences for the grades: OpenCode's `plugins.activation` is recorded as connected without tool exposure; its compile time grade stays `resolved` because the configuration is representable and the servers do connect, and the note says what the model could not do. Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
 
 Strict outcome per field group, all agents:
 
@@ -203,7 +218,8 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- Five product targets were lowered and verified, not executed. Claude Code was executed through the probe; Codex is installed but its Homebrew cask is broken on this machine, and OpenCode, Copilot, and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- Four product targets were lowered and verified, not executed. Claude Code and OpenCode were executed through probes; Codex is installed but its Homebrew cask is broken on this machine, and Copilot and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- The OpenCode MCP finding is observational: the servers connected and the model was offered no MCP tool through either path OpenCode 2 provides, but the reason was not determined.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.
