@@ -30,7 +30,7 @@ Products, static lowering by the reference compiler. A product qualifies when it
 | Product | Lowered to | Evidence |
 |---|---|---|
 | Claude Code 2.1.277 | `.claude/agents/*.md`, `.claude/skills/`, per agent `mcpServers`, `Agent(...)` subagent allowlist | generated files run headless against a scripted Anthropic endpoint; see the product probe below |
-| Codex | `.codex/agents/*.toml`, `.codex/config.toml`, `.agents/skills/` | files generated, parsed, checked; not executed |
+| Codex 0.154.0 | `.codex/agents/*.toml`, `.codex/config.toml` with the entry agent's `mcp_servers`, `AGENTS.md`, `.agents/skills/` | generated files run headless against a scripted Responses API endpoint on a Raspberry Pi; see the product probe below |
 | GitHub Copilot | `.github/agents/*.agent.md` with `agents` allowlist and cloud `mcp-servers`, `.github/skills/`, `.vscode/mcp.json` | files generated, parsed, checked; not executed |
 | OpenCode 1.18.32 and 2.0.14 | `.opencode/agent/*.md` with `permission.task` allowlist, `.opencode/skills/`, `opencode.json` `mcp` | generated files run headless against a scripted OpenAI compatible endpoint on both major versions; see the product probe below |
 | Amplifier | bundle and agent Markdown | files generated; no skills or plugin path |
@@ -72,7 +72,7 @@ Entry agent only. The JSON reports hold every agent and every reason.
 | OpenCode (product, static) | resolved | preserved | preserved | resolved | resolved | resolved | n/a | n/a | resolved | preserved |
 | AFM 0.4.0 (product, static) | preserved | preserved | preserved | resolved | resolved | preserved | n/a | n/a | resolved | unsupported |
 
-`requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; product targets were not executed, so neither applies.
+`requires` covers the fixture's `reasoning` and `tool-use`; every runtime result is a binding attestation, not native proof. `prefers` is `omitted-preference` at runtime; the static bindings selected the preferred capability. `durability` and `resources` are `skills.durability` and `skills.resources`; the static product reports do not exercise them, so neither applies.
 
 #### Product probe: Claude Code
 
@@ -110,6 +110,24 @@ So the v2 gap is a version change, not our configuration: the same files, the sa
 Two more things the probe had to learn. OpenCode resolves its project from the `PWD` environment variable, not from the process working directory, so a subprocess launched with a different `cwd` runs against the wrong project. And with the user's real home directory, the skill catalog also lists every skill under `~/.claude/skills`, a live example of skills being additive rather than isolated.
 
 Consequences for the grades: OpenCode's compile time `plugins` grade stays `resolved`, because the configuration is representable and v1 activates it fully. The v2 exposure gap is recorded in the probe evidence as a version specific observation whose cause was not determined from outside. Claude Code's `plugins` is `unsupported` for any stdio server, the same rule that already applied to CrewAI, LlamaIndex, AFM, and Copilot's cloud agent, and `resolved` for HTTP servers. The research fixture's plugin is HTTP only, so its grade did not change. Trust is host policy, but a compiler that emits agent level MCP servers should say that the project must be trusted first.
+
+#### Product probe: Codex
+
+Codex talks to its provider only through the Responses API, so the probe runs `codex exec --json` against a local server that speaks that protocol, with a custom `model_providers` entry, a fresh `CODEX_HOME`, and the temporary project marked trusted. Trust matters: Codex reads a project's `.codex/config.toml` only for trusted projects. The Codex binary on the development machine was removed by endpoint protection, so the probe ran over SSH on a Raspberry Pi 4 (`scripts/probe-on-remote.sh`). Both fixtures ran on Codex 0.154.0.
+
+| Observation | Codex 0.154.0 |
+|---|---|
+| Entry instructions | Codex's main thread is not a custom agent, so the compiler writes the entry agent's instructions to `AGENTS.md` in main mode. They reach the model as a user message headed `# AGENTS.md instructions for <project>`, separate from the task and present in every step, not in the `instructions` field |
+| Skills advertised before activation | a developer message `<skills_instructions>` lists each skill with its `SKILL.md` path; the body is absent |
+| Skill activation | no skill tool: the model reads the file with `exec_command`, and the body stays in later requests as the tool result. Codex also lists its own ambient skills (`skill-creator`, `skill-installer`) |
+| Subagents | a namespace tool `multi_agent_v1` with `spawn_agent`, `send_input`, `wait_agent`, `close_agent`, `resume_agent`; `spawn_agent` takes `agent_type`, and its description lists every custom agent in the project with its description and pinned model. The child ran with its own `developer_instructions` and without the multi agent tools; `wait_agent` returned its final message to the caller |
+| Plugin MCP servers | both reached the main thread from `.codex/config.toml`; each is one namespace tool `mcp__<server>` holding the server's tools; both invoked |
+| Stdio working directory and reserved variables | `cwd` honored, `PLUGIN_ROOT` and `PLUGIN_DATA` present |
+| Server start | servers start in the background and a step proceeds without those still initializing; the stdio server joined at the second step. With `required = true` an unreachable server fails the whole session |
+
+Three things the compiler had to learn. A function call into a namespace tool must name the namespace on the call item, or Codex answers `unsupported call`. Custom agents' `mcp_servers` reach only those agents; the entry agent needs the same servers in `.codex/config.toml`. And `required` is left at its default, because the profile declares availability, not that a session must fail without the server; the research fixture's unreachable placeholder endpoint would otherwise stop Codex before the first request.
+
+Consequences for the grades: Codex's `subagents` stays `resolved`. The probe confirmed the catalog is project wide: `spawn_agent` advertised both `explorer` and `critic`, which the lead lists, but it would advertise any other custom agent too. `skills` stays `resolved` and `plugins` `resolved`; the core stays `preserved`, with the note that in main mode the instructions travel as a persistent, separate user message rather than as developer instructions.
 
 Strict outcome per field group, all agents:
 
@@ -164,7 +182,7 @@ Not exercised, and therefore `unverified` everywhere: whether activated content 
 
 ### `plugins`
 
-Among products, Claude Code takes MCP servers per agent in the agent file, Codex per agent in its TOML, OpenCode once in `opencode.json` for every agent, and Copilot twice: per agent in the agent file for the cloud coding agent, and workspace wide in `.vscode/mcp.json` for VS Code. Copilot's cloud configuration has no working directory, so any stdio server is `unsupported` there; OpenCode's local server has `cwd`. Among frameworks, six construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
+Among products, Claude Code takes MCP servers per agent in the agent file, Codex per custom agent in its TOML and, for the entry agent, in `.codex/config.toml` because the main thread reads servers only from config, OpenCode once in `opencode.json` for every agent, and Copilot twice: per agent in the agent file for the cloud coding agent, and workspace wide in `.vscode/mcp.json` for VS Code. Copilot's cloud configuration has no working directory, so any stdio server is `unsupported` there; OpenCode's local server has `cwd`. Among frameworks, six construct native MCP clients from the plugin's `mcp.json` at build time. LangGraph and LlamaIndex cannot attach tools until a handshake succeeds; against the research fixture's unreachable endpoint they report `unsupported` rather than invent tools. Construction proves representability, not activation, so the research fixture keeps `plugins.activation` unverified and a separate probe supplies the live evidence.
 
 The probe plugin declares a stdio server (`command: python`, `${PLUGIN_ROOT}` in `args` and `cwd`, a custom `env` entry) and a streamable HTTP server that answers 401 without the configured header. One echo server script runs under MCP SDK 1.x and 2.x, because the environments pin three `mcp` releases. A deterministic model calls every echo tool once. The echo result reports working directory, whether `PLUGIN_ROOT` and `PLUGIN_DATA` arrived, and which server answered.
 
@@ -203,7 +221,7 @@ Graded against that contract, the picture splits by dimension:
 - Products: Claude Code `preserved` for the main agent and `resolved` for nested subagents, where calls work but the allowlist is not enforced. Copilot `preserved` through its `agents` list. OpenCode `preserved` through `permission.task`. Codex `resolved`, because its project catalog makes the agents available without a per agent allowlist. Amplifier `preserved`. AFM `unsupported`.
 - Frameworks: OpenAI Agents and Microsoft `preserved`. LangGraph and PydanticAI `resolved`, because an adapter tool implements the four properties on a framework without a relationship primitive. Google ADK `approximated`, because state flows both ways. LlamaIndex, Agno, and CrewAI `approximated`, because control transfers or the call is bound to a team or task graph.
 
-The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every framework that reached `preserved` or `resolved`. The product grades rest on generated files and the products' documentation; product probes are the next pass.
+The runtime traces in `generated/runtime/<target>/runtime.json` show the call and the return for every framework that reached `preserved` or `resolved`. For Claude Code, Codex, and OpenCode the product probes show the same round trip against the generated files: the child ran with its own instructions and its result came back to the caller. Copilot, Amplifier, and AFM rest on generated files and documentation.
 
 ## What changes in the profile
 
@@ -221,7 +239,8 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 
 - Deterministic model doubles avoided paid inference. They ran through each framework's real agent, tool, team or workflow, and runner code, but prove nothing about model behavior.
 - The research fixture's `https://research.example.com/mcp` endpoint is unreachable by design. Live activation comes only from the probe, against a local echo server, not a shared reference server.
-- Four product targets were lowered and verified, not executed. Claude Code and OpenCode (two major versions) were executed through probes; Codex is installed but its Homebrew cask is broken on this machine, and Copilot and Gemini CLI are not installed. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- Three product targets were lowered and verified, not executed: Copilot, Amplifier, and AFM. Claude Code, Codex, and OpenCode (two major versions) were executed through probes. Codex ran on a Raspberry Pi because the endpoint protection on the development machine removed the Codex binary; the probe did not work around that. Copilot cannot be pointed at a scripted endpoint and will stay static.
+- The Codex probe pauses ten seconds before the first answer so a slow stdio server can finish starting. Without the pause the first step ran without that server, which is Codex behavior, not a lowering loss, but it means MCP evidence on Codex depends on timing.
 - The OpenCode v2 MCP finding is observational: the servers connected and the model was offered no MCP tool through either path v2 provides, while v1 exposes and runs them; the v2 cause was not determined.
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
