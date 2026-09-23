@@ -7,7 +7,7 @@ import pytest
 
 ROOT = Path(__file__).parents[2]
 SCHEMA = json.loads(
-    (ROOT / "spec" / "agent-composition-profile-v0.2-frontmatter.schema.json").read_text(
+    (ROOT / "spec" / "agent-profile-v0.2-frontmatter.schema.json").read_text(
         encoding="utf-8"
     )
 )

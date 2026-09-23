@@ -1,6 +1,6 @@
 # Static lowering walkthrough
 
-> Historical phase-one walkthrough. Runtime findings and the evidence-revised profile are in [`../EVIDENCE.md`](../EVIDENCE.md) and [`../spec/agent-composition-profile-v0.2-discussion-draft.md`](../spec/agent-composition-profile-v0.2-discussion-draft.md).
+> Historical phase-one walkthrough. Runtime findings and the evidence-revised profile are in [`../EVIDENCE.md`](../EVIDENCE.md) and [`../spec/agent-profile-v0.2-discussion-draft.md`](../spec/agent-profile-v0.2-discussion-draft.md).
 
 This walkthrough uses one portable source and one external deployment binding. The target files are generated artifacts.
 

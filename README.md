@@ -31,7 +31,7 @@ Removed      model.prefers, generic delegates
 
 Grades are reviewer judgments backed by tests, not measurements. Anything not exercised is marked `unverified`.
 
-[EVIDENCE.md](EVIDENCE.md) has the findings and, at the end, the open probes that would turn the remaining `unverified` grades into evidence. The [draft profile](spec/agent-composition-profile-v0.2-discussion-draft.md) has the resulting shape. [EXTERNAL-PROPOSAL.md](EXTERNAL-PROPOSAL.md) frames the work for the Agent Plugins incubation.
+[EVIDENCE.md](EVIDENCE.md) has the findings and, at the end, the open probes that would turn the remaining `unverified` grades into evidence. The [draft profile](spec/agent-profile-v0.2-discussion-draft.md) has the resulting shape. [EXTERNAL-PROPOSAL.md](EXTERNAL-PROPOSAL.md) frames the work for the Agent Plugins incubation.
 
 ## Reproduce
 

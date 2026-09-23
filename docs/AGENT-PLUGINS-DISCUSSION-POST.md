@@ -1,6 +1,6 @@
 # Draft: Agent Plugins discussion post
 
-> Draft for the Agent Plugins incubation discussion. Edit freely before posting. Repository: https://github.com/hsperker/agent-composition-profile
+> Draft for the Agent Plugins incubation discussion. Edit freely before posting. Repository: https://github.com/hsperker/agent-profile
 
 ## We compiled one Agent Profile into Claude Code, Codex, Copilot CLI, and OpenCode and ran it. Here is what survived.
 
