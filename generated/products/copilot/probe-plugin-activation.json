@@ -1,0 +1,65 @@
+{
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/runtime-probes/plugin-activation",
+  "mcp_events": [
+    "{\"type\": \"session.mcp_servers_loaded\", \"data\": {\"servers\": [{\"name\": \"echohttp\", \"status\": \"connected\", \"serverMetadata\": {\"instructions\": null}}, {\"name\": \"echostdio\", \"status\": \"connected\", \"serverMetadata\": {\"instructions\": null}}]}}"
+  ],
+  "mcp_results": [
+    {
+      "result": "{\"cwd\": \"${REPO_ROOT}\", \"label\": \"http\", \"plugin_data_env\": false, \"plugin_root_env\": false, \"text\": \"probe\"}\n\n{\"result\":\"{\\\"cwd\\\": \\\"${REPO_ROOT}\\\", \\\"label\\\": \\\"http\\\", \\\"plugin_data_env\\\": false, \\\"plugin_root_env\\\": false, \\\"text\\\": \\\"probe\\\"}\"}",
+      "tool": "echohttp-echo_http"
+    },
+    {
+      "result": "{\"cwd\": \"${PROJECT_DIR}\", \"label\": \"stdio\", \"plugin_data_env\": true, \"plugin_root_env\": true, \"text\": \"probe\"}\n\n{\"result\":\"{\\\"cwd\\\": \\\"${PROJECT_DIR}\\\", \\\"label\\\": \\\"stdio\\\", \\\"plugin_data_env\\\": true, \\\"plugin_root_env\\\": true, \\\"text\\\": \\\"probe",
+      "tool": "echostdio-echo_stdio"
+    }
+  ],
+  "mcp_servers_status": {},
+  "mcp_tools_offered": [
+    "echohttp-echo_http",
+    "echostdio-echo_stdio"
+  ],
+  "notes": [],
+  "product": "copilot",
+  "requests": 3,
+  "skill_activated": null,
+  "skill_body_absent_before_activation": false,
+  "skill_body_in_context_after_activation": false,
+  "skill_body_persisted_in_later_turns": false,
+  "skill_catalog_advertised_before_activation": [],
+  "subagent_called": null,
+  "subagent_ran_with_own_instructions": false,
+  "subagent_result_returned_to_caller": false,
+  "subagent_tools_offered": [],
+  "subagents_advertised": [
+    "plugin-user"
+  ],
+  "task_call_results": [],
+  "tools_offered_to_entry": [
+    "bash",
+    "read_bash",
+    "stop_bash",
+    "list_bash",
+    "view",
+    "create",
+    "edit",
+    "fetch_copilot_cli_documentation",
+    "skill",
+    "sql",
+    "session_store_sql",
+    "read_agent",
+    "list_agents",
+    "write_agent",
+    "tool_search_tool",
+    "update_todo",
+    "grep",
+    "glob",
+    "task",
+    "echohttp-echo_http",
+    "echostdio-echo_stdio"
+  ],
+  "unlisted_subagent_call": null,
+  "version": "GitHub Copilot CLI 1.0.88"
+}

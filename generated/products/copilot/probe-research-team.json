@@ -1,0 +1,83 @@
+{
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/research-team",
+  "mcp_events": [
+    "{\"type\": \"session.mcp_server_status_changed\", \"data\": {\"serverName\": \"research\", \"status\": \"pending\"}}",
+    "{\"type\": \"session.mcp_server_status_changed\", \"data\": {\"serverName\": \"research\", \"status\": \"failed\", \"error\": \"failed to initialize MCP client: transport failure during send initialize request: Client error: error sending request for url (https://research.example.com/mcp)\"}}",
+    "{\"type\": \"session.mcp_servers_loaded\", \"data\": {\"servers\": [{\"name\": \"research\", \"status\": \"failed\", \"error\": \"failed to initialize MCP client: transport failure during send initialize request: Client error: error sending request for url (https://research.example.com/mcp)\"}]}}"
+  ],
+  "mcp_results": [],
+  "mcp_servers_status": {
+    "research": "failed"
+  },
+  "mcp_tools_offered": [],
+  "notes": [],
+  "product": "copilot",
+  "requests": 6,
+  "skill_activated": "source-evaluation",
+  "skill_body_absent_before_activation": true,
+  "skill_body_in_context_after_activation": true,
+  "skill_body_persisted_in_later_turns": true,
+  "skill_catalog_advertised_before_activation": [
+    "source-evaluation",
+    "query-planning"
+  ],
+  "subagent_called": "explorer",
+  "subagent_ran_with_own_instructions": true,
+  "subagent_result_returned_to_caller": true,
+  "subagent_tools_offered": [
+    "bash",
+    "read_bash",
+    "stop_bash",
+    "list_bash",
+    "view",
+    "create",
+    "edit",
+    "fetch_copilot_cli_documentation",
+    "skill",
+    "sql",
+    "session_store_sql",
+    "read_agent",
+    "list_agents",
+    "write_agent",
+    "tool_search_tool",
+    "update_todo",
+    "grep",
+    "glob",
+    "task"
+  ],
+  "subagents_advertised": [
+    "lead-researcher",
+    "explorer",
+    "critic"
+  ],
+  "task_call_results": [
+    "explorer result: bounded task done",
+    "lead-researcher ran although unlisted"
+  ],
+  "tools_offered_to_entry": [
+    "bash",
+    "read_bash",
+    "stop_bash",
+    "list_bash",
+    "view",
+    "create",
+    "edit",
+    "fetch_copilot_cli_documentation",
+    "skill",
+    "sql",
+    "session_store_sql",
+    "read_agent",
+    "list_agents",
+    "write_agent",
+    "tool_search_tool",
+    "update_todo",
+    "grep",
+    "glob",
+    "task"
+  ],
+  "unlisted_subagent_call": "ran: lead-researcher ran although unlisted",
+  "version": "GitHub Copilot CLI 1.0.88"
+}

@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 from agent_profile_compiler.parser import load_package
-from agent_profile_compiler.products import claude_code, codex, opencode
+from agent_profile_compiler.products import claude_code, codex, copilot, opencode
 from agent_profile_compiler.runtime.mcp_probe import echo_http_server
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,7 +16,7 @@ FIXTURES = {
     "research-team": ROOT / "examples" / "research-team" / "lead.agent.md",
     "plugin-activation": ROOT / "examples" / "runtime-probes" / "plugin-activation" / "agent.agent.md",
 }
-PRODUCTS = {"claude-code": claude_code, "codex": codex, "opencode": opencode}
+PRODUCTS = {"claude-code": claude_code, "codex": codex, "copilot": copilot, "opencode": opencode}
 
 
 def main() -> None:

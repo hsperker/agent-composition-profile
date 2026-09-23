@@ -13,7 +13,7 @@ mkdir -p "$ROOT/generated/products"
 UV_CACHE_DIR="$CACHE_DIR" "${UV[@]}" pytest -q "$ROOT/compiler/tests/products" -p no:warnings \
   2>&1 | tee "$ROOT/generated/products/test-output.txt"
 
-for product in claude-code opencode codex; do
+for product in claude-code opencode codex copilot; do
   UV_CACHE_DIR="$CACHE_DIR" "${UV[@]}" python "$ROOT/scripts/run_product_probe.py" "$product" || true
 done
 
