@@ -17,7 +17,7 @@ Evidence kind: agno=runtime, crewai=runtime, google-adk=runtime, langgraph=runti
 | skills | preserved | preserved | resolved | resolved | resolved | preserved | resolved | resolved | unsupported | resolved | resolved | resolved | resolved | preserved |
 | skills.durability | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared | not-declared | not-declared |
 | skills.resources | unverified | unverified | unverified | unverified | unverified | unverified | unverified | unverified | not-declared | not-declared | not-declared | not-declared | not-declared | not-declared |
-| subagents | approximated | approximated | approximated | resolved | approximated | preserved | preserved | resolved | preserved | preserved | resolved | preserved | preserved | unsupported |
+| subagents | approximated | approximated | approximated | resolved | approximated | preserved | preserved | resolved | preserved | preserved | resolved | resolved | preserved | unsupported |
 
 ## Strict conformance by module (all agents)
 
@@ -55,6 +55,8 @@ Fixture `examples/runtime-probes/plugin-activation`: one plugin, one stdio serve
 | claude-code/research-team | 2.1.277 (Claude Code) | true (system prompt) | true, true, true | explorer, true, true | none |
 | codex/plugin-activation | codex-cli 0.154.0 | none (user message (AGENTS.md)) | no skills in fixture | no subagents in fixture | mcp__echohttp.echo_http, mcp__echostdio.echo_stdio |
 | codex/research-team | codex-cli 0.154.0 | none (user message (AGENTS.md)) | true, true, true | explorer, true, true | none |
+| copilot/plugin-activation | GitHub Copilot CLI 1.0.88 | true (system prompt) | no skills in fixture | no subagents in fixture | echohttp-echo_http, echostdio-echo_stdio |
+| copilot/research-team | GitHub Copilot CLI 1.0.88 | true (system prompt) | true, true, true | explorer, true, true | none |
 | opencode-v1/plugin-activation | 1.18.32 | true (system prompt) | no skills in fixture | no subagents in fixture | echohttp_echo_http, echostdio_echo_stdio |
 | opencode-v1/research-team | 1.18.32 | true (system prompt) | true, true, true | explorer, true, true | none |
 | opencode-v2/plugin-activation | opencode v2.0.14 | true (system prompt) | no skills in fixture | no subagents in fixture | none |

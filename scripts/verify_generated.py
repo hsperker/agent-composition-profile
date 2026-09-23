@@ -137,6 +137,9 @@ def main() -> None:
         if path.stem.endswith("plugin-activation"):
             if payload["product"] == "claude-code":
                 assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
+            if payload["product"] == "copilot":
+                assert payload["mcp_tools_offered"] == ["echohttp-echo_http", "echostdio-echo_stdio"], path
+                assert len(payload["mcp_results"]) == 2, path
             if payload["product"] == "codex":
                 assert payload["mcp_tools_offered"] == ["mcp__echohttp.echo_http", "mcp__echostdio.echo_stdio"], path
                 assert len(payload["mcp_results"]) == 2, path

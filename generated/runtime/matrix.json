@@ -198,7 +198,7 @@
       "amplifier": "preserved",
       "claude-code": "preserved",
       "codex": "resolved",
-      "copilot": "preserved",
+      "copilot": "resolved",
       "crewai": "approximated",
       "google-adk": "approximated",
       "langgraph": "resolved",
@@ -523,6 +523,44 @@
       "subagent_ran_with_own_instructions": true,
       "subagent_result_returned_to_caller": true,
       "version": "codex-cli 0.154.0"
+    },
+    "copilot/plugin-activation": {
+      "entry_instructions_delivered_as": null,
+      "entry_instructions_in_instructions": null,
+      "entry_instructions_in_system_prompt": true,
+      "exit_code": 0,
+      "mcp_tools_offered": [
+        "echohttp-echo_http",
+        "echostdio-echo_stdio"
+      ],
+      "skill_activated": null,
+      "skill_body_absent_before_activation": false,
+      "skill_body_in_context_after_activation": false,
+      "skill_body_persisted_in_later_turns": false,
+      "skill_catalog_advertised_before_activation": [],
+      "subagent_called": null,
+      "subagent_ran_with_own_instructions": false,
+      "subagent_result_returned_to_caller": false,
+      "version": "GitHub Copilot CLI 1.0.88"
+    },
+    "copilot/research-team": {
+      "entry_instructions_delivered_as": null,
+      "entry_instructions_in_instructions": null,
+      "entry_instructions_in_system_prompt": true,
+      "exit_code": 0,
+      "mcp_tools_offered": [],
+      "skill_activated": "source-evaluation",
+      "skill_body_absent_before_activation": true,
+      "skill_body_in_context_after_activation": true,
+      "skill_body_persisted_in_later_turns": true,
+      "skill_catalog_advertised_before_activation": [
+        "source-evaluation",
+        "query-planning"
+      ],
+      "subagent_called": "explorer",
+      "subagent_ran_with_own_instructions": true,
+      "subagent_result_returned_to_caller": true,
+      "version": "GitHub Copilot CLI 1.0.88"
     },
     "opencode-v1/plugin-activation": {
       "entry_instructions_delivered_as": null,
