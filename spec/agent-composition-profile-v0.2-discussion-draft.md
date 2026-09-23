@@ -1,8 +1,8 @@
 # Agent Profile
 
-**Discussion Draft 0.2 — evidence revision — 3 September 2026**
+**Discussion Draft 0.2, evidence revision, frozen for review on 23 September 2026**
 
-**Status:** Experimental input to the Agent Plugins Agent Profile incubation discussion. Not an adopted standard and not proposed as a competing standards effort.
+**Status:** Experimental input to the Agent Plugins Agent Profile incubation discussion. Not an adopted standard and not proposed as a competing standards effort. This revision is frozen: further changes come from the discussion, not from more probing of the same fixtures.
 
 > A Markdown document identifies an agent and supplies persistent instructions. Optional fields attach a discovery description, Agent Skills, Agent Plugins, and subagents the agent may call as bounded tasks; model requirements are incubating. The host selects models and owns orchestration.
 
