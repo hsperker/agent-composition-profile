@@ -73,7 +73,7 @@ def main() -> None:
     assert copilot["agents"] == ["explorer", "critic"]
     assert "research" in copilot["mcp-servers"]
     json.loads((GENERATED / "copilot-full-strict/.vscode/mcp.json").read_text(encoding="utf-8"))
-    opencode = frontmatter(GENERATED / "opencode-full-strict/.opencode/agents/lead-researcher.md")
+    opencode = frontmatter(GENERATED / "opencode-full-strict/.opencode/agent/lead-researcher.md")
     assert opencode["permission"]["task"]["explorer"] == "allow"
     assert "research" in json.loads((GENERATED / "opencode-full-strict/opencode.json").read_text(encoding="utf-8"))["mcp"]
 
@@ -132,7 +132,11 @@ def main() -> None:
             assert payload["subagent_called"] and payload["subagent_ran_with_own_instructions"], path
             assert payload["subagent_result_returned_to_caller"], path
         if path.stem.endswith("plugin-activation"):
-            assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
+            if payload["product"] == "claude-code":
+                assert len(payload["mcp_tools_offered"]) == 2 and len(payload["mcp_results"]) == 2, path
+            if payload["product"] == "opencode":
+                assert payload["mcp_servers_connected"] == {"echostdio": "connected", "echohttp": "connected"}, path
+                assert payload["mcp_tools_offered"] == [], path
         assert "hans-christian" not in path.read_text(encoding="utf-8"), path
 
     matrix = json.loads((GENERATED / "runtime/matrix.json").read_text(encoding="utf-8"))

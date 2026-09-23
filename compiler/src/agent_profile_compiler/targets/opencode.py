@@ -1,4 +1,7 @@
-"""OpenCode agents: `.opencode/agents/<name>.md` plus `opencode.json`.
+"""OpenCode agents: `.opencode/agent/<name>.md` plus `opencode.json`.
+
+OpenCode 2.0.14 reads the singular `agent` directory; the documentation shows
+`agents`, and a run with only that directory reports the agent as not found.
 
 The filename is the agent identifier; there is no name field. Skills go to
 `.opencode/skills` and are discovered project-wide through the skill tool.
@@ -105,7 +108,7 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         else:
             report.add(agent.name, "subagents", "preserved", "Task permission is denied for a leaf agent.")
 
-        files[f".opencode/agents/{agent.name}.md"] = markdown_with_frontmatter(frontmatter, agent.instructions)
+        files[f".opencode/agent/{agent.name}.md"] = markdown_with_frontmatter(frontmatter, agent.instructions)
 
     config: dict[str, Any] = {"$schema": "https://opencode.ai/config.json"}
     if mcp:

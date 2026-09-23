@@ -314,14 +314,14 @@ def test_opencode_lowers_full_package_with_task_permission_allowlist_and_global_
     package = load_package(EXAMPLE / "lead.agent.md", EXAMPLE)
     result = compile_package(package, "opencode", BINDINGS["opencode"], strict=True)
 
-    lead_text = result.files[".opencode/agents/lead-researcher.md"]
+    lead_text = result.files[".opencode/agent/lead-researcher.md"]
     lead = yaml.safe_load(lead_text.split("---", 2)[1])
     assert "name" not in lead  # OpenCode takes the identifier from the filename
     assert lead["description"] == package.entry.description
     assert lead["mode"] == "primary"
     assert lead["permission"]["task"] == {"*": "deny", "explorer": "allow", "critic": "allow"}
     assert lead_text.rstrip().endswith(package.entry.instructions.rstrip())
-    explorer = yaml.safe_load(result.files[".opencode/agents/explorer.md"].split("---", 2)[1])
+    explorer = yaml.safe_load(result.files[".opencode/agent/explorer.md"].split("---", 2)[1])
     assert explorer["mode"] == "subagent"
     assert explorer["permission"]["task"] == {"*": "deny"}
     config = json.loads(result.files["opencode.json"])

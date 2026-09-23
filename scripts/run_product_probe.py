@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 from agent_profile_compiler.parser import load_package
-from agent_profile_compiler.products import claude_code
+from agent_profile_compiler.products import claude_code, opencode
 from agent_profile_compiler.runtime.mcp_probe import echo_http_server
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,7 +16,7 @@ FIXTURES = {
     "research-team": ROOT / "examples" / "research-team" / "lead.agent.md",
     "plugin-activation": ROOT / "examples" / "runtime-probes" / "plugin-activation" / "agent.agent.md",
 }
-PRODUCTS = {"claude-code": claude_code}
+PRODUCTS = {"claude-code": claude_code, "opencode": opencode}
 
 
 def main() -> None:
@@ -32,7 +32,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name, entry in FIXTURES.items():
         package = load_package(entry, entry.parent)
-        binding = {"capabilities": {"reasoning": True, "tool-use": True}, "entry_mode": "main"}
+        binding = {"capabilities": {"reasoning": True, "tool-use": True}, "entry_mode": "main" if args.product == "claude-code" else "primary"}
         if name == "plugin-activation":
             plugin_root = (entry.parent / "plugins" / "local-echo").resolve()
             with echo_http_server(plugin_root):
@@ -46,7 +46,7 @@ def main() -> None:
         print(
             f"{args.product} {name}: exit={result.exit_code} instructions={result.entry_instructions_in_system_prompt} "
             f"skill={result.skill_activated} subagent={result.subagent_called} returned={result.subagent_result_returned_to_caller} "
-            f"mcp={result.mcp_tools_offered} mcp_results={len(result.mcp_results)}"
+            f"mcp={result.mcp_tools_offered} mcp_results={len(result.mcp_results)} notes={result.notes}"
         )
 
 
