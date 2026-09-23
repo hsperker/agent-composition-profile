@@ -1,0 +1,18 @@
+# Host binding: everything a target needs that does not belong in the portable profile.
+# Pass it with --binding. A file may hold one target's mapping, or a `targets:` map
+# keyed by target name as here.
+targets:
+  claude-code:
+    capabilities: {tool-use: true}   # attests the profile's model.requires
+    model: sonnet                    # Claude Code model alias
+    entry_mode: main                 # the entry agent runs as the main agent; subagent otherwise
+  codex:
+    capabilities: {tool-use: true}
+    model: gpt-5.6-terra
+    model_reasoning_effort: medium
+    entry_mode: main                 # also writes AGENTS.md for Codex's main thread
+  copilot:
+    capabilities: {tool-use: true}
+  opencode:
+    capabilities: {tool-use: true}
+    entry_mode: primary              # OpenCode agent mode for the entry agent
