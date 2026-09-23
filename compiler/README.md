@@ -73,7 +73,7 @@ The `modules` section rolls findings up to the core (name and instructions) and 
 Three packages under `examples/`, all in draft 0.2 form. A test compiles each one strictly for the four executed products.
 
 - `minimal/`: name and instructions, the required core and nothing else. Compiles to a single agent file everywhere.
-- `skills-and-plugin/`: one Agent Skills directory and one Agent Plugin with a streamable HTTP MCP server. Stdio servers are deliberately absent: Claude Code and Copilot cannot set a working directory for them, so they compile as `unsupported` there.
+- `skills-and-plugin/`: one Agent Skills directory and one Agent Plugin whose MCP server is the public Microsoft Learn server (`https://learn.microsoft.com/api/mcp`, streamable HTTP, no authentication), so the compiled agent can be run for real. Stdio servers are deliberately absent: Claude Code and Copilot cannot set a working directory for them, so they compile as `unsupported` there.
 - `subagents/`: a lead with two leaf agents. Claude Code and OpenCode enforce the list; Codex and Copilot CLI expose the whole project catalog.
 
 The repository's `examples/research-team/` is the evidence fixture and uses the draft 0.1 spelling (`delegates`); the parser accepts it as an alias. The packages here are the ones to copy from.

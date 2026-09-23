@@ -1,0 +1,6 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "microsoft-learn",
+  "version": "1.0.0",
+  "description": "Official Microsoft and Azure documentation through the public Microsoft Learn MCP server"
+}
