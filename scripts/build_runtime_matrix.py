@@ -36,9 +36,10 @@ def module_outcomes(report: dict) -> dict[str, str]:
 def instructions_cell(probe: dict) -> str:
     """Whether the entry instructions reached the model, and through which channel."""
 
-    reached = probe.get("entry_instructions_in_system_prompt", probe.get("entry_instructions_in_instructions"))
+    reached = next((probe.get(key) for key in ("entry_instructions_in_system_prompt", "entry_instructions_in_instructions")
+                    if probe.get(key) is not None), None)
     channel = probe.get("entry_instructions_delivered_as") or "system prompt"
-    return f"{str(reached).lower()} ({channel})"
+    return f"{str(reached).lower()}, via {channel}"
 
 
 def main() -> None:

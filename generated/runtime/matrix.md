@@ -51,15 +51,15 @@ Fixture `examples/runtime-probes/plugin-activation`: one plugin, one stdio serve
 
 | product / fixture | version | instructions reached the model (how) | skills: catalog first, body on activation, persists | subagent: called, own instructions, result returned | MCP tools offered |
 | --- | --- | --- | --- | --- | --- |
-| claude-code/plugin-activation | 2.1.277 (Claude Code) | true (system prompt) | no skills in fixture | no subagents in fixture | mcp__echohttp__echo_http, mcp__echostdio__echo_stdio |
-| claude-code/research-team | 2.1.277 (Claude Code) | true (system prompt) | true, true, true | explorer, true, true | none |
-| codex/plugin-activation | codex-cli 0.154.0 | none (user message (AGENTS.md)) | no skills in fixture | no subagents in fixture | mcp__echohttp.echo_http, mcp__echostdio.echo_stdio |
-| codex/research-team | codex-cli 0.154.0 | none (user message (AGENTS.md)) | true, true, true | explorer, true, true | none |
-| copilot/plugin-activation | GitHub Copilot CLI 1.0.88 | true (system prompt) | no skills in fixture | no subagents in fixture | echohttp-echo_http, echostdio-echo_stdio |
-| copilot/research-team | GitHub Copilot CLI 1.0.88 | true (system prompt) | true, true, true | explorer, true, true | none |
-| opencode-v1/plugin-activation | 1.18.32 | true (system prompt) | no skills in fixture | no subagents in fixture | echohttp_echo_http, echostdio_echo_stdio |
-| opencode-v1/research-team | 1.18.32 | true (system prompt) | true, true, true | explorer, true, true | none |
-| opencode-v2/plugin-activation | opencode v2.0.14 | true (system prompt) | no skills in fixture | no subagents in fixture | none |
-| opencode-v2/research-team | opencode v2.0.14 | true (system prompt) | true, true, true | explorer, true, true | none |
+| claude-code/plugin-activation | 2.1.277 (Claude Code) | true, via system prompt | no skills in fixture | no subagents in fixture | mcp__echohttp__echo_http, mcp__echostdio__echo_stdio |
+| claude-code/research-team | 2.1.277 (Claude Code) | true, via system prompt | true, true, true | explorer, true, true | none |
+| codex/plugin-activation | codex-cli 0.154.0 | true, via user message (AGENTS.md) | no skills in fixture | no subagents in fixture | mcp__echohttp.echo_http, mcp__echostdio.echo_stdio |
+| codex/research-team | codex-cli 0.154.0 | true, via user message (AGENTS.md) | true, true, true | explorer, true, true | none |
+| copilot/plugin-activation | GitHub Copilot CLI 1.0.88 | true, via system prompt | no skills in fixture | no subagents in fixture | echohttp-echo_http, echostdio-echo_stdio |
+| copilot/research-team | GitHub Copilot CLI 1.0.88 | true, via system prompt | true, true, true | explorer, true, true | none |
+| opencode-v1/plugin-activation | 1.18.32 | true, via system prompt | no skills in fixture | no subagents in fixture | echohttp_echo_http, echostdio_echo_stdio |
+| opencode-v1/research-team | 1.18.32 | true, via system prompt | true, true, true | explorer, true, true | none |
+| opencode-v2/plugin-activation | opencode v2.0.14 | true, via system prompt | no skills in fixture | no subagents in fixture | none |
+| opencode-v2/research-team | opencode v2.0.14 | true, via system prompt | true, true, true | explorer, true, true | none |
 
 Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.
