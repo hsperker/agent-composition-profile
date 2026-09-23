@@ -1,0 +1,60 @@
+{
+  "code_mode_search_result": "{\"items\":[],\"remaining\":0,\"next\":null}",
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/research-team",
+  "mcp_results": [],
+  "mcp_servers_connected": {
+    "research": "failed"
+  },
+  "mcp_tools_offered": [],
+  "notes": [
+    "MCP servers connected but no MCP tool was offered to the model, directly or through the Code Mode catalog"
+  ],
+  "product": "opencode",
+  "requests": 6,
+  "skill_activated": "source-evaluation",
+  "skill_body_absent_before_activation": true,
+  "skill_body_in_context_after_activation": true,
+  "skill_body_persisted_in_later_turns": true,
+  "skill_catalog_advertised_before_activation": [
+    "source-evaluation",
+    "query-planning"
+  ],
+  "subagent_called": "explorer",
+  "subagent_ran_with_own_instructions": true,
+  "subagent_result_returned_to_caller": true,
+  "subagent_tools_offered": [
+    "edit",
+    "glob",
+    "grep",
+    "question",
+    "read",
+    "shell",
+    "skill",
+    "webfetch",
+    "websearch",
+    "write",
+    "execute"
+  ],
+  "subagents_advertised": [
+    "explorer",
+    "critic"
+  ],
+  "tools_offered_to_entry": [
+    "edit",
+    "glob",
+    "grep",
+    "question",
+    "read",
+    "shell",
+    "skill",
+    "subagent",
+    "webfetch",
+    "websearch",
+    "write",
+    "execute"
+  ],
+  "version": "opencode v2.0.14"
+}

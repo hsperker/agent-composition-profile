@@ -1,0 +1,42 @@
+{
+  "code_mode_search_result": "{\"items\":[],\"remaining\":0,\"next\":null}",
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/runtime-probes/plugin-activation",
+  "mcp_results": [],
+  "mcp_servers_connected": {
+    "echohttp": "connected",
+    "echostdio": "connected"
+  },
+  "mcp_tools_offered": [],
+  "notes": [
+    "MCP servers connected but no MCP tool was offered to the model, directly or through the Code Mode catalog"
+  ],
+  "product": "opencode",
+  "requests": 3,
+  "skill_activated": null,
+  "skill_body_absent_before_activation": false,
+  "skill_body_in_context_after_activation": false,
+  "skill_body_persisted_in_later_turns": false,
+  "skill_catalog_advertised_before_activation": [],
+  "subagent_called": null,
+  "subagent_ran_with_own_instructions": false,
+  "subagent_result_returned_to_caller": false,
+  "subagent_tools_offered": [],
+  "subagents_advertised": [],
+  "tools_offered_to_entry": [
+    "edit",
+    "glob",
+    "grep",
+    "question",
+    "read",
+    "shell",
+    "skill",
+    "webfetch",
+    "websearch",
+    "write",
+    "execute"
+  ],
+  "version": "opencode v2.0.14"
+}
