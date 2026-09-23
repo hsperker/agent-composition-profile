@@ -1,0 +1,57 @@
+{
+  "code_mode_search_result": null,
+  "entry_instructions_in_system_prompt": true,
+  "exit_code": 0,
+  "final_output": "final answer from the entry agent",
+  "fixture": "examples/runtime-probes/plugin-activation",
+  "mcp_results": [
+    {
+      "result": "{\"cwd\": \"${REPO_ROOT}\", \"label\": \"http\", \"plugin_data_env\": false, \"plugin_root_env\": false, \"text\": \"probe\"}",
+      "tool": "echohttp_echo_http"
+    },
+    {
+      "result": "{\"cwd\": \"${REPO_ROOT}/examples/runtime-probes/plugin-activation/plugins/local-echo\", \"label\": \"stdio\", \"plugin_data_env\": true, \"plugin_root_env\": true, \"text\": \"probe\"}",
+      "tool": "echostdio_echo_stdio"
+    }
+  ],
+  "mcp_servers_connected": {
+    "echohttp": "connected",
+    "echostdio": "connected"
+  },
+  "mcp_tools_offered": [
+    "echohttp_echo_http",
+    "echostdio_echo_stdio"
+  ],
+  "notes": [
+    "MCP tools offered directly as <server>_<tool> function tools"
+  ],
+  "product": "opencode",
+  "requests": 4,
+  "skill_activated": null,
+  "skill_body_absent_before_activation": false,
+  "skill_body_in_context_after_activation": false,
+  "skill_body_persisted_in_later_turns": false,
+  "skill_catalog_advertised_before_activation": [],
+  "subagent_called": null,
+  "subagent_ran_with_own_instructions": false,
+  "subagent_result_returned_to_caller": false,
+  "subagent_tools_offered": [],
+  "subagents_advertised": [],
+  "tools_offered_to_entry": [
+    "bash",
+    "echohttp_echo_http",
+    "echostdio_echo_stdio",
+    "edit",
+    "glob",
+    "grep",
+    "list_mcp_resource_templates",
+    "list_mcp_resources",
+    "read",
+    "read_mcp_resource",
+    "skill",
+    "todowrite",
+    "webfetch",
+    "write"
+  ],
+  "version": "1.18.32"
+}

@@ -53,7 +53,9 @@ Fixture `examples/runtime-probes/plugin-activation`: one plugin, one stdio serve
 | --- | --- | --- | --- | --- | --- |
 | claude-code/plugin-activation | 2.1.277 (Claude Code) | true | no skills in fixture | no subagents in fixture | mcp__echohttp__echo_http, mcp__echostdio__echo_stdio |
 | claude-code/research-team | 2.1.277 (Claude Code) | true | true, true, true | explorer, true, true | none |
-| opencode/plugin-activation | opencode v2.0.14 | true | no skills in fixture | no subagents in fixture | none |
-| opencode/research-team | opencode v2.0.14 | true | true, true, true | explorer, true, true | none |
+| opencode-v1/plugin-activation | 1.18.32 | true | no skills in fixture | no subagents in fixture | echohttp_echo_http, echostdio_echo_stdio |
+| opencode-v1/research-team | 1.18.32 | true | true, true, true | explorer, true, true | none |
+| opencode-v2/plugin-activation | opencode v2.0.14 | true | no skills in fixture | no subagents in fixture | none |
+| opencode-v2/research-team | opencode v2.0.14 | true | true, true, true | explorer, true, true | none |
 
 Generated from individual compatibility reports by `scripts/build_runtime_matrix.py`.
