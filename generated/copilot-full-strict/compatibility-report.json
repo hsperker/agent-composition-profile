@@ -5,8 +5,8 @@
   "has_blocking_loss": false,
   "has_unverified": false,
   "summary": {
-    "preserved": 14,
-    "resolved": 9
+    "preserved": 13,
+    "resolved": 10
   },
   "modules": {
     "core": {
@@ -92,8 +92,8 @@
     {
       "agent": "lead-researcher",
       "feature": "subagents",
-      "status": "preserved",
-      "detail": "The agents list is Copilot's per-agent subagent allowlist; each listed agent runs as a bounded task through the agent tool and returns its result to the caller."
+      "status": "resolved",
+      "detail": "The agents list names the subagents; each runs as a bounded task through the task tool and returns its result to the caller. Copilot CLI advertises and runs every custom agent in the project regardless of the list (probe evidence), so the list is not an enforced allowlist there."
     },
     {
       "agent": "explorer",

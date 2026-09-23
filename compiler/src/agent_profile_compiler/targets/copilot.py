@@ -111,9 +111,10 @@ def compile_target(package: Package, binding: Mapping[str, Any]) -> CompilationR
         # list keeps a leaf agent from spawning anything, mirroring the Claude Code target.
         frontmatter["agents"] = list(agent.subagent_names)
         if agent.subagent_names:
-            report.add(agent.name, "subagents", "preserved",
-                       "The agents list is Copilot's per-agent subagent allowlist; each listed agent runs as a bounded "
-                       "task through the agent tool and returns its result to the caller.")
+            report.add(agent.name, "subagents", "resolved",
+                       "The agents list names the subagents; each runs as a bounded task through the task tool and "
+                       "returns its result to the caller. Copilot CLI advertises and runs every custom agent in the "
+                       "project regardless of the list (probe evidence), so the list is not an enforced allowlist there.")
         else:
             report.add(agent.name, "subagents", "preserved", "An empty agents list is emitted for a leaf agent.")
 

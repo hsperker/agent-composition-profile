@@ -293,7 +293,7 @@ def test_copilot_lowers_full_package_to_agent_md_with_subagent_allowlist_and_mcp
     assert statuses(result, "instructions", "lead-researcher") == {"preserved"}
     assert statuses(result, "skills", "lead-researcher") == {"resolved"}
     assert statuses(result, "plugins", "lead-researcher") == {"resolved"}
-    assert statuses(result, "subagents", "lead-researcher") == {"preserved"}
+    assert statuses(result, "subagents", "lead-researcher") == {"resolved"}  # the CLI does not enforce the list
     assert statuses(result, "subagents", "critic") == {"preserved"}
     assert not result.report.has_unsupported
 
