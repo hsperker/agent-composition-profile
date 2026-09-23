@@ -262,3 +262,15 @@ The draft in `spec/` applies these seven changes. Each traces to a finding above
 - Skill grades follow the Agent Skills integration guide. Compaction and bundled resources were not exercised.
 - The combined fixture's strict outcome is a construction result. The plugin probe fixture has no skills or subagents.
 - The probe did not cover SSE, OAuth, colliding tool names, or activation failure reporting.
+
+## Open
+
+Probes that would turn an `unverified` grade or an assumption into evidence. None changes the frozen draft; each adds a row to the reports.
+
+- **Skill scripts and references.** Agent Skills lets a skill bundle `scripts/`, `references/`, and `assets/`. The model runs a script with the host's own execution tool; the skill registers no tool of its own. Our fixture skills bundle nothing, so `skills.resources` is `unverified` everywhere. The probe: give a skill a small script, compile for each product, and check that the directory was copied whole, that the path the body names still resolves from where the host put the skill, and that the model can run it.
+- **Skill durability under compaction.** No product or framework session was long enough to compact. `skills.durability` is `unverified` everywhere.
+- **Copilot cloud coding agent.** Only the CLI was executed. Whether the cloud agent enforces the `agents` list, which the CLI does not, is untested.
+- **OpenCode 2 MCP exposure.** Servers connect, no tool reaches the model. Cause unknown; reprobe on the next release.
+- **Codex background server start.** Whether a startup timeout setting lets the first turn wait for a slow stdio server, so the probe's pause becomes unnecessary.
+- **Unknown frontmatter keys in products.** If Claude Code and Copilot ignore `skills`, `plugins`, and `subagents` keys, a profile could be placed in `.claude/agents/` or `.github/agents/` unchanged and the compiler would only be needed for Codex, OpenCode, and file placement.
+- **MCP edge cases.** SSE transport, OAuth, colliding tool names across servers, and how each host reports an activation failure to the model.
